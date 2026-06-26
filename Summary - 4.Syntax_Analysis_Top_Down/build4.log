@@ -1,0 +1,247 @@
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Summary - 4.Syntax_Analysis_Top_Down.tex
+LaTeX2e <2026-06-01>
+L3 programming layer <2026-06-18>
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/ctexart.cls
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexbackend.cfg
+) (/Users/bytedance/texlive/2026/texmf-dist/tex/latex/l3kernel/expl3.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-xetex.d
+ef))
+Document Class: ctexart 2026/06/23 v2.6.0 Chinese adapter for class article (CT
+EX)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/ctexhook.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/ctexpatch.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/base/fix-cm.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/base/ts1enc.def))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexopts.cfg)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/base/size11.clo))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/engine/ctex-engine-xet
+ex.def (/Users/bytedance/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/l3packages/xtemplate/xtempl
+ate.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/l3packages/xparse/xparse.st
+y)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/base/fontenc.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.cfg)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg)
+)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-chi
+nese-article.def
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/config/ctex-name-utf8.
+cfg))) (/Users/bytedance/texlive/2026/texmf-dist/tex/latex/ctex/config/ctex.cfg
+) (/Users/bytedance/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics-def/xetex.def)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/tools/array.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/tools/longtable.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-com
+mon.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-lat
+ex.def)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code
+.tex (/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/pgf.revision.tex
+)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg))
+)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.co
+de.tex
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.cod
+e.tex
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibr
+aryfiltered.code.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xe
+tex.def
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dv
+ipdfmx.def
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-co
+mmon-pdf.def))))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssof
+tpath.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyspro
+tocol.code.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.co
+de.tex
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathutil.code
+.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathparser.co
+de.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.basic.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.trigonometric.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.random.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.comparison.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.base.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.round.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.misc.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions
+.integerarithmetics.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code
+.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfloat.cod
+e.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoi
+nts.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepat
+hconstruct.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepat
+husage.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoresco
+pes.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregra
+phicstate.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretra
+nsformations.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequi
+ck.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobj
+ects.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepat
+hprocessing.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearr
+ows.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoresha
+de.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreima
+ge.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreext
+ernal.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelay
+ers.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretra
+nsparency.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepat
+terns.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf
+.code.tex)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleshap
+es.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot
+.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-v
+ersion-0-65.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-v
+ersion-1-18.sty))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.cod
+e.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgffor.code
+.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/ti
+kz.code.tex
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryp
+lothandlers.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmodulematr
+ix.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarytopaths.code.tex)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys
+.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+) (/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlest
+ring.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/url/url.sty)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+))) (/Users/bytedance/texlive/2026/texmf-dist/tex/latex/hyperref/hxetex.def
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfileche
+ck.sty
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecount
+er.sty)))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarypositioning.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibrarya
+rrows.meta.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibraryshapes.geometric.code.tex
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/libraries/shapes/pgfl
+ibraryshapes.geometric.code.tex))
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibraryfit.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarybackgrounds.code.tex)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/li
+braries/tikzlibrarycalc.code.tex) (./Summary - 4.Syntax_Analysis_Top_Down.aux)
+*geometry* driver: auto-detecting
+*geometry* detected driver: xetex
+(./Summary - 4.Syntax_Analysis_Top_Down.out)
+(./Summary - 4.Syntax_Analysis_Top_Down.out)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/Users/bytedance/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd)
+(./Summary - 4.Syntax_Analysis_Top_Down.toc [1])
+Overfull \hbox (13.7287pt too wide) in paragraph at lines 106--107
+ [] 
+
+LaTeX Font Warning: Font shape `TU/PingFangSC(0)/m/sl' undefined
+(Font)              using `TU/PingFangSC(0)/m/n' instead on input line 107.
+
+[2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12] [13] [14] [15] [16] [17]
+[18] [19] [20] (./Summary - 4.Syntax_Analysis_Top_Down.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information)
+Output written on Summary - 4.Syntax_Analysis_Top_Down.pdf (20 pages).
+Transcript written on Summary - 4.Syntax_Analysis_Top_Down.log.

@@ -91,12 +91,12 @@
   hi/.style={draw,rounded corners=2pt,fill=white,minimum height=0.7cm,align=center,inner sep=4pt},
   arr/.style={-{Latex[length=2mm]},thick}]
 \node[n] (type) {Parser 类型};
-\node[n,right=1.5cm of type] (td) {Top-down};
-\node[n,right=1.5cm of td] (rdp) {递归下降\\RDP};
+\node[n,right=0.95cm of type] (td) {Top-down};
+\node[n,right=0.95cm of td] (rdp) {递归下降\\RDP};
 \node[hi,below=0.8cm of rdp] (problem) {左递归 / 回溯};
-\node[hi,right=1.5cm of rdp] (pred) {预测分析\\Predictive};
-\node[n,right=1.5cm of pred] (ff) {FIRST / FOLLOW};
-\node[n,right=1.5cm of ff] (ll) {LL(1) 表};
+\node[hi,right=0.95cm of rdp] (pred) {预测分析\\Predictive};
+\node[n,right=0.95cm of pred] (ff) {FIRST / FOLLOW};
+\node[n,right=0.95cm of ff] (ll) {LL(1) 表};
 \draw[arr] (type) -- (td);
 \draw[arr] (td) -- (rdp);
 \draw[arr] (rdp) -- (problem);
@@ -495,7 +495,7 @@ abAS\Rightarrow abS\Rightarrow abd
   \end{itemize}
 \end{enumerate}
 
-\subsection{计算 FIRST(\(\alpha\)) 的规则 \pg{34,46--48}}
+\subsection[计算 FIRST(alpha) 的规则]{计算 FIRST(\(\alpha\)) 的规则 \pg{34,46--48}}
 对符号串 \(\alpha=X_1X_2\cdots X_n\)：
 \begin{enumerate}
   \item 把 \(\mathrm{FIRST}(X_1)\) 中所有非 \(\eps\) 符号加入 \(\mathrm{FIRST}(\alpha)\)。
@@ -716,7 +716,7 @@ E\$
 
 课件逐页演示的栈变化可以整理为下表。
 
-\begin{longtable}{p{0.18\linewidth}p{0.28\linewidth}p{0.27\linewidth}p{0.2\linewidth}}
+\begin{longtable}{p{0.14\linewidth}p{0.25\linewidth}p{0.25\linewidth}p{0.22\linewidth}}
 \toprule
 已匹配 & 栈 & 剩余输入 & 动作 \\
 \midrule
@@ -780,7 +780,11 @@ F & \{(,id\} & \{*,+,\$,)\}
 \end{array}
 \]
 
-由这些集合可得到前面使用的预测分析表。注意 \(E'\to\eps\) 填到 \(M[E',)]\) 和 \(M[E',\$]\)，因为 \(\mathrm{FOLLOW}(E')=\{\$,)\}\)；\(T'\to\eps\) 填到 \(M[T',+]\)、\(M[T',)]\)、\(M[T',\$]\)，因为这些符号都在 \(\mathrm{FOLLOW}(T')\) 中。
+由这些集合可得到前面使用的预测分析表。注意：
+\begin{itemize}
+  \item \(E'\to\eps\) 填到 \(M[E',)]\) 和 \(M[E',\$]\)，因为 \(\mathrm{FOLLOW}(E')=\{\$,)\}\)。
+  \item \(T'\to\eps\) 填到 \(M[T',+]\)、\(M[T',)]\)、\(M[T',\$]\)，因为这些符号都在 \(\mathrm{FOLLOW}(T')\) 中。
+\end{itemize}
 
 % ============================================================
 \section{判断 LL(1)、非 LL(1) 处理与复杂度（第 82--89 页）}
