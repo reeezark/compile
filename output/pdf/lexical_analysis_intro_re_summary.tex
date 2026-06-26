@@ -1,0 +1,331 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\usepackage{amsmath,amssymb}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\setmainfont{Verdana}
+\setsansfont{Verdana}
+\setmonofont{Menlo}
+\setCJKmainfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+\hypersetup{colorlinks=true, linkcolor=black, urlcolor=blue}
+
+\definecolor{sysugreen}{HTML}{006B3F}
+\definecolor{softgray}{HTML}{F4F6F6}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Lexical Analysis: Intro \& Regular Expressions}
+\rhead{课件总结}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+
+\titleformat{\section}{\Large\bfseries\color{sysugreen}}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.7em}{}
+\setlist[itemize]{leftmargin=1.8em, itemsep=0.25em}
+\setlist[enumerate]{leftmargin=1.8em, itemsep=0.25em}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+
+\newcommand{\token}[2]{\ensuremath{\langle \texttt{#1},\ \texttt{#2}\rangle}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+\begin{center}
+  {\Huge\bfseries 词法分析：导论与正则表达式}\\[0.6em]
+  {\Large Lecture 1 课件总结}\\[0.8em]
+  {\large 编译原理 - 中山大学计算机学院 - 赵帅}\\[0.5em]
+  {\normalsize 根据课件 \code{1.Lexical Analysis\_Intro\_RE.pdf} 整理}
+\end{center}
+
+\vspace{0.6em}
+\hrule
+\vspace{1em}
+
+\section{整体脉络}
+
+词法分析是编译器前端的第一步。它从源程序的字符流出发，将字符切分成一串 token，再交给语法分析器构建语法树。课件的核心路线是：
+
+\begin{center}
+\fbox{\parbox{0.88\linewidth}{
+字符流 $\rightarrow$ 词法分析器 $\rightarrow$ token stream $\rightarrow$ 语法分析器 $\rightarrow$ syntax tree
+}}
+\end{center}
+
+本讲关注两个问题。第一，什么是 token、lexeme、token class，以及词法分析器如何扫描输入。第二，如何用正则表达式描述 token 的模式，为后续从正则表达式构造自动机做准备。
+
+\section{词法分析的任务}
+
+\subsection{基本定义}
+
+\begin{itemize}
+  \item \textbf{Lexical Analysis}: 识别源程序中的子串，也就是 lexeme，并根据模式将其归类，生成 token。
+  \item \textbf{Token}: 语言中具有意义的最小单位，通常写成二元组 $(class, lexeme)$。其中 class 是抽象类别，lexeme 是源代码中的实际字符序列。
+  \item \textbf{Lexeme}: 源程序中匹配某个 token 模式的一段字符，是某个 token 的实例。
+  \item \textbf{Token class}: token 的类别，例如 keyword、identifier、number、operator、whitespace 等。
+\end{itemize}
+
+例如代码片段
+\[
+\code{while (i < z) i++;}
+\]
+可以被划分为 keyword \code{while}、左括号、identifier \code{i}、关系运算符 \code{<}、identifier \code{z}、右括号、identifier \code{i}、自增运算符 \code{++} 和分号等 token。
+
+\subsection{词法分析器做什么}
+
+一个词法分析器通常完成四类工作：
+
+\begin{enumerate}
+  \item 读取源程序字符流。
+  \item 删除或跳过注释、空白符、换行、制表符等对语法结构无直接意义的内容。
+  \item 根据模式切分输入，识别每个 lexeme 的 token class。
+  \item 将 token stream 提供给 parser；parser 依赖 token class 而不是原始字符来判断语法角色。
+\end{enumerate}
+
+以 \code{a=3.14} 为例，词法分析器可以输出
+\[
+\token{id}{a},\quad \token{op}{=},\quad \token{number}{3.14}.
+\]
+
+\section{词法分析中的设计问题}
+
+\subsection{token class 的设计}
+
+词法分析首先要定义有限集合的 token class。这些类别取决于语言本身，也取决于 parser 的设计。例如常见类别包括：
+
+\begin{itemize}
+  \item \textbf{number}: 一个或多个连续数字，或更复杂的整数、浮点数格式。
+  \item \textbf{keyword}: 语言保留字，如 \code{if}、\code{else}、\code{for}、\code{while}。
+  \item \textbf{whitespace}: 空格、制表符、换行等。
+  \item \textbf{identifier}: 用户自定义名称，通常用于变量、函数、类型等实体。
+\end{itemize}
+
+设计上的关键是判断“哪些字符串属于哪个类别”。例如 \code{if} 既可能满足 identifier 的模式，也可能是 keyword；\code{==} 不能被错误切成两个 \code{=}。
+
+\subsection{歧义、最长匹配和向前看}
+
+课件强调词法分析中可能出现歧义。典型例子包括：
+
+\begin{itemize}
+  \item \code{if} 可以是 keyword，也满足 identifier 的模式。
+  \item \code{==} 可以看成一个相等运算符，也可以错误地看成两个赋值符号。
+  \item C++ 中的 \code{vector<vector<int>>} 里，\code{>>} 可能被理解为流运算符，也可能是两个模板右尖括号。
+\end{itemize}
+
+常用消歧规则有：
+
+\begin{enumerate}
+  \item \textbf{关键字优先}: 当一个字符串既可以是 keyword 又可以是 identifier 时，优先识别为 keyword。
+  \item \textbf{最长匹配}: 每次尽可能匹配最长 token。例如 \code{==} 优先于单个 \code{=}。
+  \item \textbf{规则顺序}: 若仍然冲突，优先采用词法规范中列在前面的规则。
+\end{enumerate}
+
+有些语言结构需要 look ahead，甚至需要 parser 反馈才能完全消歧。这会增加词法分析设计复杂度。因此通常希望 token 之间尽量不重叠，使扫描器可以从左到右一趟完成。
+
+\section{形式语言基础}
+
+\subsection{字母表、串和语言}
+
+正则表达式要描述的是语言。课件给出三个基础概念：
+
+\begin{itemize}
+  \item \textbf{Alphabet $\Sigma$}: 有限符号集合，例如 $\{0,1\}$、$\{a,b,c\}$ 或 ASCII 字符集。
+  \item \textbf{String}: 字母表中符号组成的有限序列。空串记为 $\epsilon$，长度为 $0$。
+  \item \textbf{Language}: 固定字母表上的任意可数串集合。
+\end{itemize}
+
+需要区分空语言 $\varnothing$ 和只包含空串的语言 $\{\epsilon\}$。前者没有任何字符串，后者有一个字符串，只是该字符串长度为 $0$。
+
+\subsection{语言运算}
+
+课件介绍了三种用于构造语言的基本运算：
+
+\begin{itemize}
+  \item \textbf{并}: $A \cup B$，正则表达式中常写作 $A \mid B$。
+  \item \textbf{连接}: $AB$，表示从 $A$ 中取一个串、从 $B$ 中取一个串后拼接所得的所有结果。
+  \item \textbf{Kleene 闭包}: $L^*$，表示将 $L$ 中的串连接零次或多次得到的所有结果，包含 $\epsilon$。
+\end{itemize}
+
+正闭包 $L^+$ 表示连接一次或多次：
+\[
+L^+ = L^1 \cup L^2 \cup L^3 \cup \cdots,\qquad
+L^* = \{\epsilon\} \cup L^+.
+\]
+
+例如 $L=\{a,b\}$，则
+\[
+L^*=\{\epsilon, a, b, aa, ab, ba, bb, aaa, aab, \ldots\}.
+\]
+
+\section{正则表达式}
+
+\subsection{正则表达式的作用}
+
+正则表达式是描述字符串模式的简单记法。它不够表达完整的自然语言或完整的 C 语言语法，但非常适合描述编程语言中的 token，例如 identifier、integer、keyword 和 whitespace。
+
+能够被正则表达式描述的语言称为正则语言。词法分析的典型工作流是：
+
+\begin{center}
+\fbox{\parbox{0.88\linewidth}{
+用正则表达式指定 token pattern $\rightarrow$ 构造 NFA/DFA $\rightarrow$ 实现 token recognizer $\rightarrow$ 生成词法分析器
+}}
+\end{center}
+
+\subsection{递归构造}
+
+正则表达式由更小的正则表达式递归构成。每个正则表达式 $r$ 表示一个语言 $L(r)$。
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.24\linewidth} >{\raggedright\arraybackslash}p{0.62\linewidth}}
+\toprule
+\textbf{形式} & \textbf{含义} \\
+\midrule
+$\epsilon$ & 匹配空串，$L(\epsilon)=\{\epsilon\}$ \\
+$a$ & 对任意符号 $a$，只匹配字符串 $a$，$L(a)=\{a\}$ \\
+$(r)$ & 与 $r$ 表示同一语言 \\
+$(r)\mid(s)$ & 表示 $L(r)\cup L(s)$ \\
+$(r)(s)$ & 表示 $L(r)L(s)$，即连接 \\
+$(r)^*$ & 表示 $(L(r))^*$，即零次或多次重复 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+注意空集 $\varnothing$ 不是空串 $\epsilon$。$\varnothing$ 对应没有字符串，$\epsilon$ 是一个长度为 $0$ 的字符串。
+
+\subsection{运算符优先级}
+
+正则表达式的运算优先级从高到低是：
+
+\[
+\text{括号 }(A)\quad > \quad \text{闭包 }A^*\quad > \quad \text{连接 }AB\quad > \quad \text{并 }A \mid B.
+\]
+
+因此 \code{ab*c|d} 的解析方式是
+\[
+((a(b^*))c)\mid d.
+\]
+
+\section{常用正则表达式写法}
+
+\subsection{常见缩写}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.32\linewidth} >{\raggedright\arraybackslash}p{0.55\linewidth}}
+\toprule
+\textbf{写法} & \textbf{含义} \\
+\midrule
+$A^+$ & 一个或多个 $A$，等价于 $AA^*$ \\
+$A?$ & 零个或一个 $A$，等价于 $A \mid \epsilon$ \\
+\code{[a-z]} & 字符范围，等价于 \code{a|b|...|z} \\
+\texttt{[\textasciicircum{}a-z]} & 排除范围，表示不在 \code{a-z} 中的字符 \\
+\texttt{\textasciicircum{}} 和 \texttt{\$} & 分别匹配行首和行尾，具体含义由上下文决定 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+identifier 的典型定义为：
+\[
+\begin{aligned}
+letter &= \code{[A-Za-z]}\\
+digit &= \code{[0-9]}\\
+identifier &= letter(letter \mid digit)^*
+\end{aligned}
+\]
+
+\subsection{编程语言中的常用记号}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.24\linewidth} >{\raggedright\arraybackslash}p{0.62\linewidth}}
+\toprule
+\textbf{记号} & \textbf{含义} \\
+\midrule
+\code{\textbackslash d} & 任意十进制数字，即 \code{[0-9]} \\
+\code{\textbackslash D} & 任意非数字字符，即 \texttt{[\textasciicircum{}0-9]} \\
+\code{\textbackslash s} & 任意空白字符，如 tab、newline、return 等 \\
+\code{\textbackslash S} & 任意非空白字符 \\
+\code{\textbackslash w} & 字母、数字或下划线，即 \code{[a-zA-Z0-9\_]} \\
+\code{\textbackslash W} & 非字母、非数字、非下划线字符 \\
+\code{.} & 任意字符；若要匹配点号本身，需要写成 \code{\textbackslash .} \\
+\code{(...)} & 捕获匹配内容 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{从正则表达式到词法规范}
+
+课件给出一个规范化步骤：
+
+\begin{enumerate}
+  \item 为每个 token class 写一个正则表达式。例如 $Numbers=digit^+$，$Keywords=\code{if}\mid\code{else}\mid\cdots$，$Identifiers=letter(letter\mid digit)^*$。
+  \item 构造一个能匹配所有 token lexeme 的总表达式：
+  \[
+  R = R_1 \mid R_2 \mid R_3 \mid \cdots.
+  \]
+  \item 对输入 $x_1x_2\cdots x_n$，从左向右检查某个前缀 $x_1\cdots x_i$ 是否属于 $L(R)$。
+  \item 若匹配成功，则该前缀属于某个 $L(R_j)$，输出相应 token。
+  \item 从输入中删除该前缀，继续扫描；若没有规则匹配，则报告词法错误。
+\end{enumerate}
+
+这个过程揭示了正则表达式的定位：正则表达式只是语言规范，真正执行匹配还需要实现机制。下一步通常是把正则表达式转换成有限自动机。
+
+\section{典型例子与结论}
+
+\subsection{正则表达式例子}
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.35\linewidth} >{\raggedright\arraybackslash}p{0.48\linewidth}}
+\toprule
+\textbf{正则表达式} & \textbf{表示的语言} \\
+\midrule
+\code{a*} & 零个或多个 \code{a}，包含 $\epsilon$ \\
+\code{a+} & 一个或多个 \code{a} \\
+\code{(a|b)(a|b)} & $\{aa,ab,ba,bb\}$ \\
+\code{(a|b)*} & 所有由 \code{a} 和 \code{b} 组成的字符串，包含 $\epsilon$ \\
+\code{(aa|ab|ba|bb)*} & 所有由 \code{a}、\code{b} 组成且长度为偶数的字符串 \\
+\code{0([0-9])*0} & 以 \code{0} 开始且以 \code{0} 结束的数字串 \\
+\code{1*(0|epsilon)1*} & 至多包含一个 \code{0} 的二进制串 \\
+\code{(0|1)*00(0|1)*} & 包含子串 \code{00} 的二进制串 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+不同正则表达式可能表示同一个语言。例如 \code{(a|b)*} 与 \code{(a*b*)*} 都能表示所有由 \code{a} 和 \code{b} 构成的字符串。
+
+\subsection{练习要点}
+
+\begin{itemize}
+  \item \code{if i == 0} 的 token 序列可以写为 $\token{keyword}{if}$、$\token{id}{i}$、$\token{op}{==}$、$\token{num}{0}$。
+  \item 正则表达式用于指定 token pattern；有限自动机用于实现 token recognizer。
+  \item \code{(x|y)(x|y)} 表示 $\{xx,xy,yx,yy\}$。
+  \item \code{(0|1)*0(0|1)*0(0|1)*} 表示至少包含两个 \code{0} 的二进制串。
+  \item 所有包含子串 \code{aba} 的 \code{a}/\code{b} 串可写为 \code{(a|b)*aba(a|b)*}。
+  \item 所有偶数长度的 \code{a}/\code{b} 串可写为 \code{(aa|ab|ba|bb)*}。
+  \item 所有不包含子串 \code{abb} 的 \code{a}/\code{b} 串可写为 \code{b*(a|ab)*}。
+\end{itemize}
+
+\section{一页复习版}
+
+\begin{itemize}
+  \item 词法分析把字符流切分为 token stream，是 parser 的输入。
+  \item token 是 $(class, lexeme)$；lexeme 是源代码中的实际字符序列。
+  \item token class 由语言和 parser 需求共同决定。
+  \item 词法分析器通常跳过注释和空白符。
+  \item 歧义通过关键字优先、最长匹配和规则顺序处理。
+  \item 字母表是有限符号集；串是有限符号序列；语言是某字母表上的串集合。
+  \item 正则表达式通过并、连接、闭包描述正则语言。
+  \item 正则表达式适合描述 token，但不是词法分析器本身；实现通常依赖 NFA/DFA。
+  \item 下一讲的自然问题是：如何从正则表达式自动构造可执行的 token recognizer。
+\end{itemize}
+
+\end{document}

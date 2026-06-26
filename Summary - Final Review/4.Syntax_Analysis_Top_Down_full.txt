@@ -1,0 +1,1777 @@
+===== 4.Syntax_Analysis_Top_Down.pdf | page 1 =====
+编译原理
+Complier Principles
+Lecture 4
+Syntax Analysis: Top-Down
+赵帅
+计算机学院
+中山大学
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 2 =====
+Before we start...
+2
+So, please pay attention and keep on track!
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 3 =====
+Mind Map[思维导图]
+3
+Syntax Analysis: Top-down parser
+problem
+type 1
+solve
+Top-down parser Bottom-up parser
+Parser Type
+First 
+Sets
+Follow 
+Sets
+RD-backtrack 
+parser
+Predictive 
+parser
+Left 
+Recursion
+Remove left 
+recursion
+LL(1) 
+grammar
+compute
+LL(1) table
+type 1 type 2
+remove problem in grammars
+construct
+tool
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 4 =====
+Mind Map[思维导图]
+4
+Syntax Analysis: Top-down parser
+type 1 type 2
+Top-down parser Bottom-up parser
+Parser Type
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 5 =====
+Parser Type[语法分析类型]
+• Most compilers use either Top-Down or Bottom-Up parsers.
+• Bottom-up parsing [自底向上分析]
+◆Begin at the leaves (the bottom) and working up towards the root (the top).
+◆Tries to reduce[规约] the input string to the start symbol.
+◆Finds reverse order of the rightmost derivation[最右推导的逆过程即最左规约]
+◆Parser code structure nothing like grammar.
+ Very difficult to implement manually.
+ Automated tools exist to convert to code (e.g., Yacc, Bison).
+规范推导 规范规约
+5
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 6 =====
+Parser Type[语法分析类型]
+• Top-Down parsing [自顶向下分析]
+◆Starting from the root (top) and create the leaves (down) of the parse tree in a 
+pre-defined order (depth-first) [深度优先,先根次序/前序].
+◆Top-down parsing can be viewed as finding a leftmost derivation[寻求最左推导]
+for an input string.
+◆Review: In each step of derivation, the following choices need to be made:
+ Choice of the non-terminal to be replaced. [替换哪个非终结符]
+ Choice of the production to be applied for a non-terminal. [使用文法中哪个规
+则来替换]
+◆Question: At each step of a top-down parse, What is the key problem?
+Why not rightmost or arbitrary derivation?
+Leftmost!
+Key Problem!
+6
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 7 =====
+Parser Type[语法分析类型]
+• Top-Down parsing [自顶向下分析]
+◆Once a production is chosen, we try to match the terminal symbols in the 
+production body with the input string.
+◆Parser code structure closely mimics grammar.
+ Manually implementation is feasible.
+ Automated tools exist to convert to code. (e.g. ANTLR)
+• Top-Down vs. Bottom-Up [对比]
+◆Top-down: easier to understand and implement manually. (E.g. ANTLR)
+◆Bottom-up: more powerful, can be implemented automatically. (E.g. 
+YACC/Bison)
+7
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 8 =====
+Parser Type[语法分析类型]
+◆Example
+◆Grammar G(S): S → AB ; A → aA | a ; B → bB | b ;
+◆Sentence: aabb;
+S
+BA
+a A
+a
+b B
+b
+Leftmost derivation
+Bottom-Up
+S ⇒ AB (1)
+⇒ aAB (2)
+⇒ aaB (3)
+⇒ aabB (4)
+⇒ aabb (5)
+Top-Down
+Leftmost reduction
+9
+S ⇒ AB (5) B reduce to S.
+⇒ AbB (4) bB reduce to B.
+⇒ Abb (3) 2nd b reduce to B.
+⇒ aAbb (2) aA reduce to A.
+⇒ aabb (1) 2nd a reduce to A.
+9
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 9 =====
+Revisit
+10
+Syntax Analysis: Top-down parser
+problem
+type 1
+solve
+Top-down parser
+Parser Type
+RD-backtrack 
+parser
+Left 
+Recursion
+Remove left 
+recursion
+type 1
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 10 =====
+Top-down Parsing[自顶向下分析]
+• Recursive-descent parsing[RDP , 递归下降语法分析]
+◆A general form[通用形式] of top-down parsing.
+◆A recursive-descent parsing program consists of a set of procedures, one for 
+each non-terminal.
+◆Execution begins with the procedure for the start symbol, which halts and 
+announces success if its procedure body scans the entire input string.
+How to choose A-production?
+It’s not specified, so the pseudocode 
+is nondeterministic[伪代码是不确定的].
+11
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 11 =====
+RDP with backtracking[回溯]
+• RDP may require backtracking.
+• Approach: for a non-terminal in the derivation, productions are tried 
+in some order until
+◆A production is found that generates a portion of the input, or
+◆No production is found that generates a portion of the input, in which case 
+backtrack to previous non-terminal.
+• Terminals of the derivation are compared against input
+◆Match: advance input, continue parsing
+◆Mismatch: backtrack, or fail
+• Parsing fails if no derivation generates the entire input. 12
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 12 =====
+RDP with backtracking[回溯]
+• In the analysis process, when a non-terminal is successfully matched with 
+an alternative, the match may be temporary.
+• If a mismatch occurs, backtracking[回溯] will be performed.
+• G[S]: S → xAy; A → ** | *, whether the input string x * y is its sentence?
+13
+S
+Ax y
+S
+Ax y
+* *
+x * y
+S S
+Ax y
+S
+Ax y
+*Backtracking! Finish!
+Easy Task! But is that all?
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 13 =====
+Left Recursion Problem[左递归问题]
+• A grammar is left recursive[左递归] if it has a 
+non-terminal A such that there is a derivation 
+A ⇒ Aα.
+• Sentence can grow infinitely without 
+consuming input.(Into an infinite loop!)
+• Top-down parsing methods cannot handle 
+left-recursive problems.[自顶向下语法分析方法不
+能处理左递归的文法]
++ S
+A… …
+… …
+A …
+…
+14
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 14 =====
+Left Recursion Problem[左递归问题]
+• Immediate left recursion [直接/立即左递归]
+◆There is a production A → Aα.
+• Non-immediate left recursion [间接/非立即左递归]
+◆Left recursion involving derivation of 2+ step.
+◆A → Bβ; B → Aα.
+• A transformation is needed to eliminate left recursion. [需要一个转
+换方法来消除左递归]
+• Rewrite the grammar so that it is right recursive. [改为右递归]
+15
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 15 =====
+Remove Left Recursion[消除左递归]
+• Immediate left recursion[直接左递归的消除]
+◆Grammar: A → A⍺ | β (⍺≠β, β doesn’t start with A)
+◆rewrite the rule of A as the following form equivalently:
+◆Grammar: A → βA’; A’ → ⍺A’ | ε (right recursion)
+G[A]: A → A⍺ | β 
+A ⇒ Aα
+⇒ Aαα
+⇒ Aααα
+……
+⇒ Aα…α
+⇒ βα…α
+G[A]: A → βA’ 
+A’ → ⍺A’ | ε
+A ⇒ βA’
+⇒ βαA’
+⇒ βααA’
+……
+⇒ βα…αA’
+⇒ βα…α
+Remove Left Recursion
+16
+想办法把“A⍺⍺..”变成“⍺⍺..A”
+A → A⍺; A → β 
+=> A⍺ => A⍺⍺⍺.. => β⍺⍺⍺.. 
+1. 避免对A的左递归
+A -> βx, where x-> ⍺⍺⍺..
+2. 引入bridging production
+A’ –> ⍺A’ | ε
+=> ⍺A’ => ⍺⍺..A’ => ⍺⍺..⍺
+3. 连接两个productions
+A -> βA’; A’ –> ⍺A’ | ε
+=> βA’ => β⍺⍺..A’ => β⍺⍺..⍺
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 16 =====
+Remove Left Recursion[消除左递归]
+• Immediate left recursion can be eliminated by the following 
+technique, which works for any number of A-productions.
+◆First, group the productions as
+A → A⍺1 | A⍺2 | … | A⍺m | β1 | β2 … | βn where no βi begins with an A.
+◆Then, replace the A-productions by
+A → β1A’ | β2A’ | … | βnA’ AND A’ → ⍺1A’ | ⍺2A’ | … | ⍺mA’ | ε
+• Exercise-Remove Immediate left recursion.
+◆G1[E]: E → E+T| T ; T → T*F | F ; F → (E) | i.
+◆G2[E]: E → TE’; E’ → +TE’ | ε; T → FT’; T’ → *FT’ | ε; F → (E) | i.
+⍺ ⍺β β
+17
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 17 =====
+Remove Left Recursion[消除左递归]
+• Non-Immediate left recursion[非直接左递归的消除]
+◆Grammar: S → Qc | c ; Q → Rb | b ; R → Sa | a.
+◆Although there is no immediate left recursion, S, Q and R are all left 
+recursion.
+S → Qc | c
+Q → Rb | b 
+R → Sa | a
+S
+Q R
+S → Qc | c
+Q → Sab | ab | b 
+R → Sa | a
+S
+Q
+S → Sabc | abc | bc | c
+Q → Sab | ab | b 
+R → Sa | a
+S
+Left Recursion!
+18
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 18 =====
+Remove Left Recursion[消除左递归]
+• The following algorithm systematically eliminates left recursion 
+from a grammar[直接/间接]. It is guaranteed to work if:
+◆the grammar has no cycles (derivations of the form A ⇒ A)
+◆the grammar has no ε–productions (productions of the form A → ε).
+◆These two can be eliminated systematically from a grammar.
+• Algorithm: Eliminating left recursion.
+◆INPUT: Grammar G with no cycles or ε–productions.
+◆OUTPUT: An equivalent grammar with no left recursion.
+◆METHOD: Apply the following 3 steps to G. Note that the resulting non-
+left-recursive grammar may have ε–productions.
++
+19
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 19 =====
+Remove Left Recursion[消除左递归]
+◆Step 1 : Arrange all non-terminals of grammar G in some order A1, A2,..., An; 
+◆Step 2 : Execute in order obtained in Step 1:
+FOR i:=1 TO n DO
+FOR j:=1 TO i-1 DO
+Replace each production of the form Ai → Ajγ by the productions 
+Ai → δ1γ | δ2γ | … δkγ, where Aj → δ1 | δ2| … δk are all current 
+Aj-productions;
+eliminate the immediate left recursion among the Ai-productions;
+END
+END
+◆Step 3 : Simplify the grammar obtained from Step 2 --- remove the production 
+rules of non-terminal that can never be reached from the start symbol.
+20
+[间接左递归问题 转换为 直接左递归问题]
+[解决直接左递归问题] 
+A → A⍺ | β 
+A → βA’; A’ → ⍺A’ | ε
+[去掉无效productions]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 20 =====
+Remove Left Recursion[消除左递归]
+• Example: Consider Grammar G(S): (ILR = immediate left recursion)
+R → Sa | a Q → Rb | b S → Qc | c 
+• Step 1 : non-terminal order: R,Q,S; (A1, A2, A3)
+• Step 2 : (i=1) For R, there is no ILR;
+(i=2,j=1) Replace production Q → Rb by the productions R 
+→ Sa | a, which generates Q → Sab | ab | b; not ILR
+(i=3,j=1) No operations.
+(i=3,j=2) Replace production S → Qc by the productions Q → Sab | 
+ab | b, which generates S → Sabc | abc | bc | c; contain ILR;
+(continue...)
+21
+[顺序决定了哪个non-terminal可能会被消除 
+(如果符合算法要求), 最后的non-terminal会留
+下][Ai=R]
+[Ai=Q, Aj=R]
+[Ai=S, Aj=R]
+[Ai=S, Aj=Q]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 21 =====
+Remove Left Recursion[消除左递归]
+(continue...)
+(i=3,j=2) S → Sabc | abc | bc | c contains ILR.
+Eliminate ILR about S:
+S → abcS’ | bcS’ | cS’ S’ → abcS’ | ε
+Q → Sab | ab | b R → Sa | a
+• Step 3 : Simplify the grammar and get Final Grammar:
+S → abcS’ | bcS’ | cS’ S’ → abcS’ | ε
+ (Q&R’s production is included by S) 
+（⍺） （β）
+22
+R → Sa | a
+Q → Rb | b
+S → Qc | c
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 22 =====
+Remove Left Recursion[消除左递归]
+• Question: What will happen if the order in step 1 is different
+• Again, consider G(S): S → Qc | c Q → Rb | b R → Sa | a
+• Exercise: If the order in step 1 is S,Q,R, the final grammar without 
+ILR is? 
+• Different order in Step1 may cause the final grammar different in 
+form[可能在形式上不同], but it is not difficult to prove that they are 
+equivalent.
+S → Qc | c
+Q → Rb | b 
+R → bcaR’ | caR’ | aR’
+R’ → bcaR’ | ε
+S → abcS’ | bcS’ | cS’
+S’ → abcS’ | ε
+S,Q,R R,Q,S
+equivalent
+23
+(was R, Q, S in the previous example)
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 23 =====
+Recursive-descent parsing[递归下降语法分析]
+• Recursive-descent parsing [RDP , 递归下降语法分析]
+◆ A general form of top-down parsing.
+◆ RDP is a simple and general parsing strategy.
+Left-recursion must be eliminated first.(Can be eliminated 
+automatically using some algorithm)
+◆ However, it is not popular because of backtracking.
+Backtracking requires re-parsing the same string.
+Tried to solve problem in any possible ways[穷尽一切可能的试探法] 
+which is inefficient.(can take exponential time)
+Also removing already added nodes in parse tree is troublesome.
+24
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 24 =====
+Mind Map[思维导图]
+25
+Syntax Analysis: Top-down parser
+type 1
+Top-down parser
+Parser Type
+First 
+Sets
+Follow 
+Sets
+Predictive 
+parser
+LL(1) 
+grammar
+compute
+LL(1) table
+type 2
+remove problem in grammars
+construct
+tool
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 25 =====
+Predictive Parsing[预测分析]
+• Predictive Parsing[预测分析法]
+◆A special case of recursive-descent parsing without backtracking[无回溯].
+◆Predictive parsing chooses the correct production by looking ahead at the 
+input a fixed number of symbols, typically we may look only at one.(that is, 
+the next input symbol) [通过向前看一步输入符号，预测正确的产生式]
+◆Restrictions on the grammar to avoid backtracking.[LL(k)]
+Parser
+Top-down Parser Bottom-up Parser
+RD-backtrack Parser Predictive Parser
+26
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 26 =====
+Predictive Parsing[预测分析]
+• A parser with no backtracking [无回溯]: select the correct 
+alternative through given next input terminal(s)[下一个输入符号/终结符]
+• A predictive parser chooses the production to apply solely on the 
+basis of [选取产生式的依据]
+◆Next input symbol(s).
+◆Current non-terminal being processed.
+G(S): S → aBD | bBB; B → c | bce; D → d
+parsing input “abced” requires no backtracking
+What if S → aBD | aBB Common Prefix[共同前缀]
+Given input terminal(s) a, cannot choose between two rules.
+27
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 27 =====
+Common Prefix[共同前缀]
+• G[S]: S → xAy; A → ** | *, If the current matching symbol is *, the 
+next step is to expand A, and A → α1 | α2 |…| αn . How to choose αi？
+◆(1) If there is a unique αi with * as the head, replace 
+using this unique αi.
+◆(2) If there are multiple αi with * as the head, the 
+substitution is not unique[替换是不唯一的], backtracking
+may happen.
+• Left factoring[提取左公因子]: Rewrite the productions to defer the 
+decision until enough of the input has been seen that we can make 
+the right choice. [推后决定直至可选择]
+x * y S
+Ax y
+How to expand?
+A → ** OR A → *?
+28
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 28 =====
+Left factoring[提取公共左因子]
+• For each non-terminal A, find the longest prefix α common to two 
+or more of its alternatives. If α ≠ ε, replace all of the A-
+productions A → αβ1 | αβ2 | … | αβn | γ, where γ represents all 
+alternatives that do not begin with α, by A → αA’| γ; A’ → β1 | β2
+| … | βn .
+• Repeatedly apply this transformation until no two alternatives for 
+a non-terminal have a common prefix.
+• Example: G[S]: S → abc |abd |ae;
+◆Step1: S → aA’; A’ → bc |bd | e;
+◆Step2: S → aA’; A’ → bB’ | e; B’ → c | d;
+ 29
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 29 =====
+Predictive Parsing[预测分析]
+• Patterns in grammars that prevent predictive parsing [并非总是能预
+测分析] :
+◆Left Recursion Problem [左递归问题]
+ Lookahead symbol changes only when a terminal is matched.
+ Q: How to solve? A: Remove Left Recursion. 
+◆Common Prefix[共同前缀] —Cause Backtracking Problem.
+ Q: How to solve? A: Left factoring. 
+◆Question: After left factoring, Can we completely avoid the backtracking 
+and do predictive parsing?
+G(S): S → aBD | bBB; B → c | bce; D → d
+parsing input “abced” requires no backtracking
+What if S → EBD | FBB; E → a…. ; F → a…
+FIRST && FOLLOW!
+30
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 30 =====
+FIRST[终结首符集]
+• During top-down parsing, FIRST and FOLLOW allow us to choose 
+which production to apply, based on the next input symbol.
+• FIRST(α) [终结首符集] (α is any string of grammar symbols)
+◆Define FIRST(α) to be the set of terminals that are the first symbol in 
+strings[串的终结首符的集合] derived from α. FIRST(α) = {a | α ⇒ a…, a ∈ VT}
+◆AND if α ⇒ ε, then ε is also in FIRST(α).
+• Consider two(or more) A-productions A → α | β, where FIRST(α) and FIRST(β) 
+are disjoint sets [不相交的集合]. We can then choose between these A-
+productions by looking at the next input symbol a, since a can be in at most 
+one of FIRST(α) and FIRST(β), not both.
+*
+*
+31
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 31 =====
+FOLLOW[后继终结符号集]
+• Question: And then, if for an input symbol a and the non-terminal 
+A (A → α1 │ α2 │…│ αn) , but for any αi , a ∉ FIRST (αi), in this case, 
+how to choose αi, or draw a conclusion of grammatical errors?
+• FOLLOW(A): For nonterminal A, the set of terminals a that can 
+appear immediately to the right of A in some sentential form; that 
+is, FOLLOW(A) = {a | S ⇒ …Aa…, a∈VT}. [在某些句型中紧跟在A右边的终
+结符号的集合]
+◆If A is the rightmost symbol in some sentential form, then $ is in FOLLOW(A); 
+recall that $ is a special “endmarker”[结束标记] symbol that is assumed not to 
+be a symbol of any grammar.
+* 
+32
+[First与Follow的区别]
+First(α): α展开的串的第一个终结符
+Follow(A): A后面紧跟的终结符 (不包括A展开的串)
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 32 =====
+FOLLOW[后继终结符号集]
+• Question: for an input symbol a and the non-terminal A (A → α1 
+│ α2 │…│ αn), a ∉ FIRST(αi), in this case, how to choose αi, or draw 
+a conclusion of grammatical errors?
+• Answer: if ε ∈ FIRST (αi), then when a ∈ FOLLOW(A), select A → 
+αi, otherwise, report grammatical error.
+• Example: G(S): S → aA | d ; A → bAS | ε. String : abd.
+FIRST(aA)= {a}
+FIRST(d) = {d}
+FIRST(bAS)= {b}
+FIRST(A) = {b, ε}
+FIRST(S) = {a, d}
+HOW TO compute 
+FIRST & FOLLOW? 33
+FOLLOW(A) ={$,a,d} S abd
+⇒ aA abd
+⇒ abAS abd (First cannot tell, check Follow)
+⇒ abS abd
+⇒ abd
+[如果A的所有候选式都推不到a, 看看有没有
+候选式能推到ε (即ε ∈ FIRST (αi)),并且A后直
+接跟着a (即a ∈ FOLLOW(A))]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 33 =====
+Compute FIRST[计算FIRST集合的方法]
+• To compute FIRST(X) for all grammar symbol X, apply the following 
+rules until no more terminals or ε can be added to any FIRST set:
+◆Rule1: If X∈VT , then FIRST(X) = {X}. [X是终结符]
+◆Rule2: If X∈VN and X → ε exists, then add ε to FIRST(X). [非终结符,空式]
+◆Rule3: If X∈VN and X→ Y1Y2Y3...Yk, then [非终结符,非空式]
+ If for some Yi and a terminal a: ① ε ∈ all of FIRST(Y1),…, FIRST(Yi-1), i.e., 
+Y1…Yi-1⇒ ε; ② a ∈ FIRST(Yi) \ {ε}. Then, a ∈ FIRST(X).
+ E.g.,
+ Everything in FIRST(Y1) \ {ε} is surely in FIRST(X).
+ If Y1 doesn’t derive ε, then we add nothing more.
+ But if Y1 ⇒ ε, then we add FIRST(Y2) \ {ε} , and so on…
+ Add ε to FIRST(X), if ε is in FIRST(Yi) for all i=1,2,…k.
+*
+*
+34
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 34 =====
+Compute FIRST[计算FIRST集合的方法]
+• Next, we can compute FIRST for any string ⍺ = X1X2…Xn [符号串]
+◆Add all non-ε symbols of FIRST(X1) to FlRST(⍺). 
+◆Add non-ε symbols of FIRST(Xi), 2≤i≤n, to FIRST(α), if FIRST(X1), ..., FIRST(Xi-1) all 
+contain ε. [前i-1个都包含空串]
+◆Add ε to FIRST(⍺), if FIRST(X1), ..., FIRST(Xn) all contain ε.
+35
+[First(X)集合的计算本质上就是看X能推导出什么， First(X)包括所有X能推导出的句子的首个字符 (必须是终结符或空串)]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 35 =====
+Compute FIRST[计算FIRST集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FIRST set of each non-terminal.
+◆FIRST(E):{
+◆FIRST(T):{
+◆FIRST(E’):{
+◆FIRST(T’):{
+◆FIRST(F):{
+Apply rules for the first time:
+E → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε
+E’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε
+E’ → ε ε add to FIRST(E’)
+T → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε
+T’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε
+T’ → ε ε add to FIRST(T’)
+F → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε
+F → id FIRST(id) add to FIRST(F)
++ , ε
+* , ε
+( , id
+36
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 36 =====
+Compute FIRST[计算FIRST集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FIRST set of each non-terminal.
+◆FIRST(E):{
+◆FIRST(T):{
+◆FIRST(E’):{ +, ε
+◆FIRST(T’):{ *, ε
+◆FIRST(F):{ (, id
+Apply rules for the second time:
+E → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε
+E’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε
+E’ → ε ε add to FIRST(E’)
+T → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε
+T’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε
+T’ → ε ε add to FIRST(T’)
+F → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε
+F → id FIRST(id) add to FIRST(F)
+It is necessary to determine whether the FIRST set has 
+changed after each rule application. first time YES!(, id
+37
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 37 =====
+Compute FIRST[计算FIRST集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FIRST set of each non-terminal.
+◆FIRST(E):{
+◆FIRST(T):{ (, id
+◆FIRST(E’):{ +, ε
+◆FIRST(T’):{ *, ε
+◆FIRST(F):{ (, id
+Apply rules for the third time:
+E → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε
+E’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε
+E’ → ε ε add to FIRST(E’)
+T → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε
+T’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε
+T’ → ε ε add to FIRST(T’)
+F → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε
+F → id FIRST(id) add to FIRST(F)
+It is necessary to determine whether the FIRST set has 
+changed after each rule application. second time YES!
+(, id
+38
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 38 =====
+Compute FIRST[计算FIRST集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FIRST set of each non-terminal.
+◆FIRST(E):{ (, id
+◆FIRST(T):{ (, id
+◆FIRST(E’):{ +, ε
+◆FIRST(T’):{ *, ε
+◆FIRST(F):{ (, id
+Apply rules for the 4th time:
+E → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε
+E’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε
+E’ → ε ε add to FIRST(E’)
+T → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε
+T’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε
+T’ → ε ε add to FIRST(T’)
+F → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε
+F → id FIRST(id) add to FIRST(F)
+It is necessary to determine whether the FIRST set has 
+changed after each rule application. third time YES!
+It is necessary to determine whether the FIRST set has 
+changed after each rule application. 4th time NO!
+}
+}
+}
+}
+}
+39
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 39 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• To compute FOLLOW(A) for all non-terminals A, apply the following 
+rules until nothing can be added to any FOLLOW set.
+◆Rule1: Place $ in FOLLOW(S), where S is the start symbol.
+◆Rule2: If there is a production A → αBβ, then everything in FIRST(β) except ε is 
+in FOLLOW(B).
+◆Rule3: If there is a production A → αB, or a production A → αBβ, where FIRST(β) 
+contains ε, then everything in FOLLOW(A) is in FOLLOW(B).
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+• FIRST(E):{ (, id }; FIRST(T):{ (, id } ; FIRST(E’):{ +, ε } ; FIRST(T’):{ *, ε } ; FIRST(F):{ (, 
+id }.
+40[FOLLOW(A)计算的本质是在看这个A后 (不包含A本身的推导结果) 的符号 (必须是终结符或结束符号)]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 40 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ 
+◆FOLLOW(T):{
+◆FOLLOW(E’):{
+◆FOLLOW(T’):{
+◆FOLLOW(F):{
+Apply rules for the first time:
+◆ Place $ in FOLLOW(E), since E is the start symbol.
+◆ E → TE’
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in FOLLOW(E) 
+is in FOLLOW(T).
+◆ E’ → +TE’ | ε
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E’) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in FOLLOW(E’) 
+is in FOLLOW(T).
++, $
+$
+$
+41
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 41 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ $
+◆FOLLOW(T):{ +, $
+◆FOLLOW(E’):{ $
+◆FOLLOW(T’):{
+◆FOLLOW(F):{
+Apply rules for the first time:
+◆ T → FT’
+ FIRST(T’) except ε is in FOLLOW(F).
+ Everything in FOLLOW(T) is in FOLLOW(T’).
+ Since FIRST(T’) contains ε, then everything in FOLLOW(T) 
+is in FOLLOW(F).
+◆ T’ → *FT’ | ε
+ FIRST(T’) except ε is in FOLLOW(F).
+ Everything in FOLLOW(T’) is in FOLLOW(T’).
+ Since FIRST(T’) contains ε, then everything in FOLLOW(T’) 
+is in FOLLOW(F).
+*
++, $
+, +, $
+42
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 42 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ $
+◆FOLLOW(T):{ +, $
+◆FOLLOW(E’):{ $
+◆FOLLOW(T’):{ +, $
+◆FOLLOW(F):{ *, +, $
+Apply rules for the first time:
+◆ F → (E) | id
+ FIRST(‘)’) except ε is in FOLLOW(E).
+Since FOLLOW sets has changed at the first time, Apply rules for 
+the second time:
+◆ E → TE’
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in FOLLOW(E) 
+is in FOLLOW(T).
+, )
+, )
+, )
+43
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 43 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ $, )
+◆FOLLOW(T):{ +, $, )
+◆FOLLOW(E’):{ $, )
+◆FOLLOW(T’):{ +, $
+◆FOLLOW(F):{ *, +, $
+◆ E’ → +TE’ | ε
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E’) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in FOLLOW(E’) 
+is in FOLLOW(T).
+◆ T → FT’
+ FIRST(T’) except ε is in FOLLOW(F).
+ Everything in FOLLOW(T) is in FOLLOW(T’).
+ Since FIRST(T’) contains ε, then everything in FOLLOW(T) 
+is in FOLLOW(F).
+, )
+, )
+44
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 44 =====
+Compute FOLLOW[计算FOLLOW集合的方法]
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FOLLOW set of each non-terminal.
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ $, )
+◆FOLLOW(T):{ +, $, )
+◆FOLLOW(E’):{ $ , )
+◆FOLLOW(T’):{ +, $, )
+◆FOLLOW(F):{ *, +, $, )
+◆ T’ → *FT’ | ε
+ FIRST(T’) except ε is in FOLLOW(F).
+ Everything in FOLLOW(T’) is in FOLLOW(T’).
+ Since FIRST(T’) contains ε, then everything in FOLLOW(T’) 
+is in FOLLOW(F).
+◆ F → (E) | id
+ FIRST(‘)’) except ε is in FOLLOW(E).
+Since FOLLOW sets has changed at the second time, Apply rules 
+for the third time:
+◆ EXERCISE! –Ans: no FOLLOW set will be changed.
+}
+}
+}
+}
+}
+45
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 45 =====
+Revisit
+• Top-down Parsing
+• Recursive-descent parsing [RDP , 递归下降语法分析]
+• (immediate and indirect) left recursion -> remove left recursion
+• Backtracking -> brutal force, not preferred due to complications and high overheads
+• Predicative parsing – LL(k) [预测分析]
+• Predict the right production based on the input symbol (i.e., lookahead), no backtracking!
+• Preliminaries: (1) remove left recursion, (2) left factoring
+• To enable prediction: FIRST and FOLLOW
+• FIRST(α) = { a | α ⇒ a…, a ∈ VT }, ε can be included
+• FOLLOW(A) = { a | S ⇒ …Aa…, a ∈ VT }, $ can be included
+• Prediction based on the input symbol a when expanding A:
+• For A with A → α | β, where FIRST(α) and FIRST(β) are disjoint, i.e., chose the one with a 
+inside its FIRST set.
+• If all FIRST sets do not contain a, but ε ∈ FIRST(α) while a ∈ FOLLOW(A), chose FIRST(α)
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 46 =====
+Compute FIRST (Revisit)
+• To compute FIRST(X) for all grammar symbol X, apply the following 
+rules until no more terminals or ε can be added to any FIRST set:
+◆Rule1: If X∈VT , then FIRST(X) = {X}. [X是终结符]
+◆Rule2: If X∈VN and X → ε exists, then add ε to FIRST(X). [非终结符,空式]
+◆Rule3: If X∈VN and X→ Y1Y2Y3...Yk, then [非终结符,非空式]
+ If for some Yi and a terminal a: ① ε ∈ all of FIRST(Y1),…, FIRST(Yi-1), i.e., 
+Y1…Yi-1⇒ ε; ② a ∈ FIRST(Yi) \ {ε}. Then, a ∈ FIRST(X).
+ E.g.,
+ Everything in FIRST(Y1) \ {ε} is surely in FIRST(X).
+ If Y1 doesn’t derive ε, then we add nothing more.
+ But if Y1 ⇒ ε, then we add FIRST(Y2) \ {ε} , and so on…
+ Add ε to FIRST(X), if ε is in FIRST(Yi) for all i=1,2,…k.
+*
+*
+47
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 47 =====
+Compute FIRST (Revisit)
+• Next, we can compute FIRST for any string ⍺ = X1X2…Xn [符号串]
+◆Add all non-ε symbols of FIRST(X1) to FlRST(⍺). 
+◆Add non-ε symbols of FIRST(Xi), 2≤i≤n, to FIRST(α), if FIRST(X1), ..., FIRST(Xi-1) all 
+contain ε. [前i-1个都包含空串]
+◆Add ε to FIRST(⍺), if FIRST(X1), ..., FIRST(Xn) all contain ε.
+48
+[First(α)集合的计算本质上就是看α能推导出什么， First(α)包括所有α能推导出的句子的首个字符 (必须是终结符或空串)]
+[给定α ->X1X2…Xn，First(α)的计算基于单个First(Xi) 的计算（方法见上页）
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 48 =====
+Compute FIRST (Revisit)
+• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → 
+(E) | id , compute the FIRST set of each non-terminal.
+◆FIRST(E):{ (, id
+◆FIRST(T):{ (, id
+◆FIRST(E’):{ +, ε
+◆FIRST(T’):{ *, ε
+◆FIRST(F):{ (, id
+E → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε
+E’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε
+E’ → ε ε add to FIRST(E’)
+T → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε
+T’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε
+T’ → ε ε add to FIRST(T’)
+F → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε
+F → id FIRST(id) add to FIRST(F)
+It is necessary to determine whether the FIRST set has 
+changed after each rule application. 
+}
+}
+}
+}
+}
+49
+⍺ = X1X2…Xn
+(1) all non-ε symbols of FIRST(X1) to 
+FlRST(⍺)
+(2) If FIRST(X1), ..., FIRST(Xi-1) all contain 
+ε, add non-ε symbols of FIRST(Xi), 
+2≤i≤n, to FIRST(α)
+(3) If FIRST(X1), ..., FIRST(Xn) all contain 
+ε, add ε to FIRST(⍺)
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 49 =====
+Compute FOLLOW (Revisit)
+• To compute FOLLOW(A) for all non-terminals A, apply the following 
+rules until nothing can be added to any FOLLOW set.
+◆Rule1: Place $ in FOLLOW(S), where S is the start symbol.
+◆Rule2: If there is a production A → αBβ, then everything in FIRST(β) except ε is 
+in FOLLOW(B).
+◆Rule3: If there is a production A → αB, or a production A → αBβ, where FIRST(β) 
+contains ε, then everything in FOLLOW(A) is in FOLLOW(B).
+50
+[FOLLOW(A)计算的本质是在看这个A后 (不包含A本身的推导结果) 的符号 (必须是终结符或结束符号)]
+[给定A → αBβ, FOLLOW(B)计算基于FIRST(β)的计算
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 50 =====
+Compute FOLLOW (Revisit)
+• G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → (E) | id
+◆FIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.
+◆FOLLOW(E):{ $, ) }
+◆FOLLOW(T):{ +, $, ) }
+◆FOLLOW(E’):{ $ , ) }
+◆FOLLOW(T’):{ +, $, ) }
+◆FOLLOW(F):{ *, +, $, ) }
+◆ Place $ in FOLLOW(E), since E is the start symbol.
+◆ E → TE’
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in 
+FOLLOW(E) is in FOLLOW(T).
+◆ E’ → +TE’ | ε
+ FIRST(E’) except ε is in FOLLOW(T).
+ Everything in FOLLOW(E’) is in FOLLOW(E’).
+ Since FIRST(E’) contains ε, then everything in 
+FOLLOW(E’) is in FOLLOW(T).
+51
+A → αBβ
+(1) If A is the start symbol, $ ∈ FOLLOW(A)
+(2) Everything in FIRST(β) except ε is in 
+FOLLOW(B).
+(3) If β does not exist or FIRST(β) contains ε, 
+then everything in FOLLOW(A) is in 
+FOLLOW(B).
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 51 =====
+LL(1) Grammar[LL(1)文法]
+• Predictive parsers, that is, recursive-descent parsers needing no 
+backtracking, can be constructed for a class of grammars called LL(1).
+• A grammar G is LL(1) if and only if whenever any two distinct 
+productions of G [G的任意两个不同的产生式], A → α | β, the following 
+conditions hold:
+1. For no terminal a, do both α and β derive strings beginning with a.
+2. At most one of α and β can derive the empty string.
+3. If β ⇒ ε, then α does not derive any string beginning with a terminal in 
+FOLLOW(A). Likewise, if α ⇒ ε, then β does not derive any string beginning 
+with a terminal in FOLLOW(A).
+*
+*
+52
+So, S → EBD | FBB; E → a…. ; F → a… is not LL(1)
+[条件1和2不满足则直接产
+生二义性, 即使用α还是β?]
+[条件3不满足也会产生两种可能的推
+导, 如推导β为ε还是推导α]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 52 =====
+LL(1) Grammar[LL(1)文法]
+• The first two conditions are equivalent to the statement that 
+FIRST(α) and FIRST(β) are disjoint sets [不相交的集合]. 
+• The third condition is equivalent to stating that if ε is in FIRST(β), 
+then FIRST(α) and FOLLOW(A) are disjoint sets, and likewise if ε is 
+in FIRST(α). [确保无等价的推导]
+• LL(1) Grammar does not contain left recursion. [LL(1)文法不含左递归]
+• LL(1) Grammar is not ambiguous. [LL(1)文法不是二义的]
+53
+反例: input symbol为b，当前句型aaAb, 产生式A-> b | ε
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 53 =====
+LL(1)/LL(k) Grammar[LL(1)/LL(k)文法]
+• LL (1) grammar.
+◆L: The first "L" in LL(1) stands for scanning the input from left to right.
+◆L: The second “L” for producing a leftmost derivation.
+◆1: The "1" for using one input symbol of lookahead at each step to make 
+parsing action decisions.
+• LL (k) grammar.
+◆k: using k input symbols of lookahead at each step to make parsing action 
+decisions.
+• Many languages are LL(k), in fact many are LL(1).
+• Is LL(0) useful at all?
+◆Grammar where rules can be predicted with no lookahead.
+◆⇒ That means, there can only be one rule per non-terminal.
+◆⇒ That means, this language can have only one string.
+ 54
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 54 =====
+LL(1) Parser Implementation[实现]
+• Recursive LL(1) parser for G[S]: S → A | B; 
+A → a; B → b.
+◆Maintaining a stack implicitly. [隐式维护栈]
+◆What is the stack for? Derivation results
+• Is there a way to express above code 
+more concisely? [简洁]
+◆Non-recursive LL(1) parsers
+ Use a predictive parsing table. [预测分析表]
+ maintaining a stack explicitly. [显式维护栈]
+ Table-driven parser. [表驱动]
+void S(){
+token = Next(); // lookahead
+if(token == a) // ’ A’ starts with ’a’
+A(); // call procedure A()
+else if (token == b) // ’B’ starts 
+with ’b’
+B(); // call procedure B()
+else
+return; // error, reject.
+}
+55
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 55 =====
+Non-recursive LL(1) Parser [非递归]
+• Input buffer[输入串]: contains the 
+string to be parsed, followed by 
+the “end marker” $. 
+• Stack[推导的中间结果]: holds a 
+sequence of grammar symbols 
+and the symbol $ to mark the 
+bottom of the stack. It may 
+contain:
+◆Terminals that have yet to matched 
+against the input symbol.
+◆Non-terminals that have yet to be 
+expanded.
+a + b $
+X
+Y
+Z
+$
+Predictive Parsing 
+Program
+Parsing Table M
+Input
+Stack
+Output
+• Parsing Table M[A,a] [语法分析表]: an 
+entry containing production “A→…” 
+or error.
+• Predictive Parsing Program[语法分析程
+序]: Execute the action according to 
+<stack top, current input symbol>
+56
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 56 =====
+LL(1) Parse Table [预测分析表]
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | id
+all non-terminals 
+in the grammar
+Input symbol, 
+lists all possible 
+terminals and $
+One action for each <non-terminal, next input>, it 
+“predicts” the correct action based on one lookahead
+- Reject on reaching error state
+- Accept on end of input & empty stack
+57
+FIRST(E):{ (, id } FIRST(T):{ (, id } FIRST(E’):{ +, ε } FIRST(T’):{ *, ε } FIRST(F):{ (, id }.
+FOLLOW(E):{ $, )} FOLLOW(T):{ +, $, )} FOLLOW(E’):{ $ , )} FOLLOW(T’):{ +, $, )} FOLLOW(F):{ *, +, $, )}
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 57 =====
+LL(1) Parsing Algorithm [非递归算法]
+• Initial state [初始态]
+◆Input: A string w and a parsing table M for grammar G. Input Buffer: w$.
+◆Stack: start symbol followed by ’$’ at bottom.
+◆Assume X: symbol at the top of the stack, a: current input symbol.
+• General idea [总体思路] : repeat one of two actions
+◆Expand non-terminal symbol at top of stack by applying a production
+◆Match terminal symbol at top of stack with input token
+a + b $
+X
+Y
+$
+Predictive Parsing 
+Program
+Parsing Table M
+Input
+Stack
+Output
+58
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 58 =====
+LL(1) Parsing Algorithm [非递归算法]
+• Algorithm Step-by-Step based on <X, a>:
+◆X: symbol at the top of the stack
+◆a: current input token
+◆If X ∈ VT, [栈顶符号为终结符] and
+ X == a == $, declare SUCCESS, stop parsing.
+ X == a != $, pop X from stack and move the 
+current input symbol forward one.
+ X != a, declare ERROR, input is rejected, stop 
+parsing.
+◆If X ∈ VN, [栈顶符号为非终结符] and
+ M[X, a] has a production about X, pop X and 
+push right side of production to stack.
+ M[X, a] == empty, declare ERROR, input is 
+rejected, stop parsing.
+X
+…
+$
++
+T
+E’
+…
+$
+If M[X,a] = X → +TE’
+Push to stack in 
+Reverse Order 
+[逆序入栈]
+If M[X,a] = X → ε
+Only pop and 
+push nothing
+59
+a + b $
+a
+Y
+$
+Predictive Parsing 
+Program
+Parsing Table M
+Input
+Stack
+Output
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 59 =====
+Use the Parse Table [使用表进行预测分析]
+• When using parse table for predictive parsers, if the grammar does 
+not conform to the specification of LL (1) grammar: 
+◆the grammar should be rewritten into LL (1) grammar by removing left 
+recursion and backtracking, then the parse table should be constructed.
+• LL(1) parser example: consider G[E] to recognize “id + id * id”
+G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | id
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+ 60
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 60 =====
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | id
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Predictive Parsing 
+Program
+E
+$
+Stack
+id + id * id $Input Buffer
+61
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 61 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+T
+E’
+$
+Stack
+id + id * id $Input Buffer
+62
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 62 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+F
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+63
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 63 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+id
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+64
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 64 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+65
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 65 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+E’
+$
+Stack
+id + id * id $Input Buffer
+66
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 66 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
++
+T
+E’
+$
+Stack
+id + id * id $Input Buffer
+67
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 67 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+T
+E’
+$
+Stack
+id + id * id $Input Buffer
+68
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 68 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+F
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+69
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 69 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+id
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+70
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 70 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+71
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 71 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+*
+F
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+72
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 72 =====
+• recognize “id + id * id”
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+F
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+73
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 73 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+id
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+74
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 74 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+T’
+E’
+$
+Stack
+id + id * id $Input Buffer
+75
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 75 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+E’
+$
+Stack
+id + id * id $Input Buffer
+76
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 76 =====
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+Use the Parse Table [使用表进行预测分析]
+• recognize “id + id * id” G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | idPredictive Parsing 
+Program
+$
+Stack
+id + id * id $Input Buffer
+ACCEPT!!
+77
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 77 =====
+Matched Stack Input Action
+E$ id + id * id$ E → TE’
+TE’$ id + id * id$ T → FT’
+FT’E’$ id + id * id$ F → id
+idT’E’$ id + id * id$ match id
+id T’E’$ + id * id$ T’ → ε
+id E’$ + id * id$ E’ → +TE’
+id +TE’$ + id * id$ match +
+id + TE’$ id * id$ T → FT’
+id + FT’ E’$ id * id$ F → id
+id + idT’ E’$ id * id$ match id
+id + id T’ E’$ * id$ T’ → *FT’
+id + id *FT’E’$ * id$ match *
+Use the Parse Table [使用表进行预测分析]
+Matched Stack Input Action
+id + id * FT’E’$ id$ F → id
+id + id * idT’E’$ id$ match id
+id + id * id T’E’$ $ T’ → ε
+id + id * id E’$ $ E’ → ε
+id + id * id $ $ ACCEPT
+The parser mimics a leftmost derivation.
+• Top-down parsing mimics the grammar
+How to construct 
+LL(1) Parse Table?
+78
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 78 =====
+Construct LL(1) Parse Table [构建预测分析表]
+• Use FIRST and FOLLOW sets for a predictive parsing table M[A,a], 
+and the algorithm is based on the following idea: 
+◆The production A → α is chosen if the next input symbol a is in FIRST (α). 
+◆The only complication occurs when α = ε or, more generally, α ⇒ ε:
+ we should again choose A → α, if (1) a is in FOLLOW(A) or (2) the $ on 
+the input has been reached and $ is in FOLLOW (A).
+*
+79
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 79 =====
+Construct LL(1) Parse Table [构建预测分析表]
+• Algorithm: For each production A → α of the grammar:
+◆For each terminal a ∈ FIRST(α), add A → α to M[A, a].
+80
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’
+T T → FT’ T → FT’
+T’ T’ → *FT’
+F F → id F → (E)
+G[E]: E → TE’ E’ → +TE’ | ε T → FT’ T’ → *FT’ | ε F → (E) | id 
+Production FIRST(α)
+E → TE’ (, id
+E’ → +TE’ +
+T → FT’ (, id
+T’ → *FT’ *
+F → (E) (
+F → id id
+E’ → ε FOLLOW
+T’ → ε FOLLOW
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 80 =====
+Construct LL(1) Parse Table [构建预测分析表]
+• Algorithm: For each production A → α of the grammar:
+◆If ε ∈ FlRST(α), then for each terminal b in FOLLOW(A), add A → α to 
+M[A,b]. If ε ∈ FlRST(α) and $ ∈ FOLLOW(A), add A → α to M[A, $] as well.
+81
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E)
+G[E]: E → TE’ E’ → +TE’ | ε T → FT’ T’ → *FT’ | ε F → (E) | id 
+Symbol FOLLOW(A)
+E’ $, )
+T’ +, $, )
+Production FIRST(α)
+E’ → ε FOLLOW
+T’ → ε FOLLOW
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 81 =====
+Construct LL(1) Parse Table [构建预测分析表]
+Symbol FIRST FOLLOW
+E (, i $, )
+E’ +, ε $, )
+T (, i +, $, )
+T’ *, ε +, $, )
+F (, i *, +, $, )
+Production FIRST(α)
+E → TE’ (, i
+E’ → +TE’ +
+T → FT’ (, i
+T’ → *FT’ *
+F → (E) (
+F → id id
+E’ → ε FOLLOW
+T’ → ε FOLLOW
+G[E]: 
+E → TE’
+E’ → +TE’ | ε
+T → FT’
+T’ → *FT’ | ε
+F → (E) | id
+id + * ( ) $
+E E → TE’ E → TE’
+E’ E’ → +TE’ E’ → ε E’ → ε
+T T → FT’ T → FT’
+T’ T’ → ε T’ → *FT’ T’ → ε T’ → ε
+F F → id F → (E) 82
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 82 =====
+Determine If Grammar is LL(1)[判断LL(1)文法]
+• Observation [直观依据]
+◆If a grammar is LL(1), each of its LL(1) table entry contains at most one rule.
+◆Otherwise, it is not LL(1).
+• Two methods to determine if a grammar is LL(1) or not
+◆Construct LL(1) table, and check if there is a multi-rule entry.
+◆Check each rule as if the table is getting constructed, grammar G is LL(1) if and 
+only if for any two distinct productions A → α|β:
+◆FIRST(α) ∩ FIRST(β) = φ
+◆If ε ∈ FIRST(β), FIRST(α) ∩ FOLLOW(A) = φ (Mentioned before)
+83
+[看语法分析表]
+[看文法]
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 83 =====
+Non-LL(1) Grammar [非LL(1)文法]
+• Assume that a grammar is not LL(1). How to solve?
+◆Case1- the language may still be LL(1)
+ Try to rewrite grammar to LL(1) grammar [remove left-recursion & left-
+factoring] 
+ Try to remove ambiguity in grammar.
+◆Case2- If Case-1 fails, language may not be LL(1)
+ It’s impossible to resolve conflict at the grammar level.
+ Programmer chooses which rule to use for conflicting entry (if choosing 
+that rule is always semantically correct)
+ Otherwise, use a more powerful parser (e.g. LL(k), LR(1)) 84
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 84 =====
+LL(1) Time and Space Complexity[复杂度]
+• Linear time and space relative to the length of input.
+• Time: each input symbol is consumed within a constant number of 
+steps.
+◆If symbol at top of stack is a terminal: Matched immediately in one step.
+◆If symbol at top of stack is a non-terminal:
+ Matched in at most N steps, where N = number of rules.
+ Since LL(1) is not left-recursive, we do not apply same rule twice without 
+consuming input.
+85
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 85 =====
+LL(1) Time and Space Complexity[复杂度]
+• Space: smaller than input (after removing X → ε)
+◆Right side of production is always longer or equal to left side of production
+ Derivation string expands monotonically.
+ Derivation string is always shorter than final input string.
+◆Stack is a subset of derivation string (unmatched portion)
+• LL(k)’s size of parse table = O(|N|∗|T|k )
+◆N = number of non-terminals, T = number of terminals
+◆prevent LL(2) ... LL(k) from wide usage
+86
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 86 =====
+Summary
+87
+Syntax Analysis: Top-down parser
+problem
+type 1
+solve
+Top-down parser
+Parser Type
+First 
+Sets
+Follow 
+Sets
+RD-backtrack 
+parser
+Predictive 
+parser
+Left 
+Recursion
+Remove left 
+recursion
+LL(1) 
+grammar
+compute
+LL(1) table
+type 1 type 2
+remove problem in grammars
+construct
+tool
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 87 =====
+Summary
+• Top-down Parsing; RDP with backtracking, predictive parsing.
+• (Immediate / Non-immediate) Left Recursion and how to resolve
+• Left-factoring.
+• FIRST, FOLLOW.
+• LL(1)/LL(k) Grammar.
+• Recursive / Non-recursive LL(1) parser implementation.
+• The use of LL(1) Parse Table.
+• The construction of LL(1) Parse Table.
+88
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 88 =====
+• RDP [递归下降分析]
+• left recursion [左递归]
+• Remove Left Recursion [消除直接/间接左递归]
+• Backtracking [回溯]
+• left factoring [提取左公因子]
+• Predictive Parsing [预测分析]
+• FIRST & FOLLOW [终结首符集 & 后继终结符号集]
+• Definition of LL(1)/LL(k) [LL(1)/LL(k)文法的定义]
+• LL(1) Parse Table [LL(1)的分析表]
+• The use of the Parse Table [分析表的使用]
+• The Construction of the Parse Table [分析表的构建]
+• Table-driven LL(1) Parser Implementation [分析表驱动的LL(1)语法分析实现]
+• Complexity of LL(1) [LL(1)的时间与空间复杂度]
+Summary [自顶向下分析]
+89
+
+===== 4.Syntax_Analysis_Top_Down.pdf | page 89 =====
+• Dragon Book
+◆Comprehensive Reading: 
+ Section 4.1.2 and 4.4.1 for the introduction to 
+top-down parsing.
+ Section 4.4.2 for function FIRST and FOLLOW.
+ Section 4.1.4, 4.4.3–4.4.4, and 4.4.5 for LL(1) 
+parsing and error recovery.
+◆Skip Reading: 
+ Section 4.1.3–4.1.4 for error recovery in top-
+down parsing.
+ Section 4.2.7 for differences between CFGs and 
+regular expressions.
+Further Reading
+90

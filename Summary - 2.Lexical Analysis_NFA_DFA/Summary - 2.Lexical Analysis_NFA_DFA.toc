@@ -1,0 +1,33 @@
+\contentsline {section}{\numberline {1}全局蓝图：从规范到实现（第 1--2 页）}{2}{section.1}%
+\contentsline {section}{\numberline {2}有穷自动机基础（第 3--13 页）}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}为什么需要有穷自动机 {\small \color {gray}\,[p3,4]}}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}转换图：FA 的画法 {\small \color {gray}\,[p5]}}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}FA 就是"语言识别程序" {\small \color {gray}\,[p6,7]}}{4}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}DFA 与 NFA 的区别 {\small \color {gray}\,[p8]}}{4}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}FA 的形式定义：五元组 {\small \color {gray}\,[p9]}}{4}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}NFA 与 DFA 接受同一串的对比 {\small \color {gray}\,[p10,11]}}{5}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}转换表：FA 的另一种表示 {\small \color {gray}\,[p12,13]}}{5}{subsection.2.7}%
+\contentsline {section}{\numberline {3}Thompson 算法：RE $\to $ NFA（第 14--22 页）}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}基础：原子 RE 的 NFA {\small \color {gray}\,[p14]}}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}归纳：三条复合规则 {\small \color {gray}\,[p15]}}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}回顾：规范与实现如何衔接 {\small \color {gray}\,[p18--22]}}{6}{subsection.3.3}%
+\contentsline {section}{\numberline {4}子集构造法：NFA $\to $ DFA（第 22--31 页）}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}为什么要转成 DFA {\small \color {gray}\,[p22,23]}}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}核心思想与两个待解决问题 {\small \color {gray}\,[p24,25]}}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}两个关键运算：$\varepsilon $-closure 与 move {\small \color {gray}\,[p25,26]}}{7}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}完整算法（三步）{\small \color {gray}\,[p27--30]}}{8}{subsection.4.4}%
+\contentsline {section}{\numberline {5}DFA 最小化：分割法（第 32--40 页）}{8}{section.5}%
+\contentsline {subsection}{\numberline {5.1}为什么能最小化、目标是什么 {\small \color {gray}\,[p33]}}{8}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}分割算法（Partition Algorithm）{\small \color {gray}\,[p34]}}{9}{subsection.5.2}%
+\contentsline {section}{\numberline {6}复杂度分析（第 41--42 页）}{10}{section.6}%
+\contentsline {section}{\numberline {7}表驱动实现与 Lex（第 43--62 页）}{10}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Lex 的流水线 {\small \color {gray}\,[p50]}}{10}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}多模式合并成一个 NFA {\small \color {gray}\,[p52]}}{11}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}模拟运行与"备份" {\small \color {gray}\,[p53,54]}}{11}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}该匹配多长？消歧规则 {\small \color {gray}\,[p55]}}{11}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}关键字怎么匹配 {\small \color {gray}\,[p56]}}{11}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}Lex DFA 例子与二义性 {\small \color {gray}\,[p57--62]}}{12}{subsection.7.6}%
+\contentsline {section}{\numberline {8}正则语言的极限与展望（第 63--68 页）}{12}{section.8}%
+\contentsline {subsection}{\numberline {8.1}全讲转换流程小结 {\small \color {gray}\,[p66,67]}}{12}{subsection.8.1}%
+\contentsline {section}{\numberline {9}练习与典型题（第 69--80 页）}{13}{section.9}%
+\contentsline {section}{考点速记}{13}{section*.2}%

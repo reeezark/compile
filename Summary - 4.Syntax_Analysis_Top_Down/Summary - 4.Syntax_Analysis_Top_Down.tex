@@ -1,0 +1,1007 @@
+\documentclass[UTF8,fontset=none,11pt]{ctexart}
+
+% ---------- 基础宏包 ----------
+\usepackage[a4paper,margin=2.15cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds,calc}
+
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+
+% ---------- 颜色 ----------
+\definecolor{maincol}{RGB}{28,85,150}
+\definecolor{accent}{RGB}{185,75,30}
+\definecolor{softbg}{RGB}{244,248,252}
+\definecolor{defrule}{RGB}{55,135,90}
+\definecolor{warnrule}{RGB}{195,130,35}
+\definecolor{graytext}{RGB}{105,105,105}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=maincol,
+  urlcolor=accent,
+  pdftitle={自顶向下语法分析详细中文学习笔记},
+  pdfauthor={Summary}
+}
+
+\setlist[itemize]{leftmargin=1.4em,itemsep=2pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,topsep=2pt}
+\renewcommand{\arraystretch}{1.18}
+
+% ---------- 自定义可分页标注盒子 ----------
+\newenvironment{defbox}[1][]{%
+  \par\medskip\noindent{\color{defrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{defrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{defrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{notebox}[1][]{%
+  \par\medskip\noindent{\color{maincol}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{maincol}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{maincol}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{warnbox}[1][]{%
+  \par\medskip\noindent{\color{warnrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{warnrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{warnrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newcommand{\pg}[1]{\texorpdfstring{{\small\color{graytext}\,[p#1]}}{ [p#1]}}
+\newcommand{\term}[2]{\textbf{#1}（#2）}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\eps}{\varepsilon}
+
+\title{\bfseries 编译原理 · 语法分析（二）：自顶向下分析\\[2pt]
+\large Syntax Analysis: Top-Down —— 详细中文学习笔记}
+\author{基于课件 \texttt{4.Syntax\_Analysis\_Top\_Down.pdf}（中山大学 · 赵帅）整理}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{notebox}[本笔记说明]
+本笔记覆盖第 4 讲《Syntax Analysis: Top-Down》共 89 页内容。主线是：
+\[
+\text{递归下降} \to \text{左递归/回溯问题} \to \text{预测分析} \to
+\text{FIRST/FOLLOW} \to \text{LL(1) 分析表} \to \text{表驱动 Parser}
+\]
+笔记按课件原顺序组织，所有核心概念给出中文解释、英文术语和页码标注，并在末尾附练习题与参考答案。
+\end{notebox}
+
+\tableofcontents
+\vspace{4pt}\hrule
+
+% ============================================================
+\section{全局导图与 Parser 类型（第 3--8 页）}
+% ============================================================
+
+\subsection{本讲主线 \pg{3,4}}
+本讲研究\term{自顶向下语法分析}{Top-down parsing}。课件的思维导图可以压缩为三条线：
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  n/.style={draw,rounded corners=2pt,fill=softbg,minimum height=0.7cm,align=center,inner sep=4pt},
+  hi/.style={draw,rounded corners=2pt,fill=white,minimum height=0.7cm,align=center,inner sep=4pt},
+  arr/.style={-{Latex[length=2mm]},thick}]
+\node[n] (type) {Parser 类型};
+\node[n,right=1.5cm of type] (td) {Top-down};
+\node[n,right=1.5cm of td] (rdp) {递归下降\\RDP};
+\node[hi,below=0.8cm of rdp] (problem) {左递归 / 回溯};
+\node[hi,right=1.5cm of rdp] (pred) {预测分析\\Predictive};
+\node[n,right=1.5cm of pred] (ff) {FIRST / FOLLOW};
+\node[n,right=1.5cm of ff] (ll) {LL(1) 表};
+\draw[arr] (type) -- (td);
+\draw[arr] (td) -- (rdp);
+\draw[arr] (rdp) -- (problem);
+\draw[arr] (problem) -- node[below,font=\footnotesize]{消除问题} (pred);
+\draw[arr] (pred) -- (ff);
+\draw[arr] (ff) -- (ll);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+  \item 第一部分讲语法分析器两大类型：\term{自顶向下}{Top-down}与\term{自底向上}{Bottom-up}。
+  \item 第二部分讲自顶向下的通用形式：\term{递归下降分析}{Recursive-Descent Parsing, RDP}，以及它遇到的左递归和回溯问题。
+  \item 第三部分讲无回溯的\term{预测分析}{Predictive Parsing}，核心工具是 FIRST、FOLLOW 和 LL(1) 分析表。
+\end{itemize}
+
+\subsection{自底向上分析 \pg{5}}
+\begin{defbox}[自底向上分析（Bottom-up Parsing）]
+自底向上分析从输入串的叶子节点开始，逐步向分析树根部构造。它尝试把输入串不断\term{规约}{reduce}为开始符号。
+\end{defbox}
+
+特点：
+\begin{itemize}
+  \item 从叶子到根，方向与推导相反。
+  \item 寻找\term{最右推导的逆过程}{reverse order of the rightmost derivation}，也称规范规约。
+  \item Parser 代码结构通常不像文法，手写实现困难。
+  \item 工具支持成熟，例如 Yacc、Bison。
+\end{itemize}
+
+\subsection{自顶向下分析 \pg{6,7}}
+\begin{defbox}[自顶向下分析（Top-down Parsing）]
+自顶向下分析从分析树根部开始，按预定顺序向叶子扩展。它可以看作是在为输入串寻找一条\term{最左推导}{leftmost derivation}。
+\end{defbox}
+
+特点：
+\begin{itemize}
+  \item 从开始符号出发，通常按深度优先、先根次序构造分析树。
+  \item 每次选择最左边尚未展开的非终结符，所以目标是最左推导。
+  \item 选定产生式后，把产生式右部的终结符与输入串匹配。
+  \item Parser 代码结构接近文法，适合手写；也有 ANTLR 等自动工具。
+\end{itemize}
+
+\begin{warnbox}[自顶向下的关键问题]
+推导每一步必须做两个选择：替换哪个非终结符、对这个非终结符使用哪条产生式。自顶向下分析固定选择“最左非终结符”，剩下的关键问题就是：\textbf{如何选择正确产生式}。
+\end{warnbox}
+
+\subsection{Top-down vs Bottom-up 示例 \pg{8}}
+课件使用文法：
+\[
+S\to AB,\qquad A\to aA\mid a,\qquad B\to bB\mid b
+\]
+识别句子 \(aabb\)。
+
+最左推导为：
+\[
+S\Rightarrow AB\Rightarrow aAB\Rightarrow aaB\Rightarrow aabB\Rightarrow aabb
+\]
+
+自底向上分析则反向规约，例如先把第二个 \(a\) 规约为 \(A\)，再把 \(aA\) 规约为 \(A\)，再处理 \(bB\)，最后规约为 \(S\)。
+
+\begin{longtable}{p{0.22\linewidth}p{0.33\linewidth}p{0.33\linewidth}}
+\toprule
+对比项 & 自顶向下 & 自底向上 \\
+\midrule
+构造方向 & 根 \(\to\) 叶子 & 叶子 \(\to\) 根 \\
+推导关系 & 寻找最左推导 & 最右推导的逆过程 \\
+实现难度 & 代码近似文法，便于手写 & 更强但手写困难 \\
+常见工具 & ANTLR & Yacc / Bison \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\section{递归下降分析与回溯（第 9--12 页）}
+% ============================================================
+
+\subsection{递归下降分析的基本思想 \pg{10}}
+\begin{defbox}[递归下降分析（Recursive-Descent Parsing, RDP）]
+递归下降分析是自顶向下分析的一种通用形式。它为每个非终结符编写一个过程，执行从开始符号对应过程开始。如果过程体能扫描完整个输入串，就宣布分析成功。
+\end{defbox}
+
+直观写法：
+\begin{itemize}
+  \item 非终结符 \(A\) 对应函数 \code{parseA()}。
+  \item 产生式 \(A\to XYZ\) 对应函数体中依次处理 \(X,Y,Z\)。
+  \item 终结符直接与输入 token 匹配；非终结符则调用对应过程。
+\end{itemize}
+
+RDP 的伪代码本身可能是\term{不确定的}{nondeterministic}，因为当 \(A\) 有多个候选式时，伪代码没有指定应该选择哪一个。
+
+\subsection{带回溯的 RDP \pg{11,12}}
+\begin{defbox}[回溯（Backtracking）]
+当一个非终结符有多个候选式时，分析器按某种顺序试用候选式。如果当前候选式最终导致失配，就退回到之前的位置，恢复输入指针和分析树状态，再尝试下一个候选式。
+\end{defbox}
+
+匹配规则：
+\begin{itemize}
+  \item 终结符与当前输入相同：匹配成功，输入指针前进。
+  \item 终结符与当前输入不同：当前尝试失败，回溯或直接报错。
+  \item 如果没有任何推导能生成完整输入串，分析失败。
+\end{itemize}
+
+课件例子：
+\[
+G[S]:\quad S\to xAy,\qquad A\to **\mid *
+\]
+输入为 \(x*y\)。如果先尝试 \(A\to **\)，读到第二个 \(*\) 时失配，需要回溯；再尝试 \(A\to *\)，即可成功。
+
+\begin{warnbox}[回溯的问题]
+回溯看起来简单，但代价很高：它会重复分析相同输入片段，最坏可达指数时间；同时已经加入分析树的节点还要撤销，实现麻烦。因此实际编译器更希望使用无回溯的预测分析。
+\end{warnbox}
+
+% ============================================================
+\section{左递归问题与消除（第 13--23 页）}
+% ============================================================
+
+\subsection{什么是左递归 \pg{13,14}}
+\begin{defbox}[左递归（Left Recursion）]
+如果文法中存在非终结符 \(A\)，使得
+\[
+A\Rightarrow^+ A\alpha
+\]
+则该文法是左递归的。也就是说，从 \(A\) 出发经过一步或多步推导后，句型最左边又出现了 \(A\) 自己。
+\end{defbox}
+
+左递归会让自顶向下分析陷入无限循环。原因是自顶向下分析总是先展开最左非终结符；若 \(A\to A\alpha\)，展开 \(A\) 后最左边还是 \(A\)，输入符号还没被消费，就会无限递归。
+
+左递归分两类：
+\begin{itemize}
+  \item \term{直接左递归}{Immediate Left Recursion}：存在产生式 \(A\to A\alpha\)。
+  \item \term{间接左递归}{Non-immediate / Indirect Left Recursion}：经过两步或多步回到自身，例如 \(A\to B\beta,\;B\to A\alpha\)。
+\end{itemize}
+
+\subsection{消除直接左递归：单个递归候选式 \pg{15}}
+基本形式：
+\[
+A\to A\alpha\mid\beta
+\]
+其中 \(\beta\) 不以 \(A\) 开头。它生成的串形如：
+\[
+\beta\alpha\alpha\cdots\alpha
+\]
+因此可以改写为右递归：
+\[
+A\to \beta A',\qquad A'\to \alpha A'\mid\eps
+\]
+
+\begin{notebox}[通俗理解]
+左递归规则 \(A\to A\alpha\) 的效果是“不断在右边追加 \(\alpha\)，最后用 \(\beta\) 收尾”。改写后先输出 \(\beta\)，再由新非终结符 \(A'\) 决定追加多少个 \(\alpha\)。两者生成同一语言，但右递归不会让自顶向下分析卡在最左 \(A\) 上。
+\end{notebox}
+
+\subsection{消除直接左递归：多个候选式 \pg{16}}
+一般形式：
+\[
+A\to A\alpha_1\mid A\alpha_2\mid\cdots\mid A\alpha_m
+\mid \beta_1\mid\beta_2\mid\cdots\mid\beta_n
+\]
+其中没有任何 \(\beta_i\) 以 \(A\) 开头。改写为：
+\[
+A\to \beta_1A'\mid \beta_2A'\mid\cdots\mid\beta_nA'
+\]
+\[
+A'\to \alpha_1A'\mid \alpha_2A'\mid\cdots\mid\alpha_mA'\mid\eps
+\]
+
+课件练习中的经典表达式文法：
+\[
+E\to E+T\mid T,\qquad T\to T*F\mid F,\qquad F\to(E)\mid i
+\]
+消除直接左递归后：
+\[
+\begin{aligned}
+E&\to TE'\\
+E'&\to +TE'\mid\eps\\
+T&\to FT'\\
+T'&\to *FT'\mid\eps\\
+F&\to(E)\mid i
+\end{aligned}
+\]
+
+\subsection{间接左递归及系统消除算法 \pg{17--19}}
+课件例子：
+\[
+S\to Qc\mid c,\qquad Q\to Rb\mid b,\qquad R\to Sa\mid a
+\]
+单看每条产生式没有 \(S\to S\alpha\) 这种直接形式，但存在：
+\[
+S\Rightarrow Qc\Rightarrow Rbc\Rightarrow Sabc
+\]
+所以 \(S\) 间接左递归，\(Q,R\) 也参与左递归环。
+
+系统算法适用于无环、无 \(\eps\)-产生式的文法：
+\begin{enumerate}
+  \item 将非终结符按某个顺序排列为 \(A_1,A_2,\ldots,A_n\)。
+  \item 对 \(i=1\) 到 \(n\)，对每个 \(j<i\)，把形如 \(A_i\to A_j\gamma\) 的产生式替换为
+  \[
+  A_i\to \delta_1\gamma\mid\delta_2\gamma\mid\cdots\mid\delta_k\gamma
+  \]
+  其中 \(A_j\to\delta_1\mid\delta_2\mid\cdots\mid\delta_k\) 是当前 \(A_j\) 的所有产生式。
+  \item 对当前 \(A_i\) 消除直接左递归。
+  \item 最后删除从开始符号不可达的无效产生式。
+\end{enumerate}
+
+这个算法本质上先把间接左递归展开为直接左递归，再调用直接左递归消除公式。
+
+\subsection{R/Q/S 示例 \pg{20--22}}
+使用顺序 \(R,Q,S\)：
+\[
+R\to Sa\mid a,\qquad Q\to Rb\mid b,\qquad S\to Qc\mid c
+\]
+处理后得到：
+\[
+Q\to Sab\mid ab\mid b
+\]
+继续替换 \(S\to Qc\)：
+\[
+S\to Sabc\mid abc\mid bc\mid c
+\]
+此时 \(S\) 出现直接左递归。消除得到：
+\[
+S\to abcS'\mid bcS'\mid cS'
+\]
+\[
+S'\to abcS'\mid\eps
+\]
+最后 \(Q,R\) 从开始符号 \(S\) 不可达，可删除。
+
+如果步骤 1 选择顺序 \(S,Q,R\)，最终文法形式会不同，例如课件给出：
+\[
+R\to bcaR'\mid caR'\mid aR',\qquad R'\to bcaR'\mid\eps
+\]
+形式不同但语言等价。非终结符排序会影响输出形式，但不改变等价性。
+
+\subsection{递归下降分析的局限 \pg{23}}
+递归下降分析简单、通用，但不流行的原因主要是：
+\begin{itemize}
+  \item 必须先消除左递归。
+  \item 回溯会重复分析相同输入片段，效率低。
+  \item 穷尽所有可能候选式的尝试，最坏可能指数时间。
+  \item 回溯时需要撤销已经构造的 parse tree 节点，实现复杂。
+\end{itemize}
+
+% ============================================================
+\section{预测分析与左因子提取（第 24--29 页）}
+% ============================================================
+
+\subsection{预测分析的定义 \pg{25,26}}
+\begin{defbox}[预测分析（Predictive Parsing）]
+预测分析是无回溯的递归下降分析。它只根据当前正在处理的非终结符和向前看的固定数量输入符号，预测应使用哪条产生式。最常见情况只看 1 个输入符号。
+\end{defbox}
+
+选择产生式的依据：
+\begin{itemize}
+  \item 当前要展开的非终结符 \(A\)。
+  \item 当前输入符号，也称\term{向前看符号}{lookahead symbol}。
+\end{itemize}
+
+例子：
+\[
+S\to aBD\mid bBB,\qquad B\to c\mid bce,\qquad D\to d
+\]
+读到第一个输入符号是 \(a\) 时选 \(S\to aBD\)，读到 \(b\) 时选 \(S\to bBB\)，无需回溯。若改成
+\[
+S\to aBD\mid aBB
+\]
+两个候选式前缀相同，只看一个 \(a\) 无法选择。
+
+\subsection{共同前缀问题 \pg{27}}
+仍看：
+\[
+S\to xAy,\qquad A\to **\mid *
+\]
+当要展开 \(A\) 且当前输入为 \(*\) 时，两个候选式都可能匹配。共同前缀会让预测分析无法立即选择，导致回溯风险。
+
+\subsection{左因子提取 \pg{28}}
+\begin{defbox}[左因子提取（Left Factoring）]
+左因子提取把多个候选式的公共前缀提出来，把选择推迟到读到足够多输入符号之后。
+\end{defbox}
+
+通用形式：
+\[
+A\to \alpha\beta_1\mid\alpha\beta_2\mid\cdots\mid\alpha\beta_n\mid\gamma
+\]
+其中 \(\alpha\ne\eps\) 是公共前缀，\(\gamma\) 表示不以 \(\alpha\) 开头的其他候选式。改写为：
+\[
+A\to \alpha A'\mid\gamma,\qquad A'\to \beta_1\mid\beta_2\mid\cdots\mid\beta_n
+\]
+重复应用直到同一非终结符的候选式不再共享公共前缀。
+
+例子：
+\[
+S\to abc\mid abd\mid ae
+\]
+第一步：
+\[
+S\to aA',\qquad A'\to bc\mid bd\mid e
+\]
+第二步：
+\[
+S\to aA',\qquad A'\to bB'\mid e,\qquad B'\to c\mid d
+\]
+
+\subsection{预测分析的两个前置改写 \pg{29}}
+阻碍预测分析的典型文法模式：
+\begin{itemize}
+  \item 左递归：lookahead 只有在匹配终结符时才前进，左递归会无限展开。
+  \item 共同前缀：多个候选式看起来一样，必须回溯或推迟选择。
+\end{itemize}
+
+对应处理：
+\[
+\text{左递归} \to \text{消除左递归}
+\qquad
+\text{共同前缀} \to \text{左因子提取}
+\]
+
+但课件强调：仅做这两步还不一定完全够，还需要 FIRST 和 FOLLOW 来判断什么时候能无回溯选择产生式。
+
+% ============================================================
+\section{FIRST 与 FOLLOW（第 30--50 页）}
+% ============================================================
+
+\subsection{FIRST 的定义与作用 \pg{30}}
+\begin{defbox}[FIRST 集（FIRST Set / 终结首符集）]
+对任意文法符号串 \(\alpha\)，\(\mathrm{FIRST}(\alpha)\) 是所有能出现在 \(\alpha\) 推导结果开头的终结符集合：
+\[
+\mathrm{FIRST}(\alpha)=\{a\mid \alpha\Rightarrow^* a\cdots,\;a\in V_T\}
+\]
+如果 \(\alpha\Rightarrow^*\eps\)，则 \(\eps\in\mathrm{FIRST}(\alpha)\)。
+\end{defbox}
+
+作用：若 \(A\to\alpha\mid\beta\)，且
+\[
+\mathrm{FIRST}(\alpha)\cap\mathrm{FIRST}(\beta)=\varnothing
+\]
+那么看下一个输入符号 \(a\) 就能决定选择哪个候选式，因为 \(a\) 不可能同时属于两个 FIRST 集。
+
+\subsection{FOLLOW 的定义与作用 \pg{31,32}}
+\begin{defbox}[FOLLOW 集（FOLLOW Set / 后继终结符号集）]
+对非终结符 \(A\)，\(\mathrm{FOLLOW}(A)\) 是所有可能紧跟在 \(A\) 右侧的终结符集合：
+\[
+\mathrm{FOLLOW}(A)=\{a\mid S\Rightarrow^* \cdots A a\cdots,\;a\in V_T\}
+\]
+如果 \(A\) 能出现在某个句型最右端，则结束标记 \(\$\) 属于 \(\mathrm{FOLLOW}(A)\)。
+\end{defbox}
+
+FIRST 和 FOLLOW 的区别：
+\begin{itemize}
+  \item \(\mathrm{FIRST}(\alpha)\)：看 \(\alpha\) 自己展开后最前面的终结符。
+  \item \(\mathrm{FOLLOW}(A)\)：看 \(A\) 这个非终结符后面可能紧跟什么终结符，不包含 \(A\) 自己展开出来的符号。
+\end{itemize}
+
+如果当前要展开 \(A\)，输入符号 \(a\) 不在任何候选式的 FIRST 中，但某个候选式 \(\alpha_i\) 可以推出空串：
+\[
+\eps\in\mathrm{FIRST}(\alpha_i)
+\]
+并且
+\[
+a\in\mathrm{FOLLOW}(A)
+\]
+则应选择 \(A\to\alpha_i\)。意思是：\(A\) 可以不产生任何东西，让后面的符号去匹配当前输入。
+
+\subsection{FOLLOW 使用例子 \pg{32}}
+文法：
+\[
+S\to aA\mid d,\qquad A\to bAS\mid\eps
+\]
+输入 \(abd\)。相关集合：
+\[
+\mathrm{FIRST}(aA)=\{a\},\quad
+\mathrm{FIRST}(d)=\{d\},\quad
+\mathrm{FIRST}(bAS)=\{b\}
+\]
+\[
+\mathrm{FIRST}(A)=\{b,\eps\},\quad
+\mathrm{FIRST}(S)=\{a,d\},\quad
+\mathrm{FOLLOW}(A)=\{\$,a,d\}
+\]
+推导过程：
+\[
+S\Rightarrow aA\Rightarrow abAS
+\]
+此时输入还剩 \(d\)，当前 \(A\) 的候选式 \(bAS\) 不能以 \(d\) 开头，但 \(A\to\eps\) 可用，并且 \(d\in\mathrm{FOLLOW}(A)\)，所以选择 \(A\to\eps\)，继续得到：
+\[
+abAS\Rightarrow abS\Rightarrow abd
+\]
+
+\subsection{计算 FIRST(X) 的规则 \pg{33}}
+对所有文法符号 \(X\) 反复应用以下规则，直到没有新终结符或 \(\eps\) 可加入：
+\begin{enumerate}
+  \item 若 \(X\in V_T\)，则 \(\mathrm{FIRST}(X)=\{X\}\)。
+  \item 若 \(X\in V_N\)，且存在 \(X\to\eps\)，则把 \(\eps\) 加入 \(\mathrm{FIRST}(X)\)。
+  \item 若 \(X\in V_N\)，且存在 \(X\to Y_1Y_2\cdots Y_k\)，则：
+  \begin{itemize}
+    \item 将 \(\mathrm{FIRST}(Y_1)\setminus\{\eps\}\) 加入 \(\mathrm{FIRST}(X)\)。
+    \item 如果 \(Y_1\Rightarrow^*\eps\)，继续加入 \(\mathrm{FIRST}(Y_2)\setminus\{\eps\}\)，以此类推。
+    \item 若所有 \(Y_i\) 都能推出 \(\eps\)，则把 \(\eps\) 加入 \(\mathrm{FIRST}(X)\)。
+  \end{itemize}
+\end{enumerate}
+
+\subsection{计算 FIRST(\(\alpha\)) 的规则 \pg{34,46--48}}
+对符号串 \(\alpha=X_1X_2\cdots X_n\)：
+\begin{enumerate}
+  \item 把 \(\mathrm{FIRST}(X_1)\) 中所有非 \(\eps\) 符号加入 \(\mathrm{FIRST}(\alpha)\)。
+  \item 如果 \(X_1,\ldots,X_{i-1}\) 都能推出 \(\eps\)，则把 \(\mathrm{FIRST}(X_i)\setminus\{\eps\}\) 加入 \(\mathrm{FIRST}(\alpha)\)。
+  \item 如果所有 \(X_1,\ldots,X_n\) 都能推出 \(\eps\)，则把 \(\eps\) 加入 \(\mathrm{FIRST}(\alpha)\)。
+\end{enumerate}
+
+\begin{notebox}[FIRST 计算的直觉]
+FIRST 的本质是问“这个符号或符号串最终生成的句子，第一个终结符可能是什么”。如果前面的符号可能消失为空串，就继续看后一个符号。
+\end{notebox}
+
+\subsection{表达式文法的 FIRST 示例 \pg{35--38}}
+文法：
+\[
+\begin{aligned}
+E&\to TE'\\
+E'&\to +TE'\mid\eps\\
+T&\to FT'\\
+T'&\to *FT'\mid\eps\\
+F&\to(E)\mid id
+\end{aligned}
+\]
+
+最终 FIRST 集为：
+\[
+\begin{aligned}
+\mathrm{FIRST}(E)&=\{(,id\}\\
+\mathrm{FIRST}(T)&=\{(,id\}\\
+\mathrm{FIRST}(E')&=\{+,\eps\}\\
+\mathrm{FIRST}(T')&=\{*,\eps\}\\
+\mathrm{FIRST}(F)&=\{(,id\}
+\end{aligned}
+\]
+
+计算需要迭代：第一次可能只能得出 \(E'\)、\(T'\)、\(F\) 的集合；再由 \(F\) 推到 \(T\)，再由 \(T\) 推到 \(E\)。每轮应用规则后都要检查集合是否变化，直到不再变化。
+
+\subsection{计算 FOLLOW 的规则 \pg{39,49,50}}
+对所有非终结符 \(A\)，反复应用以下规则，直到没有新符号可加入：
+\begin{enumerate}
+  \item 将 \(\$\) 放入开始符号 \(S\) 的 FOLLOW 集。
+  \item 若存在产生式 \(A\to \alpha B\beta\)，则把 \(\mathrm{FIRST}(\beta)\setminus\{\eps\}\) 加入 \(\mathrm{FOLLOW}(B)\)。
+  \item 若存在产生式 \(A\to\alpha B\)，或 \(A\to\alpha B\beta\) 且 \(\eps\in\mathrm{FIRST}(\beta)\)，则把 \(\mathrm{FOLLOW}(A)\) 加入 \(\mathrm{FOLLOW}(B)\)。
+\end{enumerate}
+
+\begin{notebox}[FOLLOW 计算的直觉]
+若 \(B\) 后面直接跟着 \(\beta\)，那么 \(\beta\) 可能开头的终结符也可能紧跟 \(B\)。若 \(\beta\) 可以消失，或 \(B\) 已经在产生式末尾，那么 \(B\) 后面会接上左部非终结符 \(A\) 后面能出现的符号。
+\end{notebox}
+
+\subsection{表达式文法的 FOLLOW 示例 \pg{40--44,50}}
+仍使用表达式文法，最终 FOLLOW 集为：
+\[
+\begin{aligned}
+\mathrm{FOLLOW}(E)&=\{\$,)\}\\
+\mathrm{FOLLOW}(T)&=\{+,\$,)\}\\
+\mathrm{FOLLOW}(E')&=\{\$,)\}\\
+\mathrm{FOLLOW}(T')&=\{+,\$,)\}\\
+\mathrm{FOLLOW}(F)&=\{*,+,\$,)\}
+\end{aligned}
+\]
+
+关键来源：
+\begin{itemize}
+  \item \(E\) 是开始符号，所以 \(\$\in\mathrm{FOLLOW}(E)\)。
+  \item \(F\to(E)\)，所以 \()\in\mathrm{FOLLOW}(E)\)。
+  \item \(E\to TE'\)：\(+\in\mathrm{FIRST}(E')\)，所以 \(+\in\mathrm{FOLLOW}(T)\)；又因为 \(E'\Rightarrow\eps\)，所以 \(\mathrm{FOLLOW}(E)\subseteq\mathrm{FOLLOW}(T)\)。
+  \item \(T\to FT'\)：\(*\in\mathrm{FIRST}(T')\)，所以 \(*\in\mathrm{FOLLOW}(F)\)；又因为 \(T'\Rightarrow\eps\)，所以 \(\mathrm{FOLLOW}(T)\subseteq\mathrm{FOLLOW}(F)\)。
+\end{itemize}
+
+% ============================================================
+\section{LL(1) 文法（第 51--53 页）}
+% ============================================================
+
+\subsection{LL(1) 的判定条件 \pg{51,52}}
+\begin{defbox}[LL(1) 文法]
+能构造无回溯预测分析器的文法类称为 LL(1) 文法。对任意同一左部的两个不同产生式
+\[
+A\to\alpha\mid\beta
+\]
+必须满足下面条件。
+\end{defbox}
+
+\begin{enumerate}
+  \item 不存在某个终结符 \(a\)，使得 \(\alpha\) 和 \(\beta\) 都能推出以 \(a\) 开头的串。等价地：
+  \[
+  \mathrm{FIRST}(\alpha)\cap\mathrm{FIRST}(\beta)=\varnothing
+  \]
+  \item \(\alpha\) 和 \(\beta\) 至多一个能推出空串。
+  \item 如果 \(\beta\Rightarrow^*\eps\)，则 \(\alpha\) 不能推出以 \(\mathrm{FOLLOW}(A)\) 中任何终结符开头的串。等价地：
+  \[
+  \eps\in\mathrm{FIRST}(\beta)\Rightarrow
+  \mathrm{FIRST}(\alpha)\cap\mathrm{FOLLOW}(A)=\varnothing
+  \]
+  对 \(\alpha\Rightarrow^*\eps\) 的情况同理。
+\end{enumerate}
+
+\begin{warnbox}[LL(1) 的重要性质]
+LL(1) 文法不含左递归；LL(1) 文法无二义性。但反过来不成立：无左递归、无二义的文法不一定是 LL(1)。
+\end{warnbox}
+
+例子：
+\[
+S\to EBD\mid FBB,\qquad E\to a\cdots,\qquad F\to a\cdots
+\]
+由于两个候选式都可能以 \(a\) 开头，只看一个 lookahead 不能选择，因此不是 LL(1)。
+
+\subsection{LL(1) 和 LL(k) 的含义 \pg{53}}
+\begin{itemize}
+  \item 第一个 \(L\)：从左到右扫描输入（Left-to-right scanning）。
+  \item 第二个 \(L\)：产生最左推导（Leftmost derivation）。
+  \item \(1\)：每步只看 1 个输入符号做决策。
+  \item LL(\(k\))：每步看 \(k\) 个输入符号做决策。
+\end{itemize}
+
+LL(0) 几乎没有实用价值。因为不用任何 lookahead 就能预测，意味着每个非终结符只能有一条规则，语言基本只能生成一个固定字符串。
+
+% ============================================================
+\section{LL(1) Parser 实现与非递归算法（第 54--58 页）}
+% ============================================================
+
+\subsection{递归 LL(1) Parser \pg{54}}
+以文法
+\[
+S\to A\mid B,\qquad A\to a,\qquad B\to b
+\]
+为例，递归 LL(1) parser 可以写成类似：
+\[
+\begin{array}{l}
+\texttt{token = Next();}\\
+\texttt{if token == a then A();}\\
+\texttt{else if token == b then B();}\\
+\texttt{else error;}
+\end{array}
+\]
+递归实现隐式维护调用栈。这个栈本质上保存尚未完成的推导结果。
+
+\subsection{非递归 LL(1) Parser 的组件 \pg{55,56}}
+非递归实现使用显式栈和预测分析表。
+
+\begin{longtable}{p{0.25\linewidth}p{0.65\linewidth}}
+\toprule
+组件 & 作用 \\
+\midrule
+输入缓冲区 & 保存待分析 token 串，并在末尾追加结束标记 \(\$\)。\\
+栈 & 保存尚未匹配或尚未展开的文法符号；底部也放 \(\$\)。\\
+预测分析表 \(M[A,a]\) & 行是非终结符 \(A\)，列是终结符或 \(\$\)。单元格保存应使用的产生式或 error。\\
+预测分析程序 & 根据栈顶符号 \(X\) 和当前输入符号 \(a\) 执行动作。\\
+\bottomrule
+\end{longtable}
+
+\subsection{非递归 LL(1) 分析算法 \pg{57,58}}
+初始状态：
+\[
+\text{Input}=w\$, \qquad \text{Stack}=S\$
+\]
+设 \(X\) 是栈顶符号，\(a\) 是当前输入符号。
+
+\begin{enumerate}
+  \item 如果 \(X\in V_T\)：
+  \begin{itemize}
+    \item 若 \(X=a=\$\)，分析成功。
+    \item 若 \(X=a\ne\$\)，弹出 \(X\)，输入指针前进。
+    \item 若 \(X\ne a\)，报语法错误。
+  \end{itemize}
+  \item 如果 \(X\in V_N\)：
+  \begin{itemize}
+    \item 若 \(M[X,a]\) 中有产生式 \(X\to Y_1Y_2\cdots Y_k\)，弹出 \(X\)，并将右部\textbf{逆序}压栈：先压 \(Y_k\)，最后压 \(Y_1\)，使 \(Y_1\) 位于栈顶。
+    \item 若 \(M[X,a]\) 为空，报语法错误。
+    \item 若产生式是 \(X\to\eps\)，只弹出 \(X\)，不压入任何符号。
+  \end{itemize}
+\end{enumerate}
+
+\begin{notebox}[为什么右部要逆序入栈]
+栈是后进先出。若产生式为 \(X\to +TE'\)，希望下一步先处理 \(+\)，再处理 \(T\)，最后处理 \(E'\)。因此压栈顺序必须是 \(E'\)、\(T\)、\(+\)。
+\end{notebox}
+
+% ============================================================
+\section{使用 LL(1) 分析表（第 59--77 页）}
+% ============================================================
+
+\subsection{表达式文法与预测分析表 \pg{59}}
+课件使用表达式文法识别：
+\[
+id+id*id
+\]
+文法为：
+\[
+\begin{aligned}
+E&\to TE'\\
+E'&\to +TE'\mid\eps\\
+T&\to FT'\\
+T'&\to *FT'\mid\eps\\
+F&\to(E)\mid id
+\end{aligned}
+\]
+
+预测分析表为：
+\[
+\begin{array}{c|cccccc}
+ & id & + & * & ( & ) & \$\\
+\hline
+E & E\to TE' & & & E\to TE' & &\\
+E'& & E'\to +TE' & & & E'\to\eps & E'\to\eps\\
+T & T\to FT' & & & T\to FT' & &\\
+T'& & T'\to\eps & T'\to *FT' & & T'\to\eps & T'\to\eps\\
+F & F\to id & & & F\to(E) & &
+\end{array}
+\]
+
+\subsection{完整分析过程 \pg{60--77}}
+输入缓冲区：
+\[
+id+id*id\$
+\]
+初始栈：
+\[
+E\$
+\]
+
+课件逐页演示的栈变化可以整理为下表。
+
+\begin{longtable}{p{0.18\linewidth}p{0.28\linewidth}p{0.27\linewidth}p{0.2\linewidth}}
+\toprule
+已匹配 & 栈 & 剩余输入 & 动作 \\
+\midrule
+\endfirsthead
+\toprule
+已匹配 & 栈 & 剩余输入 & 动作 \\
+\midrule
+\endhead
+\(\eps\) & \(E\$\) & \(id+id*id\$\) & \(E\to TE'\)\\
+\(\eps\) & \(TE'\$\) & \(id+id*id\$\) & \(T\to FT'\)\\
+\(\eps\) & \(FT'E'\$\) & \(id+id*id\$\) & \(F\to id\)\\
+\(\eps\) & \(idT'E'\$\) & \(id+id*id\$\) & 匹配 \(id\)\\
+\(id\) & \(T'E'\$\) & \(+id*id\$\) & \(T'\to\eps\)\\
+\(id\) & \(E'\$\) & \(+id*id\$\) & \(E'\to +TE'\)\\
+\(id\) & \(+TE'\$\) & \(+id*id\$\) & 匹配 \(+\)\\
+\(id+\) & \(TE'\$\) & \(id*id\$\) & \(T\to FT'\)\\
+\(id+\) & \(FT'E'\$\) & \(id*id\$\) & \(F\to id\)\\
+\(id+\) & \(idT'E'\$\) & \(id*id\$\) & 匹配 \(id\)\\
+\(id+id\) & \(T'E'\$\) & \(*id\$\) & \(T'\to *FT'\)\\
+\(id+id\) & \(*FT'E'\$\) & \(*id\$\) & 匹配 \(*\)\\
+\(id+id*\) & \(FT'E'\$\) & \(id\$\) & \(F\to id\)\\
+\(id+id*\) & \(idT'E'\$\) & \(id\$\) & 匹配 \(id\)\\
+\(id+id*id\) & \(T'E'\$\) & \(\$\) & \(T'\to\eps\)\\
+\(id+id*id\) & \(E'\$\) & \(\$\) & \(E'\to\eps\)\\
+\(id+id*id\) & \(\$\) & \(\$\) & ACCEPT\\
+\bottomrule
+\end{longtable}
+
+这个过程模拟了最左推导。每次栈顶是非终结符，就查表展开；每次栈顶是终结符，就与输入匹配。
+
+% ============================================================
+\section{构建 LL(1) 分析表（第 78--81 页）}
+% ============================================================
+
+\subsection{填表算法 \pg{78--80}}
+\begin{defbox}[LL(1) 分析表构建算法]
+对文法中每条产生式 \(A\to\alpha\)：
+\begin{enumerate}
+  \item 对每个终结符 \(a\in\mathrm{FIRST}(\alpha)\)，把 \(A\to\alpha\) 填入 \(M[A,a]\)。
+  \item 如果 \(\eps\in\mathrm{FIRST}(\alpha)\)，则对每个 \(b\in\mathrm{FOLLOW}(A)\)，把 \(A\to\alpha\) 填入 \(M[A,b]\)。
+  \item 如果 \(\eps\in\mathrm{FIRST}(\alpha)\) 且 \(\$\in\mathrm{FOLLOW}(A)\)，也把 \(A\to\alpha\) 填入 \(M[A,\$]\)。
+\end{enumerate}
+\end{defbox}
+
+直观解释：
+\begin{itemize}
+  \item 如果当前输入 \(a\) 可能是 \(\alpha\) 展开结果的第一个符号，就选择 \(A\to\alpha\)。
+  \item 如果 \(\alpha\) 能推出空串，那它可以“什么都不生成”，此时应看 \(A\) 后面允许出现什么，即 FOLLOW(A)。
+\end{itemize}
+
+\subsection{表达式文法的完整 FIRST/FOLLOW 和表 \pg{81}}
+\[
+\begin{array}{c|c|c}
+\text{符号} & \mathrm{FIRST} & \mathrm{FOLLOW}\\
+\hline
+E & \{(,id\} & \{\$,)\}\\
+E' & \{+,\eps\} & \{\$,)\}\\
+T & \{(,id\} & \{+,\$,)\}\\
+T' & \{*,\eps\} & \{+,\$,)\}\\
+F & \{(,id\} & \{*,+,\$,)\}
+\end{array}
+\]
+
+由这些集合可得到前面使用的预测分析表。注意 \(E'\to\eps\) 填到 \(M[E',)]\) 和 \(M[E',\$]\)，因为 \(\mathrm{FOLLOW}(E')=\{\$,)\}\)；\(T'\to\eps\) 填到 \(M[T',+]\)、\(M[T',)]\)、\(M[T',\$]\)，因为这些符号都在 \(\mathrm{FOLLOW}(T')\) 中。
+
+% ============================================================
+\section{判断 LL(1)、非 LL(1) 处理与复杂度（第 82--89 页）}
+% ============================================================
+
+\subsection{判断一个文法是否 LL(1) \pg{82}}
+两种方法：
+\begin{enumerate}
+  \item 构建 LL(1) 分析表。如果每个表项至多一条产生式，则文法是 LL(1)；若某个表项有多条规则冲突，则不是 LL(1)。
+  \item 直接检查每个同左部的候选式 \(A\to\alpha\mid\beta\)：
+  \[
+  \mathrm{FIRST}(\alpha)\cap\mathrm{FIRST}(\beta)=\varnothing
+  \]
+  若 \(\eps\in\mathrm{FIRST}(\beta)\)，还需：
+  \[
+  \mathrm{FIRST}(\alpha)\cap\mathrm{FOLLOW}(A)=\varnothing
+  \]
+  对 \(\alpha\) 能推出空串的情况同理。
+\end{enumerate}
+
+\subsection{非 LL(1) 文法怎么办 \pg{83}}
+若文法不是 LL(1)，分两种情况：
+
+\begin{itemize}
+  \item \textbf{语言本身仍可能是 LL(1)}：尝试改写文法，例如消除左递归、提取左因子、消除二义性。
+  \item \textbf{语言可能不是 LL(1)}：无法在文法层面完全消除冲突。此时可以人工指定冲突表项选择哪条规则，前提是该选择语义上总是正确；否则应使用更强 parser，例如 LL(k) 或 LR(1)。
+\end{itemize}
+
+\subsection{LL(1) 时间与空间复杂度 \pg{84,85}}
+\begin{itemize}
+  \item \textbf{时间复杂度}：相对于输入长度是线性的。每个输入符号会在常数数量级步骤内被消费；栈顶为终结符时一步匹配，栈顶为非终结符时查表展开。LL(1) 无左递归，不会在不消费输入的情况下无限应用同一规则。
+  \item \textbf{空间复杂度}：栈保存未匹配的推导片段，通常小于输入长度。去掉 \(X\to\eps\) 后，产生式右部长度不小于左部，推导串单调扩展，栈只是最终推导串的未匹配部分。
+  \item \textbf{LL(k) 表大小}：
+  \[
+  O(|N|\cdot |T|^k)
+  \]
+  其中 \(N\) 是非终结符数量，\(T\) 是终结符数量。\(k\) 增大时表规模指数增长，这限制了 LL(2)、LL(3) 等在实践中的广泛使用。
+\end{itemize}
+
+\subsection{本讲总结 \pg{86--89}}
+本讲需要掌握：
+\begin{itemize}
+  \item Top-down parsing 与 Bottom-up parsing 的方向和推导关系。
+  \item RDP、回溯以及回溯低效的原因。
+  \item 直接/间接左递归的识别和消除。
+  \item 共同前缀问题与左因子提取。
+  \item FIRST、FOLLOW 的定义、计算规则和用途。
+  \item LL(1)/LL(k) 文法定义和判定条件。
+  \item 递归与非递归 LL(1) parser 实现。
+  \item LL(1) 分析表的使用、构建和复杂度。
+\end{itemize}
+
+延伸阅读：Dragon Book 4.1.2、4.4.1、4.4.2、4.4.3--4.4.5。课件建议可跳读 4.1.3--4.1.4 的错误恢复，以及 4.2.7 的 CFG 与正则表达式差异。
+
+% ============================================================
+\section{练习题与参考答案}
+% ============================================================
+
+\subsection*{练习 1：Top-down 与 Bottom-up}
+给定文法 \(S\to AB,\;A\to aA\mid a,\;B\to bB\mid b\)，写出 \(aabb\) 的最左推导，并说明自底向上分析与它的关系。
+
+\textbf{答案：}
+\[
+S\Rightarrow AB\Rightarrow aAB\Rightarrow aaB\Rightarrow aabB\Rightarrow aabb
+\]
+自底向上分析从 \(aabb\) 出发做规约，方向与推导相反，可看作最右推导的逆过程。
+
+\subsection*{练习 2：判断直接左递归并消除}
+消除文法 \(A\to Aa\mid b\) 的直接左递归。
+
+\textbf{答案：}
+套用 \(A\to A\alpha\mid\beta\)：
+\[
+A\to bA',\qquad A'\to aA'\mid\eps
+\]
+它生成 \(ba^n\;(n\ge 0)\)。
+
+\subsection*{练习 3：多个候选式左递归}
+消除：
+\[
+A\to Aa\mid Ab\mid c\mid d
+\]
+
+\textbf{答案：}
+\[
+A\to cA'\mid dA'
+\]
+\[
+A'\to aA'\mid bA'\mid\eps
+\]
+
+\subsection*{练习 4：左因子提取}
+对文法
+\[
+S\to if\ E\ then\ S\ else\ S\mid if\ E\ then\ S\mid other
+\]
+提取左因子。
+
+\textbf{答案：}
+公共前缀是 \(if\ E\ then\ S\)，改写为：
+\[
+S\to if\ E\ then\ S\ S'\mid other
+\]
+\[
+S'\to else\ S\mid\eps
+\]
+
+\subsection*{练习 5：计算 FIRST}
+文法：
+\[
+S\to AB,\quad A\to a\mid\eps,\quad B\to b
+\]
+求 \(\mathrm{FIRST}(S)\)、\(\mathrm{FIRST}(A)\)、\(\mathrm{FIRST}(B)\)。
+
+\textbf{答案：}
+\[
+\mathrm{FIRST}(A)=\{a,\eps\},\quad \mathrm{FIRST}(B)=\{b\}
+\]
+由于 \(A\) 可为空，所以 \(S=AB\) 的开头既可能来自 \(A\)，也可能来自 \(B\)：
+\[
+\mathrm{FIRST}(S)=\{a,b\}
+\]
+
+\subsection*{练习 6：计算 FOLLOW}
+文法：
+\[
+S\to AB,\quad A\to a\mid\eps,\quad B\to b
+\]
+求 \(\mathrm{FOLLOW}(S)\)、\(\mathrm{FOLLOW}(A)\)、\(\mathrm{FOLLOW}(B)\)。
+
+\textbf{答案：}
+因为 \(S\) 是开始符号：
+\[
+\mathrm{FOLLOW}(S)=\{\$\}
+\]
+在 \(S\to AB\) 中，\(A\) 后面是 \(B\)，所以：
+\[
+\mathrm{FOLLOW}(A)=\mathrm{FIRST}(B)=\{b\}
+\]
+\(B\) 在产生式末尾，所以：
+\[
+\mathrm{FOLLOW}(B)=\mathrm{FOLLOW}(S)=\{\$\}
+\]
+
+\subsection*{练习 7：判断 LL(1)}
+文法：
+\[
+S\to aA\mid bB,\quad A\to c,\quad B\to c
+\]
+是否是 LL(1)？
+
+\textbf{答案：}
+是。对 \(S\) 的两个候选式：
+\[
+\mathrm{FIRST}(aA)=\{a\},\quad \mathrm{FIRST}(bB)=\{b\}
+\]
+两者不相交；\(A,B\) 各只有一条产生式。因此可用一个 lookahead 决策。
+
+\subsection*{练习 8：判断非 LL(1)}
+文法：
+\[
+S\to aA\mid aB,\quad A\to c,\quad B\to d
+\]
+是否是 LL(1)？如何改写？
+
+\textbf{答案：}
+不是 LL(1)，因为两个 \(S\) 候选式 FIRST 都是 \(\{a\}\)。提取左因子：
+\[
+S\to aS',\qquad S'\to A\mid B,\qquad A\to c,\qquad B\to d
+\]
+若继续替换，也可写为：
+\[
+S\to aS',\qquad S'\to c\mid d
+\]
+此时是 LL(1)。
+
+\subsection*{练习 9：构造分析表项}
+表达式文法中：
+\[
+E'\to +TE'\mid\eps,\qquad \mathrm{FOLLOW}(E')=\{\$,)\}
+\]
+应如何填写 \(E'\) 这一行的 LL(1) 表？
+
+\textbf{答案：}
+因为 \(\mathrm{FIRST}(+TE')=\{+\}\)，所以：
+\[
+M[E',+]=E'\to +TE'
+\]
+因为 \(\eps\in\mathrm{FIRST}(\eps)\)，应在 FOLLOW(\(E'\)) 对应列填写空产生式：
+\[
+M[E',\$]=E'\to\eps,\qquad M[E',)]=E'\to\eps
+\]
+
+\subsection*{练习 10：非递归 LL(1) 动作}
+若栈顶是非终结符 \(T'\)，当前输入符号是 \(*\)，且分析表有
+\[
+M[T',*]=T'\to *FT'
+\]
+非递归 LL(1) parser 应如何处理？
+
+\textbf{答案：}
+弹出 \(T'\)，再把产生式右部逆序压栈：先压 \(T'\)，再压 \(F\)，最后压 \(*\)。这样下一步栈顶是 \(*\)，可以先与输入符号匹配。
+
+\subsection*{练习 11：复杂度}
+为什么 LL(1) 分析通常是线性时间？
+
+\textbf{答案：}
+每个输入符号最终只会被匹配并消费一次。栈顶是终结符时一步匹配；栈顶是非终结符时查表展开。LL(1) 无左递归，不会无限展开而不消费输入，因此总步骤数与输入长度成线性关系。
+
+\begin{notebox}[考前速记]
+\begin{itemize}
+  \item Top-down：根到叶，寻找最左推导；Bottom-up：叶到根，最右推导逆过程。
+  \item RDP：每个非终结符一个过程；问题是左递归和回溯。
+  \item 直接左递归：\(A\to A\alpha\mid\beta\) 改为 \(A\to\beta A'\)，\(A'\to\alpha A'\mid\eps\)。
+  \item 左因子：\(A\to\alpha\beta_1\mid\alpha\beta_2\) 改为 \(A\to\alpha A'\)，\(A'\to\beta_1\mid\beta_2\)。
+  \item FIRST 看“自己展开后的第一个终结符”；FOLLOW 看“非终结符右边可能紧跟什么”。
+  \item LL(1)：左到右扫描、最左推导、1 个 lookahead。
+  \item LL(1) 表项冲突说明文法不是 LL(1)。
+  \item 构表：FIRST 填普通产生式；若能推出 \(\eps\)，按 FOLLOW 填空产生式。
+  \item 非递归 LL(1)：输入缓冲区 + 显式栈 + 分析表；产生式右部逆序入栈。
+\end{itemize}
+\end{notebox}
+
+\end{document}

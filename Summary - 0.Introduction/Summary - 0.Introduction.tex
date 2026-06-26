@@ -1,0 +1,596 @@
+\documentclass[UTF8,fontset=none,11pt]{ctexart}
+
+% ---------- 基础宏包 ----------
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds}
+
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+
+% ---------- 颜色 ----------
+\definecolor{maincol}{RGB}{30,90,160}
+\definecolor{accent}{RGB}{200,80,30}
+\definecolor{softbg}{RGB}{243,247,252}
+\definecolor{defbg}{RGB}{238,246,240}
+\definecolor{defrule}{RGB}{60,140,90}
+\definecolor{warnbg}{RGB}{253,245,233}
+\definecolor{warnrule}{RGB}{200,140,40}
+
+% ---------- 超链接 ----------
+\hypersetup{colorlinks=true,linkcolor=maincol,urlcolor=accent,
+  pdftitle={编译原理 导论笔记},pdfauthor={Summary}}
+
+% ---------- 列表风格 ----------
+\setlist[itemize]{leftmargin=1.4em,itemsep=2pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,topsep=2pt}
+
+% ---------- 自定义可分页标注盒子（不依赖 tcolorbox） ----------
+\newenvironment{defbox}[1][]{%
+  \par\medskip\noindent{\color{defrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{defrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{defrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{notebox}[1][]{%
+  \par\medskip\noindent{\color{maincol}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{maincol}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{maincol}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{warnbox}[1][]{%
+  \par\medskip\noindent{\color{warnrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{warnrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{warnrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+% 页码引用标记
+\newcommand{\pg}[1]{{\small\color{gray}\,[p#1]}}
+% 中英术语
+\newcommand{\term}[2]{\textbf{#1}（#2）}
+
+\title{\bfseries 编译原理 · 导论笔记\\[2pt]\large Introduction to Compilation Principle —— 详细学习笔记}
+\author{基于课件 \texttt{0.Introduction.pdf}（中山大学 · 赵帅）整理}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{notebox}[本笔记说明]
+本笔记完整覆盖导论课件 34 页内容，分两大板块：\textbf{课程行政信息}（第 1--11 页）与
+\textbf{编译原理核心概念}（第 12--34 页）。每个知识点后用 \pg{页码} 标注来源幻灯片。
+所有专业术语首次出现时给出\textbf{中文（English）}对照，并配通俗解释。后半部分各阶段的
+"知识结构图"是整门课的术语全景，本笔记逐一拆解，作为后续章节的"地图"。
+\end{notebox}
+
+\tableofcontents
+\vspace{4pt}
+\hrule
+
+% ============================================================
+\section{课程概览与行政信息（第 1--11 页）}
+% ============================================================
+
+\subsection{课程定位}
+\begin{itemize}
+  \item 课程名称：\textbf{编译原理}（Introduction to Compilation Principle），授课教师赵帅，中山大学计算机学院。\pg{1,3}
+  \item 适用年级：\textbf{大三第二学期}。\pg{2}
+  \item 先修课程：计算机组成原理、汇编语言、数据结构、编程语言设计等。\pg{2}
+  \item \textbf{贯穿全课的核心问题}：\emph{一个用高级语言写的程序，最后究竟如何在计算机上跑起来？}\pg{2}
+\end{itemize}
+
+\begin{notebox}[为什么先修这些课]
+编译器是"软件"与"硬件"之间的翻译官，所以既要懂\textbf{高层的语言/数据结构}（怎么描述程序），
+又要懂\textbf{底层的组成原理/汇编}（机器怎么执行）。这些先修课正好覆盖了这两端。
+\end{notebox}
+
+\subsection{理论课与实验课}
+\begin{itemize}
+  \item \textbf{理论课}：讲解编译核心理论与方法——词法分析、语法分析、语义分析、代码生成、代码优化。\pg{2}
+  \item \textbf{实验课}：独立课程，与理论课协同；用 Java 做语言处理、逆向工程工具等。\pg{2}
+\end{itemize}
+
+\subsection{教材与参考资料 \pg{8}}
+\begin{itemize}
+  \item 主教材：\textbf{《Compilers: Principles, Techniques, and Tools》}（俗称\textbf{"龙书"}，The Dragon Book）第二版，覆盖第 1--6 章 + 附录 A。
+  \item 参考书：《Modern Compiler Implementation in Java》（"虎书"）、《Advanced Compiler Design and Implementation》（"鲸书"）、《程序员的自我修养——链接、装载与库》。
+\end{itemize}
+
+\subsection{时间、地点与进度}
+\begin{itemize}
+  \item 理论课：周一（第 1--9 周）+ 周三（第 1--17 周），第 5--6 节（14:20--16:00），东 D302。\pg{9}
+  \item 实验课：周三（第 1--17 周），第 7--8 节（16:30--18:10），北实验楼 B202。\pg{9}
+\end{itemize}
+
+\begin{table}[h]\centering
+\small
+\caption{学时分配（按编译阶段，单位：周/讲次）\pg{10}}
+\begin{tabular}{lc}
+\toprule
+\textbf{阶段} & \textbf{课时数} \\
+\midrule
+词法分析（Lexical Analysis） & 4 \\
+语法分析（Syntax Analysis） & 8（最重） \\
+语义分析（Semantic Analysis） & 4 \\
+中间代码（Intermediate Code） & 3 \\
+代码优化（Code Optimization） & 3 \\
+目标代码生成（Code Generation） & 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{成绩构成 \pg{11}}
+\begin{itemize}
+  \item 理论课（3 学分 / 54 学时）：\textbf{平时 40\% + 闭卷考试 60\%}。
+  \item 实验课（1 学分 / 36 学时）：四个项目依次占 \textbf{10\% / 25\% / 30\% / 35\%}
+        （所得税计算器 → 改进语言处理程序 → 表达式计算器 → 程序逆向工程工具）。
+\end{itemize}
+
+% ============================================================
+\section{什么是编译（第 12--18 页）}
+% ============================================================
+
+\subsection{编译要解决的根本矛盾 \pg{12}}
+\begin{itemize}
+  \item 程序员用\textbf{高级语言}（C/C++/Java/Python/Ruby 等）写程序，关注\emph{功能}，不关心底层细节。
+  \item 但计算机\textbf{只懂机器语言}（二进制码），无法直接执行高级语言。
+  \item 因此需要一个翻译器，把高级语言翻成机器码，并兼顾\textbf{查错、性能、可移植性}。
+\end{itemize}
+
+\begin{defbox}[定义：编译（Compilation）]
+把一种语言（通常是高级\,源语言 source language）书写的程序，翻译成另一种语言
+（通常是\,目标语言 target language，如机器码/汇编）的等价程序的过程。
+完成这项工作的程序就叫\textbf{编译器（Compiler）}。
+\end{defbox}
+
+\subsection{三种语言执行方式：编译、解释、JIT}
+
+\begin{defbox}[编译（Compile / AOT, Ahead-of-Time）\pg{13,14}]
+\textbf{执行前一次性全文翻译}成机器码，再运行。代表语言：C、C++。\\
+特点：① 生成的\textbf{目标程序独立}于源程序（改代码要重新编译）；
+② 能分析程序\textbf{上下文}，便于做\textbf{整体优化}；③ \textbf{性能最好}（所以核心代码常用 C/C++）。
+\end{defbox}
+
+\begin{defbox}[解释（Interpret）\pg{13,14}]
+把源程序作为输入，\textbf{边翻译边执行}，逐句进行。代表语言：Python、Ruby。\\
+特点：① \textbf{不生成}独立目标程序，\textbf{可移植性高}；
+② 逐句执行，\textbf{难以整体优化}；③ \textbf{性能通常一般}。
+\end{defbox}
+
+\begin{defbox}[即时编译（JIT, Just-In-Time）\pg{13,15}]
+\textbf{运行时}才把代码（或字节码）编译成机器码，并\textbf{缓存}起来供下次复用。代表语言：Java（先编译为字节码 \texttt{.class}，运行时由 JIT 转机器码）。\\
+JIT vs.\ AOT：JIT 兼具\textbf{解释器的灵活性}（有 JIT 即可运行），性能基本与 AOT 相当；
+虽有运行时编译的开销，但能利用\textbf{运行时特征做动态优化}。
+\end{defbox}
+
+\begin{warnbox}[课堂 Quiz：Java 是解释型还是编译型？\pg{14}]
+答案：\textbf{两者皆是（混合型）}。Java 源码先被\textbf{编译}成与平台无关的\textbf{字节码（bytecode, .class）}，
+运行时再由 JVM 通过\textbf{解释 + JIT 编译}执行。所以它既不是纯编译，也不是纯解释。
+\end{warnbox}
+
+\subsection{计算机系统的层次结构 \pg{13}}
+理解编译器的位置，要先看"软件如何一层层落到硬件"：
+
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0pt,
+  layer/.style={draw,minimum width=7.2cm,minimum height=0.72cm,font=\small,anchor=north}]
+\node[layer,fill=softbg]                     (app)  at (0,0)      {应用程序 Application};
+\node[layer,fill=softbg,below=of app]        (comp) {编译器 / 库 Compiler / Libraries};
+\node[layer,fill=softbg,below=of comp]       (os)   {操作系统 Operating System};
+\node[layer,fill=defbg,below=of os]          (isa)  {指令集 ISA (Instruction Set)};
+\node[layer,fill=defbg,below=of isa]         (org)  {计算机组成 System Organization};
+\node[layer,fill=warnbg,below=of org]        (cir)  {电路 Circuits (硬件功能)};
+\node[layer,fill=warnbg,below=of cir]        (phy)  {半导体物理 Semiconductor Physics};
+\node[right=4pt of app,font=\footnotesize\itshape] {软件 SOFTWARE};
+\node[right=4pt of isa,font=\footnotesize\itshape] {体系结构 ARCHITECTURE};
+\node[right=4pt of cir,font=\footnotesize\itshape] {硬件 HARDWARE};
+\end{tikzpicture}
+\end{center}
+
+\noindent\textbf{要点}：编译器处在\textbf{应用程序之下、操作系统之上}，是把"人写的程序"向"机器能跑的指令"
+转化的关键一层。\textbf{ISA（指令集架构）}是软硬件的分界线——上层软件最终都要落到 ISA 定义的指令上。
+
+\subsection{C 语言的完整编译流程 \pg{16,17}}
+以 \texttt{gcc source.c -o a.out} 为例，源程序到可执行文件经过\textbf{四步}：
+
+\begin{table}[h]\centering\small
+\caption{C 编译四阶段：每步的输入 $\to$ 输出}
+\begin{tabular}{>{\bfseries}l l l}
+\toprule
+阶段 & 做什么 & 文件变化 \\
+\midrule
+预处理 Preprocessing & 合并头文件、展开宏定义 & \texttt{.c} $\to$ \texttt{.i}（仍是 C 代码）\\
+编译 Compiling      & 把展开后的代码翻成汇编 & \texttt{.i} $\to$ \texttt{.s}（汇编 assembly）\\
+汇编 Assembling     & 汇编翻成机器码 & \texttt{.s} $\to$ \texttt{.o}（可重定位目标文件）\\
+链接 Linking        & 链接库代码，拼成可执行文件 & \texttt{.o} $\to$ \texttt{a.out}（机器码可执行）\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{notebox}[术语小贴士]
+\textbf{可重定位目标文件（relocatable object, .o）}：还没确定最终内存地址、需要与其他模块拼接的机器码。
+\textbf{链接（Linking）}就是把多个 \texttt{.o} 和库函数（如 \texttt{printf}）的代码"拼装"并定地址，最终得到能直接运行的 \texttt{a.out}。
+\end{notebox}
+
+\subsection{为什么要学编译原理 \pg{18}}
+\begin{itemize}
+  \item \textbf{写出更高质量代码}：理解编译器有助写出对编译器友好、可被优化的代码（虽然多数日常编程并不直接用到）。
+  \item \textbf{职业方向}：编译器研究员、游戏/优化编译器工程师等（多数岗位并不强制要求，但这是高门槛方向）。
+  \item \textbf{掌握学科核心设计理念}：\textbf{抽象（abstraction）}、\textbf{自顶向下/自底向上（top-down / bottom-up）}等思想贯穿计算机学科。
+  \item \textbf{理论与实践深度结合}：编译原理是少数把"形式语言理论"直接落到"可运行系统"的课程。
+\end{itemize}
+
+% ============================================================
+\section{编译器的总体结构（第 19--20 页）}
+% ============================================================
+
+编译器是一条\textbf{流水线（pipeline）}：每个阶段消费上一阶段的输出，产生下一阶段的输入。
+整体分\textbf{前端（Front End）}与\textbf{后端（Back End）}。
+
+\begin{center}
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw,rounded corners=2pt,minimum width=2.9cm,minimum height=0.8cm,align=center,fill=softbg},
+  fe/.style={box,fill=defbg},
+  be/.style={box,fill=warnbg},
+  arr/.style={-{Latex[length=2mm]}}
+]
+\node[box] (src) {字符流 / 源代码\\Character Stream};
+\node[fe,below=0.55cm of src] (lex) {词法分析\\Lexical Analyzer};
+\node[fe,below=0.55cm of lex] (syn) {语法分析\\Syntax Analyzer};
+\node[fe,below=0.55cm of syn] (sem) {语义分析\\Semantic Analyzer};
+\node[be,below=0.55cm of sem] (ir)  {中间代码生成\\Intermediate Code Gen.};
+\node[be,below=0.55cm of ir]  (opt) {代码优化\\Code Optimizer};
+\node[be,below=0.55cm of opt] (cg)  {目标代码生成\\Code Generator};
+\node[box,below=0.55cm of cg] (tgt) {目标机器码\\Target Machine Code};
+
+\draw[arr] (src) -- (lex);
+\draw[arr] (lex) -- node[right,font=\footnotesize] {token 流 token stream} (syn);
+\draw[arr] (syn) -- node[right,font=\footnotesize] {语法树 syntax tree} (sem);
+\draw[arr] (sem) -- node[right,font=\footnotesize] {带标注语法树 annotated tree} (ir);
+\draw[arr] (ir)  -- node[right,font=\footnotesize] {中间表示 IR} (opt);
+\draw[arr] (opt) -- node[right,font=\footnotesize] {优化后的 IR} (cg);
+\draw[arr] (cg)  -- (tgt);
+
+\begin{scope}[on background layer]
+\node[draw=defrule,dashed,rounded corners,fit=(lex)(syn)(sem),
+      label={[defrule]left:\rotatebox{90}{\bfseries 前端 Front End}}] {};
+\node[draw=warnrule,dashed,rounded corners,fit=(ir)(opt)(cg),
+      label={[warnrule]left:\rotatebox{90}{\bfseries 后端 Back End}}] {};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\begin{defbox}[前端（Front End，"分析"部分）\pg{20}]
+面向\textbf{源程序}，负责\textbf{识别结构、理解语义、报告错误}。包含：
+词法分析、语法分析、语义分析。简记为 \emph{Analysis}（分析）。
+\end{defbox}
+
+\begin{defbox}[后端（Back End，"综合"部分）\pg{20}]
+\textbf{综合}前端的分析结果，生成与源程序\textbf{语义等价}的目标程序。包含：
+中间代码生成（产出 IR, Intermediate Representation）、代码优化、目标代码生成（产出 Target Machine Code）。简记为 \emph{Synthesis}（综合）。
+\end{defbox}
+
+\begin{notebox}[为什么要分前端/后端]
+分离的好处是\textbf{可复用}：同一个前端（如 C 语言前端）可以接不同后端（生成 x86 / ARM 代码）；
+反过来同一个后端也能服务多种语言的前端。中间的 \textbf{IR} 就是连接两者的"通用语"。
+\end{notebox}
+
+% ============================================================
+\section{贯穿全课的运行示例}
+% ============================================================
+课件用同一段代码贯穿所有阶段，建议把它当作"主线案例"记住：
+
+\begin{center}
+\begin{minipage}{0.46\textwidth}
+\textbf{源代码 \pg{12,21}}
+\begin{verbatim}
+while (y < z) {
+    int x = a + b;
+    y += x;
+}
+\end{verbatim}
+\end{minipage}\hfill
+\begin{minipage}{0.46\textwidth}
+\textbf{它会依次变成}
+\begin{enumerate}[nosep]
+  \item token 序列（词法）
+  \item 抽象语法树 AST（语法）
+  \item 带标注 AST + 符号表（语义）
+  \item 三地址码 IR（中间代码）
+  \item 优化后的 IR（优化）
+  \item x86 汇编/机器码（目标代码）
+\end{enumerate}
+\end{minipage}
+\end{center}
+
+% ============================================================
+\section{阶段一：词法分析（第 21--22 页）}
+% ============================================================
+
+\begin{defbox}[词法分析（Lexical Analysis）\pg{21}]
+扫描源程序\textbf{字符流}，识别并切分出有词法意义的\textbf{单词 / 符号（token，词法单元）}。\\
+\textbf{输入}：源程序（字符流）；\textbf{输出}：token 序列。\\
+每个 token 表示为 \textbf{(类别, 属性值)}，例如关键字、标识符、常量、运算符。
+\end{defbox}
+
+\textbf{示例（对应主线案例）\pg{21}}：\;
+\texttt{while (y<z)\{ int x=a+b; y+=x; \}} 被切成
+\[
+\texttt{(keyword,while)(id,y)(sym,<)(id,z)(id,x)(id,a)(sym,+)(id,b)(sym,;)\dots}
+\]
+
+\begin{warnbox}[判据：token 是否合法？\pg{21}]
+词法分析还要判断单词\textbf{是否符合词法规则}。例如 \texttt{0var}、\texttt{\$num} 不是合法标识符
+（标识符不能以数字开头、不能含非法字符）。
+\end{warnbox}
+
+\subsection{词法分析的知识地图 \pg{22}}
+这张图是后续两讲（词法分析）的术语全景，核心是一条\textbf{自动化生成链}：
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  n/.style={draw,rounded corners=2pt,fill=softbg,minimum height=0.7cm,align=center},
+  arr/.style={-{Latex[length=2mm]},thick}]
+\node[n] (re)  {正则表达式\\RE};
+\node[n,right=1.1cm of re] (nfa) {NFA};
+\node[n,right=1.1cm of nfa] (dfa) {DFA};
+\node[n,right=1.1cm of dfa] (min) {最小化 DFA\\Minimizing};
+\node[n,right=1.1cm of min] (tab) {表驱动实现\\Table-Driven};
+\draw[arr] (re) -- node[above,font=\footnotesize]{Thompson} (nfa);
+\draw[arr] (nfa)-- node[above,font=\footnotesize]{子集构造} (dfa);
+\draw[arr] (dfa)-- (min);
+\draw[arr] (min)-- (tab);
+\end{tikzpicture}
+\end{center}
+
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{模式 / 正则表达式}{Pattern / Regular Expression, RE}] 用来\emph{描述}一类单词长什么样（如"标识符 = 字母开头的字母数字串"）。一个 token 类别由一个 RE 指定。\pg{22}
+  \item[\term{词素}{Lexeme}] 源代码中真正匹配某个模式的\emph{那一段字符}（如具体的变量名 \texttt{y}）。token 由词素抽象而来。\pg{22}
+  \item[\term{NFA}{Nondeterministic Finite Automaton，非确定有限自动机}] 一种识别 RE 的状态机，同一输入可有多条转移路径。由 RE 经 \textbf{Thompson 算法}构造。\pg{22}
+  \item[\term{DFA}{Deterministic Finite Automaton，确定有限自动机}] 每个状态对每个输入只有唯一转移，便于直接编程。由 NFA 经\textbf{子集构造算法（Subset Construction）}得到。\pg{22}
+  \item[\term{DFA 最小化}{Minimizing}] 合并等价状态，得到状态最少的 DFA，节省实现开销。\pg{22}
+  \item[\term{表驱动实现}{Table-Driven Implementation}] 把 DFA 的转移关系存成一张表，用查表方式高效驱动词法分析器。\pg{22}
+\end{description}
+
+\begin{notebox}[一句话串起来]
+\emph{语言规范 $\to$ 用 RE 描述每类 token $\to$ Thompson 转 NFA $\to$ 子集构造转 DFA $\to$ 最小化 $\to$ 表驱动，生成词法分析器（Lexical Analyzer）。}
+\end{notebox}
+
+% ============================================================
+\section{阶段二：语法分析（第 23--25 页）}
+% ============================================================
+
+\begin{defbox}[语法分析（Syntax Analysis / Parsing）\pg{23}]
+解析 token 序列，构造出\textbf{语法分析树（syntax tree）}，常用其精简形式
+\textbf{抽象语法树（AST, Abstract Syntax Tree）}。\\
+\textbf{输入}：token 流；\textbf{输出}：语法树。\\
+同时判断输入程序\textbf{是否符合语法规则}（如 \texttt{x*+}、\texttt{a += 5;} 是否合法）。
+\end{defbox}
+
+\begin{notebox}[词法 vs.\ 语法的分工]
+词法管"\textbf{单词}拼得对不对"（\texttt{0var} 非法）；语法管"\textbf{句子结构}对不对"
+（\texttt{x*+} 是合法 token 但语法不通）。
+\end{notebox}
+
+\subsection{基础概念 \pg{24}}
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{乔姆斯基文法层次}{Chomsky's Grammar Hierarchy}] 按表达能力把文法分四类：
+    \textbf{0 型无限制（Unrestricted）} $\supset$ \textbf{1 型上下文有关（Context-Sensitive）}
+    $\supset$ \textbf{2 型上下文无关（Context-Free, CFG）} $\supset$ \textbf{3 型正则（Regular）}。
+    编程语言的语法主要用\textbf{2 型 CFG}描述，词法用 3 型。\pg{24}
+  \item[\term{推导}{Derivation}] 从文法的开始符号出发，反复用产生式替换，最终得到具体句子的过程（"文法 $\to$ 语言"）。\pg{24}
+  \item[\term{最左 / 最右推导}{Leftmost / Rightmost Derivation}] 每步总是替换最左（或最右）的非终结符；与两类分析方法对应。\pg{24}
+  \item[\term{语法分析树}{Parse Tree}] 推导过程的树形表示。\pg{24}
+  \item[\term{二义性}{Ambiguity}] 同一句子存在\emph{两棵不同}的语法树，会造成歧义；可通过\textbf{规定优先级（precedence）与结合性（associativity）}来消除。\pg{24}
+\end{description}
+
+\subsection{两大类分析方法 \pg{25}}
+
+\begin{defbox}[自顶向下分析（Top-Down Parser）\pg{25}]
+从开始符号出发"\textbf{往下猜}"，尝试推出输入串。关键工具与概念：\\
+\textbf{First 集 / Follow 集}（预测下一步用哪条产生式）、\textbf{消除左递归（Remove Left Recursion）}、
+\textbf{LL(1) 文法 / LL(1) 分析表}、\textbf{递归下降分析（含回溯, RD-backtrack）}与\textbf{预测分析（Predictive Parser，无回溯）}。
+\end{defbox}
+
+\begin{defbox}[自底向上分析（Bottom-Up Parser）\pg{25}]
+从输入串出发"\textbf{往上归约（reduce）}"到开始符号。主力是 \textbf{LR 家族（LR family）}：\\
+\textbf{LR(0)}（由项 item + 闭包 CLOSURE + GOTO 函数构造自动机与分析表，可能有冲突 conflicts）；\;
+\textbf{SLR(1)}（用 Follow 集限制归约动作）；\;
+\textbf{LR(1)}（LR(0) 项 + 向前看符号 lookahead，最精确）；\;
+\textbf{LALR(1)}（在 LR(1) 与 SLR(1) 间折中，工具常用）。
+\end{defbox}
+
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{项}{Item}] 带有"分析进度圆点"的产生式，记录已识别到哪。\pg{25}
+  \item[\term{闭包}{CLOSURE} 与 \term{GOTO 函数}{GOTO Function}] 构造 LR 自动机状态与状态间转移的两个基本运算。\pg{25}
+  \item[\term{冲突}{Conflict}] 分析表某格出现多个动作（移进/归约冲突等），说明文法对该分析方法不够强。\pg{25}
+  \item[\term{向前看}{Lookahead}] 多看后续若干符号来消除冲突，是 LR(1)/LALR(1) 比 LR(0) 强的原因。\pg{25}
+\end{description}
+
+\begin{notebox}[记忆口诀]
+\textbf{LL = 自顶向下、最左推导}；\textbf{LR = 自底向上、最右推导的逆}。
+表达能力：$\text{LR(1)} \supset \text{LALR(1)} \supset \text{SLR(1)} \supset \text{LR(0)}$。语法分析是本课\textbf{最重}的部分（8 讲）。
+\end{notebox}
+
+% ============================================================
+\section{阶段三：语义分析（第 26--27 页）}
+% ============================================================
+
+\begin{defbox}[语义分析（Semantic Analysis）\pg{26}]
+在语法结构基础上进一步分析\textbf{含义}。\\
+\textbf{输入}：语法树；\textbf{输出}：\textbf{带标注的语法树（Annotated / Decorated AST）} + \textbf{符号表（Symbol Table）}。\\
+工作：收集标识符的属性信息（如\textbf{类型 type、作用域 scope}），并检查程序\textbf{是否符合语义规则}
+（如\emph{变量未声明就使用、重复声明}）。
+\end{defbox}
+
+\begin{notebox}[直观理解]
+语法树只知道"结构对"，但不知道"\texttt{x} 是 \texttt{int} 还是 \texttt{bool}、\texttt{x} 是否声明过"。
+语义分析就是给这棵树"\textbf{贴上类型等标签}"（所以叫\emph{带标注}的 AST），同时用符号表登记每个名字的信息。
+\end{notebox}
+
+\subsection{语义分析的知识地图 \pg{27}}
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{语法制导定义}{SDD, Syntax-Directed Definitions}] 在文法产生式上附加\textbf{语义规则}，给文法符号关联\textbf{属性（attributes）}。\pg{27}
+  \item[\term{综合属性}{Synthesized Attribute}] 由子节点"\textbf{往上}"计算得到的属性（自下而上）。\pg{27}
+  \item[\term{继承属性}{Inherited Attribute}] 由父/兄节点"\textbf{往下/横向}"传来的属性。\pg{27}
+  \item[\term{依赖图}{Dependence Graph} 与 \term{拓扑序}{Topological Order}] 属性间的计算依赖关系构成依赖图，按拓扑序求值才能保证先算被依赖者。\pg{27}
+  \item[\term{S-属性定义}{S-SDD}] 只含综合属性，天然适合 \textbf{LR/自底向上}分析。\pg{27}
+  \item[\term{L-属性定义}{L-SDD}] 综合 + 受限的继承属性，适合 \textbf{LL/自顶向下}分析。\pg{27}
+  \item[\term{语法制导翻译}{SDT, Syntax-Directed Translation}] 把语义规则落成\textbf{语义动作（semantic actions）}，嵌入产生式不同位置执行（如 LL 用 marker、LR 借助分析栈 stack）。\pg{27}
+  \item[\term{符号表}{Symbol Table}] 登记标识符的类型、作用域、所属方法/类等；服务于\textbf{类型检查（type checking）}与\textbf{作用域（scope）}管理。\pg{27}
+\end{description}
+
+% ============================================================
+\section{阶段四：中间代码生成（第 28--29 页）}
+% ============================================================
+
+\begin{defbox}[中间代码生成（Intermediate Code Generation）\pg{28}]
+做初步翻译，生成与源程序等价的\textbf{中间表示（IR, Intermediate Representation）}。\\
+\textbf{输入}：（带标注的）语法树；\textbf{输出}：IR。\\
+作用：在\textbf{源语言与目标语言之间架桥}，让翻译更易实现，也利于某些\textbf{优化算法}。
+常见形式：\textbf{三地址码（TAC, Three-Address Code）}。
+\end{defbox}
+
+\textbf{主线案例的三地址码 \pg{28}}：
+\begin{center}
+\begin{minipage}{0.6\textwidth}
+\begin{verbatim}
+        goto L1
+L2:     t1 := a + b
+        x  := t1
+        t2 := y + x
+        y  := t2
+L1:     if y < z goto L2
+\end{verbatim}
+\end{minipage}
+\end{center}
+
+\begin{notebox}[为什么叫"三地址码"]
+每条指令最多含\textbf{三个地址（操作数）}，形如 \texttt{x := y op z}，结构简单、接近机器又独立于具体机器，
+非常适合做优化与后续翻译。\texttt{t1, t2} 是编译器引入的\textbf{临时变量（temporary）}。
+\end{notebox}
+
+\subsection{中间代码的知识地图 \pg{29}}
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{抽象语法树 / DAG}{AST / Directed Acyclic Graph}] 两种高层 IR；DAG 通过共享公共子表达式，比 AST 更紧凑。\pg{29}
+  \item[\term{三地址码}{Three-Address Code}] 低层 IR，可用\textbf{四元式（quadruples）、三元式（triples）、间接三元式（indirect triples）}三种数据结构表示。\pg{29}
+  \item[\term{静态单赋值}{SSA, Static Single Assignment}] 每个变量\emph{只被赋值一次}的 IR 形式，极大\textbf{方便优化}。\pg{29}
+  \item[\term{布尔表达式翻译}{Boolean Expression}] 可用\textbf{直接翻译}或基于跳转的\textbf{间接（跳转 jumping）翻译}处理控制流。\pg{29}
+  \item[\term{回填}{BackPatching}] 一种\textbf{一趟（one-pass）}生成跳转代码的技术：先留空跳转目标，确定后再"填回去"，避免两趟扫描。\pg{29}
+  \item[\term{静态类型检查}{Static Type Check}] 在生成 IR 阶段配合做类型检查。\pg{29}
+\end{description}
+
+% ============================================================
+\section{阶段五：代码优化（第 30--31 页）}
+% ============================================================
+
+\begin{defbox}[代码优化（Code Optimization）\pg{30}]
+对中间代码进行加工变换，使其\textbf{更优}（代码更短、性能更高、内存更省）。\\
+\textbf{输入}：IR；\textbf{输出}：优化后的 IR。\\
+特点：本阶段优化\textbf{机器无关（machine independent）}。例：\textbf{公共子表达式识别、运算操作替换}。
+\end{defbox}
+
+\begin{warnbox}[课堂 Quiz：这里做了什么优化？\pg{30}]
+对比优化前后：原 IR 在循环体内每轮都算 \texttt{t1 := a+b}；优化后把 \texttt{t1 = a + b}
+\textbf{提到循环外}，循环内直接用 \texttt{t1}。这是\textbf{循环不变量外提（loop-invariant code motion）}
+配合\textbf{公共子表达式消除}的效果——因为 \texttt{a}、\texttt{b} 在循环中不变，无需重复计算。
+\end{warnbox}
+
+\subsection{代码优化的知识地图 \pg{31}}
+优化分两大类：\textbf{与代码相关的变换（Code-related）}和\textbf{与布局相关的变换（Layout-related）}。
+
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{基本块}{Basic Block}] 顺序执行、只能从开头进、从结尾出的最大指令序列；是优化的基本单位。\pg{31}
+  \item[\term{控制流图}{CFG, Control-Flow Graph}] 以基本块为节点、跳转关系为边的图，描述程序执行路径。\pg{31}
+  \item[\term{局部优化}{Local Optimizations}] 在\emph{单个基本块内}做的优化。\pg{31}
+  \item[\term{全局优化}{Global Optimizations}] \emph{跨基本块}的优化，需借助数据流分析。\pg{31}
+  \item[\term{数据流分析}{Dataflow Analysis}] 沿 CFG 分析变量取值/活跃性等信息，为全局优化提供依据。\pg{31}
+  \item[\term{死代码消除}{Dead Code Elimination}] 删除永远不会被用到、不影响结果的代码。\pg{31}
+  \item[\term{公共子表达式消除}{Common Subexpression Elimination}] 相同的计算只做一次，复用结果。\pg{31}
+  \item[\term{常量传播 / 常量折叠}{Constant Propagation / Constant Folding}] 把已知常量沿程序传播，并在编译期直接算出常量表达式（如 \texttt{3+4}$\to$\texttt{7}）。\pg{31}
+\end{description}
+
+% ============================================================
+\section{阶段六：目标代码生成（第 32--33 页）}
+% ============================================================
+
+\begin{defbox}[目标代码生成（Target Code Generation）\pg{32}]
+为\textbf{特定机器}产生目标代码（如汇编/机器码）。\\
+\textbf{输入}：（优化后的）IR；\textbf{输出}：目标代码。\\
+核心工作：\textbf{寄存器分配（register allocation）}——把频繁访问的数据放进寄存器；
+\textbf{指令选择（instruction selection）}——用机器指令实现 IR 操作；
+以及进一步的\textbf{机器相关优化}（如寄存器与访存优化）。
+\end{defbox}
+
+\textbf{主线案例最终的 x86 片段 \pg{32}}：
+\begin{center}
+\begin{minipage}{0.7\textwidth}
+\begin{verbatim}
+   mov edx, DWORD PTR [rbp-12]
+   mov eax, DWORD PTR [rbp-16]
+   add eax, edx
+   mov DWORD PTR [rbp-20], eax
+   jmp L2
+L3:mov eax, DWORD PTR [rbp-20]
+   add DWORD PTR [rbp-4], eax
+L2:mov eax, DWORD PTR [rbp-4]
+   cmp eax, DWORD PTR [rbp-8]
+   jl  L3
+\end{verbatim}
+\end{minipage}
+\end{center}
+
+\subsection{目标代码生成的知识地图 \pg{33}}
+\begin{description}[leftmargin=1.4em,style=nextline]
+  \item[\term{指令选择}{Instruction Selection}] 为每个 IR 操作挑选合适的机器指令。\pg{33}
+  \item[\term{寄存器分配}{Register Allocation}] 决定哪些变量驻留在有限的寄存器中（寄存器比内存快得多）。\pg{33}
+  \item[\term{指令调度 / 排序}{Instruction Scheduling / Ordering}] 重排指令顺序以提升流水线效率。\pg{33}
+  \item[\term{活动记录}{Activation Record}] 函数调用时在栈上为其分配的信息块（参数、局部变量、返回地址等）。\pg{33}
+  \item[\term{调用者 / 被调用者约定}{Caller / Callee Conventions}] 规定函数调用时谁负责保存哪些寄存器、如何传参。\pg{33}
+  \item[\term{窥孔优化}{Peephole Optimization}] 在一个小"窗口"内对相邻几条目标指令做局部改写，去除冗余。\pg{33}
+  \item[面向对象相关] 还涉及\term{方法分派}{Dispatch}、\term{继承}{Inheritance}等的目标代码实现。\pg{33}
+\end{description}
+
+% ============================================================
+\section{全流程一图速记}
+% ============================================================
+把主线案例 \texttt{while (y<z)\{int x=a+b; y+=x;\}} 走完整条流水线：
+
+\begin{table}[h]\centering\small
+\caption{六阶段：输入 $\to$ 输出 一览（含主线案例形态）}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{>{\bfseries}p{2.3cm} p{3.3cm} p{3.3cm} p{4.2cm}}
+\toprule
+阶段 & 输入 & 输出 & 案例中的形态 \\
+\midrule
+词法分析 & 字符流 & token 序列 & \texttt{(keyword,while)(id,y)\dots} \\
+语法分析 & token 序列 & 语法树 AST & while 子树 / 赋值子树 \\
+语义分析 & AST & 带标注 AST + 符号表 & 每个节点标上 \texttt{int/bool} 类型 \\
+中间代码 & 带标注 AST & 中间表示 IR & 三地址码 \texttt{t1:=a+b}\dots \\
+代码优化 & IR & 优化后 IR & \texttt{a+b} 提出循环外 \\
+目标代码 & 优化后 IR & 目标机器码 & x86 \texttt{mov/add/cmp/jl}\dots \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{notebox}[考点速记]
+\begin{itemize}
+  \item \textbf{前端三件套}：词法、语法、语义（分析 Analysis）；\textbf{后端三件套}：中间代码、优化、目标代码（综合 Synthesis）。
+  \item \textbf{各阶段产物链}：字符流 $\to$ token $\to$ AST $\to$ 带标注 AST+符号表 $\to$ IR $\to$ 优化 IR $\to$ 目标码。
+  \item \textbf{编译 / 解释 / JIT}：AOT 性能最好、解释最灵活、JIT 折中；Java = 字节码 + 解释/JIT。
+  \item \textbf{C 编译四步}：预处理 \texttt{.i} $\to$ 编译 \texttt{.s} $\to$ 汇编 \texttt{.o} $\to$ 链接 \texttt{a.out}。
+  \item \textbf{词法链}：RE $\xrightarrow{\text{Thompson}}$ NFA $\xrightarrow{\text{子集构造}}$ DFA $\to$ 最小化 $\to$ 表驱动。
+  \item \textbf{语法两派}：LL（自顶向下/最左）vs.\ LR（自底向上/最右逆）；LR(1) 最强、LALR(1) 常用。
+\end{itemize}
+\end{notebox}
+
+\begin{center}\itshape Enjoy the Journey! \pg{34}\end{center}
+
+\end{document}

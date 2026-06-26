@@ -1,0 +1,544 @@
+\documentclass[UTF8,fontset=none,11pt]{ctexart}
+
+% ---------- 基础宏包 ----------
+\usepackage[a4paper,margin=2.2cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tikz}
+\usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds}
+
+\setCJKmainfont{PingFang SC}
+\setCJKsansfont{PingFang SC}
+\setCJKmonofont{PingFang SC}
+
+% ---------- 颜色 ----------
+\definecolor{maincol}{RGB}{30,90,160}
+\definecolor{accent}{RGB}{200,80,30}
+\definecolor{softbg}{RGB}{243,247,252}
+\definecolor{defbg}{RGB}{238,246,240}
+\definecolor{defrule}{RGB}{60,140,90}
+\definecolor{warnbg}{RGB}{253,245,233}
+\definecolor{warnrule}{RGB}{200,140,40}
+
+% ---------- 超链接 ----------
+\hypersetup{colorlinks=true,linkcolor=maincol,urlcolor=accent,
+  pdftitle={词法分析与正则表达式 笔记},pdfauthor={Summary}}
+
+% ---------- 列表风格 ----------
+\setlist[itemize]{leftmargin=1.4em,itemsep=2pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=2pt,topsep=2pt}
+
+% ---------- 自定义可分页标注盒子（不依赖 tcolorbox） ----------
+\newenvironment{defbox}[1][]{%
+  \par\medskip\noindent{\color{defrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{defrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{defrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{notebox}[1][]{%
+  \par\medskip\noindent{\color{maincol}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{maincol}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{maincol}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newenvironment{warnbox}[1][]{%
+  \par\medskip\noindent{\color{warnrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{warnrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{warnrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+% 页码引用标记
+\newcommand{\pg}[1]{{\small\color{gray}\,[p#1]}}
+% 中英术语
+\newcommand{\term}[2]{\textbf{#1}（#2）}
+
+\title{\bfseries 编译原理 · 词法分析（一）：导论与正则表达式\\[2pt]
+\large Lexical Analysis: Intro \& Regular Expressions —— 详细学习笔记}
+\author{基于课件 \texttt{1.Lexical Analysis\_Intro\_RE.pdf}（中山大学 · 赵帅）整理}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{notebox}[本笔记说明]
+本笔记完整覆盖第 1 讲《词法分析：导论与正则表达式》共 43 页。主线是一条
+\textbf{"从规范到实现"}的链路：先理解\emph{词法分析要做什么}，再学会用
+\textbf{正则表达式（Regular Expression, RE）}\emph{描述}单词的模式，为下一讲用
+\textbf{有限自动机（Finite Automata）}实现识别器打基础。每个知识点用 \pg{页码} 标注来源；
+专业术语首次出现给出\textbf{中文（English）}对照与通俗解释。
+\end{notebox}
+
+\tableofcontents
+\vspace{4pt}\hrule
+
+% ============================================================
+\section{词法分析是什么（第 2--5 页）}
+% ============================================================
+
+\subsection{它在编译流程中的位置 \pg{2,3}}
+词法分析是编译器\textbf{前端（Front End）}的\emph{第一步}，紧跟在源代码之后：
+\[
+\text{字符流 (源代码)} \;\xrightarrow{\textbf{词法分析}}\; \text{token 流}
+\;\to\; \text{语法分析}\to\cdots
+\]
+它把"一长串字符"切成"一个个有意义的小单元（token）"，再交给语法分析器（Parser）。
+
+\begin{notebox}[贯穿全讲的例子]
+源代码 \texttt{while (y<z)\{ int x=a+b; y+=x; \}} 经词法分析后变成 token 序列：
+\[
+\texttt{(keyword,while)(id,y)(sym,<)(id,z)(id,x)(id,a)(sym,+)(id,b)(sym,;)\dots}
+\]
+\end{notebox}
+
+\subsection{词法分析的定义与步骤 \pg{4,5}}
+\begin{defbox}[词法分析（Lexical Analysis）]
+识别源程序中的\textbf{子串}（称为\textbf{词素 lexeme}），并通过\emph{判断它属于哪个词法单元类别}
+生成\textbf{词法单元（token）}的过程。\\
+\textbf{任务}：把源程序当作\emph{字符串}读入，切分成一个个 token。
+\end{defbox}
+
+\textbf{三个步骤}（以 \texttt{/* simple example */ while (i<z) i++;} 为例）\pg{4}：
+\begin{enumerate}
+  \item \textbf{去除注释}（remove comments）：删掉 \texttt{/* simple example */}。
+  \item \textbf{切分子串}（identify substrings）：得到 \texttt{'while' '(' 'i' '==' 'j'}\dots
+  \item \textbf{识别类别}（identify token classes）：标注成 \texttt{(keyword,'while')(Lpar,'(')(id,'i')}\dots
+\end{enumerate}
+
+\begin{notebox}[扫描过程的直观理解 \pg{5}]
+词法分析器像一个"指针"\textbf{从左到右逐字符扫描}：读到 \texttt{w,h,i,l,e} 时发现匹配了关键字模式，
+就吐出一个 token \texttt{(keyword,'while')}，然后\emph{继续扫描（keep scanning）}下一个词素。
+\end{notebox}
+
+% ============================================================
+\section{从规范到实现：全局蓝图（第 6--7 页）}
+% ============================================================
+这张图是整个词法分析模块的"地图"，务必记牢它的两条线：\textbf{描述线}与\textbf{实现线} \pg{6}。
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  n/.style={draw,rounded corners=2pt,fill=softbg,minimum height=0.7cm,align=center,inner sep=3pt},
+  hi/.style={draw,rounded corners=2pt,fill=defbg,minimum height=0.7cm,align=center,inner sep=3pt},
+  arr/.style={-{Latex[length=2mm]},thick}]
+\node[n] (spec) {语言规范\\Language Spec.};
+\node[n,below=0.9cm of spec] (tok) {词法单元\\Token};
+\node[hi,right=2.3cm of tok] (re) {正则表达式\\RE};
+\node[hi,right=2.3cm of re] (nfa) {NFA};
+\node[hi,right=2.3cm of nfa] (dfa) {DFA};
+\node[hi,below=1.0cm of dfa] (tab) {表驱动实现\\Table-Driven};
+\node[n,left=2.3cm of tab] (lex) {词法分析器\\Lexical Analyzer};
+
+\draw[arr] (spec) -- node[left,font=\footnotesize]{指定 Specify} (tok);
+\draw[arr] (tok) -- node[above,font=\footnotesize]{表达 Express} (re);
+\draw[arr] (re) -- node[above,font=\footnotesize]{Thompson} (nfa);
+\draw[arr] (nfa) -- node[above,font=\footnotesize]{子集构造} (dfa);
+\draw[arr] (dfa) -- node[right,font=\footnotesize]{最小化} (tab);
+\draw[arr] (tab) -- node[above,font=\footnotesize]{实现 Impl.} (lex);
+\end{tikzpicture}
+\end{center}
+
+\begin{itemize}
+  \item \textbf{描述线}：语言规范 $\to$ 定义 token $\to$ 用\textbf{正则表达式}表达每类 token 的模式（pattern）。
+  \item \textbf{实现线}：RE $\xrightarrow{\text{Thompson}}$ NFA $\xrightarrow{\text{子集构造}}$ DFA $\xrightarrow{\text{最小化}}$ 表驱动 $\to$ 词法分析器。
+  \item \textbf{本讲（Lecture 1）只覆盖左半部分}（规范 + RE，第 7 页的简化图）；右半部分（NFA/DFA）留待下一讲 \pg{7}。
+\end{itemize}
+
+% ============================================================
+\section{Token 与 Lexeme（第 8--11 页）}
+% ============================================================
+
+\begin{defbox}[词法单元（Token）\pg{8}]
+语言中的一个"\textbf{词}"——\textbf{带有含义的最小单位}。\\
+形式上是一个二元组 \textbf{(类别 class, 词素 lexeme)}，即 \textbf{(token name, 可选的属性值)}。\\
+其中\textbf{类别（class / token name）}是一个\emph{抽象符号}，代表某一类词法单位（如某个关键字、或一串构成标识符的字符）。
+\end{defbox}
+
+\begin{defbox}[词素（Lexeme）\pg{8}]
+源程序中\emph{真正出现的、匹配某个 token 模式}的\textbf{一段字符序列}，
+被词法分析器识别为该 token 的\textbf{一个实例（instance）}。
+\end{defbox}
+
+\begin{notebox}[Token vs.\ Lexeme 一句话区分]
+\textbf{Lexeme 是"具体的字符"}（如代码里写的 \texttt{y}、\texttt{3.14}）；
+\textbf{Token 是"抽象的分类 + 这段字符"}（如 \texttt{(id,'y')}、\texttt{(number,'3.14')}）。
+一个 token 类别（如"标识符"）对应\emph{无数}可能的词素。
+\end{notebox}
+
+\subsection{常见的 Token 类别 \pg{9}}
+\begin{itemize}
+  \item \term{数字}{Numbers}：非空的连续数字串。
+  \item \term{关键字}{Keyword}：一组固定的保留字（\texttt{for}, \texttt{if}, \texttt{else}\dots）。
+  \item \term{空白}{Whitespace}：非空的空格、制表符、换行序列。
+  \item \term{标识符}{Identifier}：用户自定义的实体名字。
+\end{itemize}
+
+\begin{warnbox}[Quiz：哪些名字不被 Java 接受？哪个是好的命名习惯？\pg{10}]
+选项：\texttt{A. 1var}\quad\texttt{B. \_var}\quad\texttt{C. \$var}\quad\texttt{D. main}\quad\texttt{E. while}\\
+\textbf{不被接受}：\texttt{A.1var}（标识符不能以数字开头）、\texttt{E.while}（\texttt{while} 是关键字，被保留）。\\
+\texttt{B.\_var} 和 \texttt{C.\$var} 合法（\texttt{\_} 和 \texttt{\$} 允许打头），\texttt{D.main} 也合法（\texttt{main} 在 Java 中不是关键字）。\\
+\textbf{好的命名习惯}：\texttt{D. main}（普通有意义的小写名；\texttt{\$} 一般保留给编译器生成代码，\texttt{\_} 开头不推荐）。
+\end{warnbox}
+
+\subsection{词法分析的角色 \pg{11}}
+\begin{defbox}[分词 / 扫描器（Tokenization / Scanner）]
+词法分析又称\textbf{分词（Tokenization）}或\textbf{扫描器（Scanner）}。它：
+① 把输入串\textbf{切分}成 token 序列；② 通过\textbf{匹配模式}给每个 token \textbf{分类}；
+③ 把 token \textbf{传给语法分析器（Parser）}。
+\end{defbox}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  n/.style={draw,rounded corners=2pt,fill=softbg,minimum height=0.75cm,align=center,inner sep=4pt},
+  arr/.style={-{Latex[length=2mm]},thick}]
+\node[n] (src) {源代码\\source code};
+\node[n,right=1.3cm of src] (lex) {词法分析器\\Lexical Analyzer};
+\node[n,right=1.6cm of lex] (par) {语法分析器\\Parser};
+\node[n,below=0.8cm of lex] (sym) {符号表\\Symbol Table};
+\draw[arr] (src) -- (lex);
+\draw[arr] (lex) -- node[above,font=\footnotesize]{token} node[below,font=\footnotesize]{$\leftarrow$ getNextToken} (par);
+\draw[arr] (lex) -- (sym);
+\draw[arr] (par) -- ++(0,0.9) node[above,font=\footnotesize]{到语义分析 to semantic analysis};
+\end{tikzpicture}
+\end{center}
+
+\begin{notebox}[为什么 Parser 依赖 token 类别]
+语法分析器靠 token 的\textbf{类别}来判断每个词的"角色"——\emph{关键字}和\emph{标识符}会被区别对待。
+例如 \texttt{a=3.14} 被分成 \texttt{<id,'a'><op,'='><number,'3.14'>}，Parser 才知道这是一句赋值。
+注意是 Parser 主动\textbf{按需向词法器要下一个 token}（\texttt{getNextToken}），而非一次全部产出。
+\end{notebox}
+
+% ============================================================
+\section{设计、实现与扫描难点（第 12--15 页）}
+% ============================================================
+
+\subsection{设计要点 \pg{12}}
+\begin{itemize}
+  \item \textbf{定义有限的 token 类别集合}：涵盖所有关心的词（关键字、标识符、空白\dots），并\emph{取决于语言本身和 Parser 的设计}。
+  \item \textbf{判定每个字符串属于哪个类别}。例如 \texttt{if (a == 3.14)} 中要分清是 \texttt{'='} 还是 \texttt{'=='}，以及某个词是关键字还是标识符。
+\end{itemize}
+
+\subsection{实现要点 \pg{13}}
+\begin{itemize}
+  \item 实现要做两件事：① \textbf{识别}子串属于哪个 token 类别；② \textbf{返回}它的值/词素。
+  \item 词法器通常会\textbf{丢弃}注释和空白（空格、换行、制表符等无意义内容）。
+  \item 若 token 类别\textbf{无歧义}，则\emph{一次从左到右扫描}即可识别全部 token。
+  \item 当类别\textbf{有歧义（ambiguous）}时会出问题（见下文 \S\,\ref{sec:amb}）。
+\end{itemize}
+
+\subsection{扫描的挑战：C++ 的 \texttt{>>} 歧义 \pg{14}}
+\begin{warnbox}[经典难题：\texttt{vector<vector<int>>}]
+\texttt{>>} 到底是\textbf{一个流操作符}（如 \texttt{cin >> var}），还是\textbf{两个连续的右尖括号}（嵌套模板结尾）？\\
+\[
+\texttt{vector<vector<int>>} \;\Rightarrow\; \text{模板语法？还是 } \texttt{>>} \text{ 运算符？}
+\]
+仅看局部字符无法判定，需要更大的\textbf{上下文/结构}信息——而结构要到\emph{语法分析阶段}画出语法树才浮现。
+\end{warnbox}
+
+\subsection{展望（Look Ahead）\pg{15}}\label{sec:la}
+\begin{defbox}[展望（Look Ahead）]
+为消除歧义，有时需要\textbf{向后多看若干字符}（甚至需要 Parser 的反馈）才能确定当前 token。
+\end{defbox}
+\begin{itemize}
+  \item 有些 token 只有结合更大上下文/结构才能提取；这会\textbf{使词法分析设计复杂化}，应\emph{尽量减少向前看的量}。
+  \item \textbf{通常情况下 token 不重叠（do not overlap）}：分词可\emph{一趟完成、无需 Parser 反馈}，词法与语法分析职责\textbf{清晰分离}。
+\end{itemize}
+
+% ============================================================
+\section{Token 规范：用正则表达式描述（第 16 页）}
+% ============================================================
+\begin{defbox}[Token 规范的核心思想 \pg{16}]
+要识别 token 类别，关键问题是：\emph{如何描述字符串的"模式（pattern）"？}
+答案是用\textbf{正则表达式（Regular Expression, RE）}来定义每个 token 类别。
+\end{defbox}
+
+四者关系：\;\textbf{词素（lexemes）} 是 token 的\emph{实例}；\textbf{token} 的\emph{抽象形式}是\textbf{模式（pattern）}；
+模式由\textbf{正则表达式}来\emph{描述/指定}。\pg{16}
+
+\begin{notebox}[为什么选正则表达式]
+\textbf{简单却有效}：能表达重复序列等简单模式；虽\emph{不足以}描述英语甚至整个 C 语言的语法，
+但\textbf{足以描述 token}（如标识符）。更妙的是——可由规范\textbf{自动生成}分词器（用翻译工具）。
+\end{notebox}
+
+% ============================================================
+\section{语言的形式化基础：字母表、串、语言（第 17--21 页）}
+% ============================================================
+
+\begin{defbox}[字母表（Alphabet $\Sigma$）\pg{17}]
+一个\textbf{有限}的符号集合。符号可以是字母、数字、标点等。
+例：$\{0,1\}$、$\{a,b,c\}$、ASCII 字符集。
+\end{defbox}
+
+\begin{defbox}[串（String）\pg{17}]
+字母表上的一个串是该字母表中符号构成的\textbf{有穷序列}。\\
+例：\texttt{abc}（长度 $|abc|=3$）；$\varepsilon$（\textbf{空串 empty string}，长度 $|\varepsilon|=0$）。
+\end{defbox}
+
+\begin{defbox}[语言（Language）\pg{17}]
+某个给定字母表上的\textbf{任意一个可数的串集合}。\\
+例：在 $\Sigma=\{a,b\}$ 上，$\{\}$、$\{ab,ba\}$、$\{a,aa,aaaa,\dots\}$ 都是语言。
+\end{defbox}
+
+\begin{warnbox}[极易混淆：$\varnothing$ 与 $\{\varepsilon\}$ \pg{17,23}]
+\textbf{空集 $\varnothing=\{\}$}：一个\emph{不含任何串}的语言，$\mathrm{size}(\varnothing)=0$。\\
+\textbf{$\{\varepsilon\}$}：一个\emph{只含空串}的语言，$\mathrm{size}(\{\varepsilon\})=1$，但 $\mathrm{length}(\varepsilon)=0$。\\
+两者\textbf{不相等}！前者"啥都没有"，后者"有一个东西，只不过那个东西是空的"。
+\end{warnbox}
+
+\textbf{语言是"所有可能串"的子集 \pg{18}}：例如英文字母表上，并非所有字符串都是合法英文句子
+（\texttt{aaa bbb ccc} 不是）；数字与正负号的序列也并非都是合法整数（\texttt{125+}、\texttt{1-25} 不是）。
+
+\subsection{语言上的运算 \pg{19,20,21}}
+\begin{defbox}[并、连接、闭包（Union / Concatenation / Closure）]
+设 $A,B$ 为两个语言：
+\begin{itemize}
+  \item \textbf{并（Union）}：$A\cup B$，记作 $A\,|\,B$，即集合并。
+  \item \textbf{连接（Concatenation）}：$AB$ = 从 $A$ 取一个串、从 $B$ 取一个串，按所有可能方式\emph{拼接}得到的全部串。
+  \item \textbf{（Kleene）闭包（Closure）}：$L^{*}$ = 把 $L$ 自我连接\emph{零次或多次}得到的全部串。
+\end{itemize}
+\end{defbox}
+
+\textbf{闭包的形式定义 \pg{19}}：
+\[
+L^{0}=\{\varepsilon\},\quad L^{i}=L^{i-1}L;\qquad
+L^{*}=\bigcup_{i=0}^{\infty}L^{i}=L^{0}\cup L^{1}\cup L^{2}\cup\cdots
+\]
+\[
+L^{+}=\bigcup_{i=1}^{\infty}L^{i}=L^{1}\cup L^{2}\cup\cdots \quad(\textbf{正闭包 Positive Closure}),\qquad L^{+}=L\,L^{*}
+\]
+
+\begin{notebox}[$L^{*}$ 与 $L^{+}$ 的区别]
+$L^{*}$ \textbf{含} $L^{0}=\{\varepsilon\}$（即包含空串）；$L^{+}$ \textbf{不含} $L^{0}$，
+所以\emph{除非 $\varepsilon$ 本身就在 $L$ 里}，否则 $\varepsilon\notin L^{+}$。简记：星号可空，加号至少一个。
+\end{notebox}
+
+\textbf{具体例子 \pg{20}}（设 $L=\{a,b\}$，$D=\{0,1\}$）：
+\begin{align*}
+L\cup D &= \{a,b,0,1\}\\
+LD &= \{a0,b0,a1,b1\}\quad(\text{4 个长度为 2 的串})\\
+L^{3} &= \{aaa,aab,aba,abb,baa,bab,bba,bbb\}\quad(\text{8 个长度为 3 的串})\\
+L^{*} &= \{\varepsilon,a,b,aa,ab,ba,bb,aaa,\dots\}\\
+L^{+} &= \{a,b,aa,ab,ba,bb,aaa,\dots\}\quad(\text{比 }L^{*}\text{ 少一个 }\varepsilon)
+\end{align*}
+
+\textbf{更贴近编程的例子 \pg{21}}（设 $L=\{A\!-\!Z,a\!-\!z\}$ 字母，$D=\{0\!-\!9\}$ 数字）：
+\begin{itemize}
+  \item $L\cup D$：所有字母和数字，共 \textbf{62} 个长度为 1 的串。
+  \item $LD$：\textbf{520} 个长度为 2 的串（一个字母后跟一个数字）。
+  \item $L^{4}$：所有长度为 4 的纯字母串。
+  \item $L^{*}$：所有字母串（含空串 $\varepsilon$）。\quad $D^{+}$：一个或多个数字的串。
+  \item $\boxed{L(L\cup D)^{*}}$：\textbf{以字母开头}、由字母和数字组成的所有串——\emph{这正是"标识符"的定义}！
+\end{itemize}
+
+% ============================================================
+\section{正则表达式与正则语言（第 22--27 页）}
+% ============================================================
+
+\begin{defbox}[正则表达式（Regular Expression, RE）与正则语言（Regular Language）\pg{22}]
+RE 用来描述\emph{由某字母表上的符号经运算符构建出的}所有语言。它是一种\textbf{简单的记号}，
+用于\textbf{表示字符串的模式}。\\
+能被正则表达式描述的语言称为\textbf{正则语言（Regular Languages）}；更复杂的语言需要更复杂的记号。
+\end{defbox}
+
+\subsection{原子正则表达式（递归定义的基础）\pg{23}}
+RE 是\textbf{递归}地由更小的 RE 构建的；每个 RE $r$ 都对应一个语言 $L(r)$。\textbf{原子（Atomic）RE} 是不能再拆的最小单元：
+\begin{itemize}
+  \item $\varepsilon$ 是一个 RE，匹配\textbf{空串}：$L(\varepsilon)=\{\text{""}\}$。
+  \item 对任意符号 $a$，$a$ 是一个 RE，只匹配自身：$L(a)=\{\text{"a"}\}$。
+  \item 空集 $\varphi$ 是 RE，与 $\varepsilon$ \textbf{不同}：$\mathrm{size}(\varphi)=0$、$\mathrm{size}(L(\varepsilon))=1$、$\mathrm{length}(\varepsilon)=0$。
+\end{itemize}
+
+\subsection{复合正则表达式（递归构建）\pg{24}}
+\begin{defbox}[复合 RE 的四条递归规则]
+设 $r,s$ 是 RE，分别表示语言 $L(r),L(s)$，则：
+\begin{itemize}
+  \item $(r)$ 表示 $L(r)$ —— 加括号不改变所表示的语言。
+  \item $(r)\,|\,(s)$ 表示 $L(r)\cup L(s)$ —— \textbf{并}。
+  \item $(r)(s)$ 表示 $L(r)L(s)$ —— \textbf{连接}。
+  \item $(r)^{*}$ 表示 $(L(r))^{*}$ —— \textbf{闭包}。
+\end{itemize}
+\end{defbox}
+RE 中常含\emph{多余的括号}可省略：$(A)\equiv A$；\;$(a)|((b)^{*}(c))\equiv a\,|\,b^{*}c$。\pg{24}
+
+\subsection{运算符优先级 \pg{25}}
+\begin{defbox}[RE 运算符优先级（从高到低）]
+\[
+\underbrace{(A)}_{\text{括号}} \;>\; \underbrace{A^{*}}_{\text{闭包}} \;>\; \underbrace{A\,B}_{\text{连接}} \;>\; \underbrace{A\,|\,B}_{\text{并}}
+\]
+\end{defbox}
+所以 \texttt{ab*c|d} 解析为 $((a(b^{*}))c)\,|\,d$：先 \texttt{b*}（闭包最高），再与 \texttt{a},\texttt{c} 连接，最后才是 \texttt{|d}。
+
+\begin{notebox}[记忆法]
+优先级顺序与四则运算类比：\textbf{闭包 $\approx$ 乘方}、\textbf{连接 $\approx$ 乘法}、\textbf{并 $\approx$ 加法}，
+所以"星号最紧、竖线最松"。
+\end{notebox}
+
+\subsection{常用扩展记号 \pg{26,27}}
+\begin{longtable}{>{\ttfamily}l p{10.5cm}}
+\toprule
+\normalfont\textbf{记号} & \textbf{含义} \\
+\midrule
+A+ & 一个或多个 $A$：$A^{+}\equiv AA^{*}$ \\
+A? & 零个或一个 $A$：$A?\equiv A\,|\,\varepsilon$ \\
+{[a1 a2 \dots an]} & 字符任选其一：$\equiv a_1|a_2|\dots|a_n$ \\
+{[a-z]} & 范围（Range）：$\equiv$ \texttt{'a'|'b'|\dots|'z'} \\
+{[\^{}a-z]} & 排除范围（补集 complement）：不在 \texttt{a-z} 中的字符 \\
+\^{} & 匹配\textbf{行首}（左端）\\
+\$ & 匹配\textbf{行尾}（右端）\\
+\bottomrule
+\end{longtable}
+
+\noindent 例：\texttt{\^{}[\^{}aeiou]*\$} 匹配\textbf{一整行都不含小写元音字母（vowel）}的行。\pg{27}
+\textbf{注意}：\texttt{\^{}} 在 \texttt{[\^{}\dots]} 内表示"排除"，在方括号外表示"行首"，需\emph{看上下文区分}。
+
+\begin{defbox}[标识符的标准 RE \pg{27}]
+\begin{align*}
+\texttt{letter} &= \texttt{[A-Za-z]}\\
+\texttt{digit}  &= \texttt{[0-9]}\\
+\texttt{identifier} &= \texttt{letter (letter | digit)*}
+\end{align*}
+即"\textbf{字母开头，后跟任意多个字母或数字}"——与第 21 页的 $L(L\cup D)^{*}$ 完全一致。
+\end{defbox}
+
+% ============================================================
+\section{正则表达式实例与等价（第 28--34 页）}
+% ============================================================
+
+\subsection{RE 例子表 \pg{31}}
+\begin{longtable}{>{\ttfamily}l p{9.5cm}}
+\toprule
+\normalfont\textbf{正则表达式} & \textbf{说明} \\
+\midrule
+a* & 0 个或多个 a（$\varepsilon$, a, aa, aaa, \dots）\\
+a+ & 1 个或多个 a（a, aa, aaa, \dots）\\
+(a|b)(a|b) & \{aa, ab, ba, bb\} \\
+(a|b)* & 所有由 a、b 组成的串（含 $\varepsilon$）\\
+(aa|ab|ba|bb)* & 所有\textbf{偶数长度}的 a/b 串 \\
+{[a-zA-Z]} & "a|b|\dots|z|A|\dots|Z" 的简写 \\
+{[0-9]} & "0|1|\dots|9" 的简写 \\
+0([0-9])*0 & 以 0 开头、以 0 结尾的数字串 \\
+1*(0|$\varepsilon$)1* & \textbf{至多含一个} 0 的二进制串 \\
+(0|1)*00(0|1)* & 含子串 "00" 的所有二进制串 \\
+\bottomrule
+\end{longtable}
+
+\subsection{同一语言可有不同 RE \pg{31,32}}
+\begin{warnbox}[Quiz：$(a^{*}b^{*})$ 与 $(ab)^{*}$ 等价吗？$(a|b)^{*}$ 与 $(a^{*}b^{*})^{*}$ 等价吗？]
+\textbf{第一问：不等价}。$(ab)^{*}=\{\varepsilon,ab,abab,\dots\}$ 只含 \texttt{ab} 重复；
+而 $a^{*}b^{*}=\{\varepsilon,a,b,aa,ab,abb,aab,\dots\}$ 是"若干 a 后跟若干 b"，范围大得多（如 \texttt{aa} 在后者不在前者）。\\
+\textbf{第二问：等价}，都等于 $\{a,b\}^{*}$（见下方推导）。
+\end{warnbox}
+
+\textbf{推导 \pg{32}}：
+\begin{align*}
+(a|b)^{*} &= (\{a\}\cup\{b\})^{*} = \{a,b\}^{*} = \{\varepsilon,a,b,aa,ab,ba,bb,\dots\}\\
+(a^{*}b^{*})^{*} &= (L(a^{*})L(b^{*}))^{*} = (\{\varepsilon,a,aa,\dots\}\{\varepsilon,b,bb,\dots\})^{*}\\
+&= \{\varepsilon,a,b,aa,ab,bb,\dots\}^{*} = \{a,b\}^{*}
+\end{align*}
+两者得到的都是"a 和 b 的任意组合"，故\textbf{等价}。
+
+\subsection{典型 token 的 RE \pg{33}}
+\begin{itemize}
+  \item \texttt{letter = [A-Za-z]}，\quad \texttt{digit = [0-9]}
+  \item \textbf{关键字}：\texttt{'if' | 'else' | 'then' | 'for'}（把字符逐个连接：\texttt{'i''f'} 等）
+  \item \textbf{无符号整数}：\texttt{digit digit*}（即 \texttt{digit+}）
+  \item \textbf{空白}：\texttt{' ' | '\textbackslash n' | '\textbackslash t'} 的非空序列
+\end{itemize}
+
+\subsection{编程语言中的 RE 简写 \pg{34}}
+\begin{longtable}{>{\ttfamily}l p{10cm}}
+\toprule
+\normalfont\textbf{符号} & \textbf{含义} \\
+\midrule
+\textbackslash d & 任意数字 \texttt{[0-9]} \\
+\textbackslash D & 任意非数字 \texttt{[\^{}0-9]} \\
+\textbackslash s & 任意空白字符 \texttt{[\textbackslash t\textbackslash n\textbackslash r\textbackslash f\textbackslash v]} \\
+\textbackslash S & 任意非空白字符 \\
+\textbackslash w & 任意字母数字或下划线 \texttt{[a-zA-Z0-9\_]} \\
+\textbackslash W & 任意非（字母数字下划线） \\
+. & 任意字符 \\
+\textbackslash. & 匹配真正的句点 "." \\
+{[a-f]} / {[\^{}a-f]} & 字符范围 / 排除范围 \\
+\^{} / \$ & 匹配串首 / 串尾 \\
+(\dots) & 捕获组（capture matches）\\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+\section{语言的词法规范算法与二义性（第 35--36 页）}
+% ============================================================
+
+\subsection{把 RE 用于分词的算法 S0--S4 \pg{35}}
+\begin{defbox}[语言的词法规范算法（Lexical Specification）]
+\begin{description}[leftmargin=2.6em,style=nextline,itemsep=1pt]
+  \item[S0] 为\emph{每个} token 类别写一个 RE，例如：\\
+    \texttt{Numbers = digit+}\quad
+    \texttt{Keywords = 'if'|'else'|\dots}\quad
+    \texttt{Identifiers = letter(letter|digit)*}
+  \item[S1] 构造总 RE：\;$R = R_1 + R_2 + R_3 + \cdots$（把各类 token 的 RE 用并合起来）。
+  \item[S2] 设输入为 $x_1\dots x_n$，对 $1\le i\le n$，检查前缀 $x_1\dots x_i \in L(R)$？
+  \item[S3] 若成功，则知道 $x_1\dots x_i \in L(R_j)$（属于某个具体类别 $j$）。
+  \item[S4] 把 $x_1\dots x_i$ 从输入中\textbf{移除}，回到 S2 继续切下一个 token。
+\end{description}
+\end{defbox}
+\textbf{核心思想}：从左到右，不断找"能匹配某类 token 的前缀"，切下、归类、再继续。
+
+\subsection{二义性与消解规则 \pg{36}}\label{sec:amb}
+\begin{warnbox}[二义性（Ambiguity）：一个串可能匹配多个 RE]
+当一个字符串能被\emph{多个}正则表达式匹配时，语言定义必须给出\textbf{消歧规则}：
+\begin{enumerate}
+  \item \textbf{关键字优先（keyword preferred）}：当某串既可看作标识符又是关键字时，\emph{优先当关键字}（如 \texttt{while}）。
+  \item \textbf{最长匹配（Maximal Match）}：总是选\emph{能匹配的最长}的 token。
+  \item \textbf{顺序规则（rule of thumb）}：若仍冲突，选\emph{列在最前面}的那条规则。
+  \item \textbf{都不匹配}：若 $x_1\dots x_i \notin L(R)$，则\textbf{报错（Error）}。
+\end{enumerate}
+\end{warnbox}
+\textbf{例 \pg{36}}：\texttt{if (a == 3.14)} 中的 \texttt{==}，因\textbf{最长匹配}规则\emph{总是先被识别为 \texttt{'=='}}，
+而不会被切成两个 \texttt{'='}。
+
+% ============================================================
+\section{总结与练习（第 37--43 页）}
+% ============================================================
+
+\subsection{本讲总结 \pg{37,38}}
+\begin{itemize}
+  \item \textbf{概念}：Token \& Lexeme；Alphabet \& String \& Language。
+  \item 用\textbf{正则表达式}为词法分析\emph{指定}（specify）token。
+  \item 学会\textbf{构建}正则表达式（原子 + 复合 + 优先级 + 常用记号）。
+  \item \textbf{关键认识}：RE \emph{只是语言规范}，还需要\textbf{实现}——
+        \emph{下一讲用有限自动机（Finite Automata）构造 token 识别器}（RE$\to$NFA$\to$DFA$\to$表驱动，可\textbf{自动生成}）。
+\end{itemize}
+
+\subsection{重点习题 \pg{39--42}}
+\begin{itemize}
+  \item \texttt{if i == 0} 的 token 序列：\;\texttt{<keyword,'if'><id,'i'><op,'=='><num,'0'>}。\pg{39}
+  \item RE 与 FA 的分工：\textbf{RE 指定 token 模式；FA 实现 token 识别器}。\pg{39}
+  \item $(x|y)(x|y)$ 表示 $\{xx,xy,yx,yy\}$。\pg{39}
+  \item $(0|1)^{*}0(0|1)^{*}0(0|1)^{*}$ 表示\textbf{至少含两个 0}的二进制串。\pg{39}
+  \item 哪些是词素（Lexeme）？\;标识符、常量、关键字——\textbf{全部都是}。\pg{40}
+  \item RE \texttt{a|b} 表示集合 $\{a,b\}$。\pg{41}
+  \item 含子串 \texttt{aba}：\;$(a|b)^{*}aba(a|b)^{*}$。\pg{42}
+  \item $\{a,b\}$ 上所有\textbf{偶数长度}串：\;$(aa|ab|ba|bb)^{*}$。\pg{42}
+  \item \textbf{不含}子串 \texttt{abb} 的 a/b 串：\;$b^{*}(a|ab)^{*}$。\pg{42}
+\end{itemize}
+
+\begin{notebox}[进一步阅读（龙书 Dragon Book）\pg{43}]
+\textbf{精读}：1.1、1.2、1.6 节；2.6 与 3.1--3.2（扫描器导论）；3.3（正则表达式与正则定义）。\\
+\textbf{略读}：1.3--1.5；3.4--3.5、3.8（扫描器生成器）。
+\end{notebox}
+
+\begin{notebox}[考点速记]
+\begin{itemize}
+  \item \textbf{Token=(类别,词素)}；词素是具体字符，token 是抽象分类。
+  \item \textbf{三大基础}：字母表（有限符号集）、串（有穷序列）、语言（可数串集）。
+  \item \textbf{三大运算}：并 $A|B$、连接 $AB$、闭包 $A^{*}$（含 $\varepsilon$）/ 正闭包 $A^{+}$（不含 $\varepsilon$）。
+  \item \textbf{优先级}：$()>{*}>$ 连接 $>|$。
+  \item \textbf{标识符} $=$ \texttt{letter(letter|digit)*} $=L(L\cup D)^{*}$。
+  \item \textbf{消歧三规则}：关键字优先、最长匹配、顺序优先；都不中则报错。
+  \item \textbf{$\varnothing\neq\{\varepsilon\}$}：空集无元素；$\{\varepsilon\}$ 有一个空串。
+  \item \textbf{RE 只是规范，识别靠 FA}（下一讲）。
+\end{itemize}
+\end{notebox}
+
+\end{document}

@@ -1,0 +1,174 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture1\nLexical Analysis: Intro & Regular Expressions\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "The Starting Point\n2\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generation\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nCharacter Stream\n(Source Code)\nsyntax  tree\nCode Optimizer\nTarget Machine Code\n（executable）\nFront End\nBack End\n"
+  },
+  {
+    "page": 3,
+    "text": "The Starting Point\n3\n(keyword, while)\n(id, y)\n(sym, <)\n(id, z)\n(id, x)\n(id, a)\n(sym, +)\n(id, b)\n(sym, ;)\n(id, y)\n(sym, +=)\n(id, x)\n(sym, ;)\nwhile (y<z){\n    int x = a + b;\n    y += x;\n}\nHOW?\nLexical Analysis：\n"
+  },
+  {
+    "page": 4,
+    "text": "• Lexical Analysis is the process of identifying the substrings (called \nlexeme[词素]) and generating tokens[词] by identifying token class.\n• Task: Reading the source program as a string of characters and diving \nit up into tokens.\n• Step\n1.\nRemove comments: /* simple example */\n2.\nIdentify substrings: ‘while’  ‘(’  ‘i’  ‘==’  ‘j’…...\n3.\nIdentify token classes: (keyword, ‘while’), (Lpar, ‘(’), (id, ‘i’), (Rpar, ‘)’)……\nWhat is Lexical Analysis?\n4\n/* simple example */\nwhile (i<z)\n   i++;\n"
+  },
+  {
+    "page": 5,
+    "text": "• Example\nWhat is Lexical Analysis[词法分析]?\n5\nw\nh\ni\nl\ne\n(\ni\n<\nz\n)\n\\\nn\n\\\nt\ni\n+\n+\n;\nw\nh\ni\nl\ne\n(\ni\n<\nz\n)\n\\\nn\n\\\nt\ni\n+\n+\n;\nw\nh\ni\nl\ne\n(\ni\n<\nz\n)\n\\\nn\n\\\nt\ni\n+\n+\n;\n（keyword, ‘while’）\nw\nh\ni\nl\ne\n(\ni\n<\nz\n)\n\\\nn\n\\\nt\ni\n+\n+\n;\n‘while’\nToken class\nKeep  scanning…\n/* simple example */\nwhile (i<z)\n   i++;\n"
+  },
+  {
+    "page": 6,
+    "text": "Lexical Analysis[词法分析]\n6\nLanguage \nSpecification\nToken\nRegular \nExpression\nNFA\nDFA\nTable-Driven \nImplementation\nPattern\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nExpress\nMatch\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nTranslation\nTranslation\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\nLexeme\nAbstract\nInstance\nSpecify\nFrom Specification to Implementation\n"
+  },
+  {
+    "page": 7,
+    "text": "Content\n7\nFrom Specification to Implementation\nLanguage \nSpecification\nToken\nRegular \nExpression\nPattern\nLexical\nAnalyzer\nToken\nExpress\nMatch\n（Class, Lexeme）\nSource code\nConsist\nLexeme\nAbstract\nInstance\nSpecify\nImpl.\n"
+  },
+  {
+    "page": 8,
+    "text": "• Token[词法单元/词]: a “word” in language (smallest unit with meaning) \n◆A token is a pair consisting of a token name and an optional attribute value.\n◆A token is a tuple (class, lexeme)\n◆The token name (i.e., class) is an abstract symbol representing a kind of \nlexical unit[词法单位], e.g., a particular keyword, or a sequence of input \ncharacters denoting an identifier.  \n• Lexeme[词素]: A lexeme is a sequence of characters in the source \nprogram that matches the pattern for a token and is identified by \nthe lexical analyzer as an instance of that token[词法单元的一个实例]\nToken & Lexeme [词法单元&词素]\n8\n"
+  },
+  {
+    "page": 9,
+    "text": "⚫Numbers: a non-empty string of consecutive digits\n⚫Keyword: a fixed set of reserved words (“for”, “if”, “else”, …)\n⚫Whitespace: a non-empty sequence of blanks, tabs, newlines\n⚫Identifier: user-defined name of an entity to identify\nThe Categories of Tokens\n9\n"
+  },
+  {
+    "page": 10,
+    "text": "• Which of the following names are NOT accepted by Java?\n• In terms of JAVA coding convention, which of the above is \nGOOD coding practice?\nQuiz\n10\nA. int 1var = 0; \nB. int _var = 0;\nC. int $var = 0;\nD. int main = 0;\nE. int while = 0;\n"
+  },
+  {
+    "page": 11,
+    "text": "• Lexical analysis is also called Tokenization (or Scanner)[词法分析也称\n为扫描器]\n◆Partition input string into a sequence of tokens.\n◆Classify each token according to its role (token class), by matching patterns\n◆Pass tokens to syntax analyzer (also called Parser) [语法分析器]\nParser relies on token classes to identify roles (e.g., a keyword is treated \ndifferently than an identifier)\nThe Role of Lexical Analysis\n11\nsource \ncode\nLexical\nAnalyzer\nParser\ntoken\ngetNextToken\nSymbol Table\nto semantic\nanalysis\na=3.14\n<id, ‘a’>\n<op, ‘=’>\n<number, ‘3.14’>\n"
+  },
+  {
+    "page": 12,
+    "text": "• Define a finite set of token classes [定义词法单元的类别]\n◆Describe all items of interest\n◆keyword, identifier, whitespace…\n◆Depends on both the language and the design of parser \n• Determine which string belongs to which token class[识别字符串\n属于哪个类别]\nLexical Analysis: Design\n12\nif (a == 3.14)\n    stmt1;\nelse\n    stmt2;\nShould identify ‘=’ or ‘==’\nkeyword or identifier?\n"
+  },
+  {
+    "page": 13,
+    "text": "• An implementation must do two things\n◆Recognize the token class that the substring belongs to[识别分类]\n◆Return the value or lexeme.\n• The lexer usually strips out comments and whitespace (e.g., blank, \nnewline,  tab, etc.)[丢弃无意义词]\n• If token classes are non-ambiguous, tokens can be recognized in a \nsingle left-to-right scan of the input string. \n• Problem can occur when classes are ambiguous[二义性]\nLexical Analysis: Implementation\n13\n"
+  },
+  {
+    "page": 14,
+    "text": "• C++: Nested template declarations\nvector<vector<int>> myVector\n• Ambiguity\n◆vector<vector<int>>\n◆cin >> var \nChallenges in Scanning\n14\nTemplate syntax ? \nStream syntax ?\nOperator?\nQ: Is ‘>>’ a stream operator or two consecutive brackets?\n◆(vector  <   (vector  <  (int   >>   myVector))) \n◆vector   <  vector   <  int   >>   myVector\n"
+  },
+  {
+    "page": 15,
+    "text": "• “look ahead” may be required to resolve ambiguity[消除歧义]\n◆Extracting some tokens requires looking at the larger context or structure\n◆Structure emerges only at the parsing stage with the parse tree\n◆vector<vector<int>>\n◆Hence, sometimes feedback from the parser[语法解析器] is needed for lexing\nThis complicates the design of lexical analysis\nShould minimize the amount of looking ahead\n• Usually, tokens do not overlap[通常无重叠]\n◆Tokenizing can be done in one pass without parser feedback\n◆Clean division between lexical and syntax analyses\nLook Ahead[展望]\n15\n"
+  },
+  {
+    "page": 16,
+    "text": "• Identifying token class: which set of strings belong to which \ntoken class?\n◆Question: How to describe string patterns? [模式] \n◆Use regular expressions[正则表达式] to define token class.\nToken Specification[定义]\nexpressing\nlexemes\nTokens\npatterns\nRegular expressions\ninstance of\nabstract form\ndescribing the forms\n16\n• Regular Expression is a good way to specify tokens.\n◆Simple yet effective \n◆Tokenizer[分词器] implementation can be generated automatically from \nspecification (using a translation tool)\nspecify\n"
+  },
+  {
+    "page": 17,
+    "text": "• Alphabet ∑[字母表]: A finite set of symbols.\n◆Symbol: letter, digit, punctuation, … \n◆Example: {0, 1}, {a, b, c}, ASCII, …\n• String[串]: A string over an alphabet is a finite sequence of symbols \ndrawn from that alphabet. [字母表中符号的有穷序列]\n◆Example: abc (length: |abc|=3), ε (empty string, length: |ε|= 0)\n• Language[语言]: Any countable set of strings over some fixed \nalphabet. [某个给定字母表上一个任意的可数的串集合]\n◆∑ = {a, b}, then {}, {ab, ba}, {a, aa, aaaa, …} are all languages over ∑ \n◆An empty set[空集] ( = {} ) is a language\n◆The set containing only an empty string ( {ε} ) is also a language. \nand {ε} are not equal\nLanguage: Definition\n17\n"
+  },
+  {
+    "page": 18,
+    "text": "• Examples:\n◆Alphabet Σ = (set of) English characters\nLanguage L = (set of) English sentences\n◆Alphabet Σ = (set of) Digits, +, -\nLanguage L = (set of) Integer numbers\n• Languages are subsets of all possible strings\n◆Not all strings of English characters are (valid) sentences\nE.g., aaa bbb ccc\n◆Not all sequences of digits and signs are valid integers\nE.g., 125+, 1-25\nLanguage: Example\n18\n"
+  },
+  {
+    "page": 19,
+    "text": "• Union[并]: similar operation on sets, i.e., 𝐴∪𝐵, denoted as A | B\n• Concatenation[连接]: all strings formed by taking a string from the \nfirst language and a string from the second language in all \npossible ways, denoted as 𝑨𝑩\n• Closure[闭包]: the (Kleene) closure of a language 𝐿is the set of \nstrings by concatenating 𝐿zero or more times, denoted as L*, \n◆𝐿0 = {ε}, 𝐿i = 𝐿i−1𝐿;\n◆𝐿∗= 𝐿0 ∪𝐿1 ∪𝐿2 ∪𝐿3 ∪…\n◆𝐿+ = 𝐿1 ∪𝐿2 ∪𝐿3 ∪…(the positive closure[正闭包], Kleene closure \nwithout 𝐿0. That is, ε will not be in 𝐿+ unless it is in 𝐿itself.)\n◆𝐿+ = 𝐿𝐿∗\nLanguage: Operations[语言运算]\n19\n"
+  },
+  {
+    "page": 20,
+    "text": "• Language:  L = {a, b}, D = {0, 1}\n• L∪D = {a, b} ∪{0, 1} = {a, b, 0, 1}\n• LD =  {a, b}{0, 1} = {a0, b0, a1, b1} \n• 𝑳𝟑= {a, b}3 = {a, b}{a, b}{a, b} = {aaa, aab, aba, abb, baa, bab, bba, bbb}\n• 𝑳∗= ڂ𝑖=0\n∞𝐿𝑖= 𝐿0 ∪𝐿1 ∪𝐿2 ∪𝐿3∪…  \n= {ε} ∪{a, b} ∪{a, b}2 ∪{a, b}3…  \n= {ε, a, b, aa, ab, ba, bb, aaa, aab, aba, abb, baa, …}\n• 𝑳+ = ڂ𝑖=1\n∞𝐿𝑖=   \n= {a, b} ∪{a, b}2 ∪{a, b}3…  \n= {a, b, aa, ab, ba, bb, aaa, aab, aba, abb, baa, …}\nExample\n20\nQuiz\n"
+  },
+  {
+    "page": 21,
+    "text": "• L = {A, B, …, Z, a, b, …, z}, D = {0, 1, …, 9}\n◆L and D are languages whose strings happen to be of length one\n◆Some other languages that can be constructed from L and D are:\n• L ∪D: the set of letters and digits, i.e., language with 62 strings of length one\n• LD: the set of 520 strings of length two, each is one letter followed by one digit\n• L4: the set of all 4-letter strings\n• L*: the set of all strings of letters, including ε, the empty string\n• D+: the set of all strings of one or more digits\n• L(L ∪D)*: the set of all strings of letters and digits beginning with a letter\nExample Cont.\n21\nQuiz\n"
+  },
+  {
+    "page": 22,
+    "text": "• Regular expressions [正则表达式] are to describe all languages that can be \nbuilt from the operators applied to the symbols of some alphabet.\n• Regular Expression is a simple notation\n◆Can express simple patterns (e.g., repeating sequences)\n◆Not powerful enough to express English (or even C)\n◆But powerful enough to express tokens (e.g., identifiers)\n• Function: Represent patterns of strings of characters[描述字符串的模式]\n• Languages that can be expressed using regular expressions are called \nRegular Languages [正则语言]. More complex languages need more \ncomplex notations.\nRegular Expressions & Languages\n22\n"
+  },
+  {
+    "page": 23,
+    "text": "• The regular expressions are built recursively out of smaller regular \nexpressions. \n• Each regular expression r denotes a language L(r)\n◆defined recursively from the languages denoted by r's subexpressions.\n• Atomic[原子] Regular Expressions\n◆Smallest RE that cannot be broken down further\n◆The symbol ε is a regular expression matches the empty string.\nL(ε) = {“”}\n◆For any symbol a, the symbol a is a regular expression that just matches a.\nL(a) = {“a”}\n◆Empty set is φ, not the same as ε\nsize(φ) = 0; size(L(ε)) = 1; length(ε) = 0;\nBuild Regular Expressions[构建正则表达式]\n23\n"
+  },
+  {
+    "page": 24,
+    "text": "Build Regular Expressions[构建正则表达式]\n24\n• Compound Regular Expressions[复合正则表达式]\n◆Large REs built from smaller ones\n• Suppose r and s are REs denoting languages L(r) and L(s) \n◆(r) is a RE denoting the language L(r) \nthis says that we can add additional pairs of parentheses[小括号] around \nexpressions without changing the language they denote.\n◆(r)|(s) is a RE denoting the language L(r) ∪L(s)\n◆(r)(s) is a RE denoting the language L(r)L(s)\n◆(r)* is a RE denoting the language (L(r))*\n• REs often contain unnecessary (), which could be dropped\n◆(A) ≡ A: A is a RE\n◆(a)|((b)*(c)) ≡ a | b*c\n"
+  },
+  {
+    "page": 25,
+    "text": "• Regular expression operator precedence is\n(A)\nA*\nA B\nA | B\nSo ab*c|d is parsed as ((a(b*))c)|d\na(b*)c|d\n(a(b*))c|d\n((a(b*))c)|d\nOperator Precedence[运算符优先级]\n25\n"
+  },
+  {
+    "page": 26,
+    "text": "• One or more instances: 𝐴+ ≡𝐴𝐴∗\n• Zero or one instance: 𝐴? ≡𝐴| 𝜀\n• Characters: [𝑎1𝑎2 … 𝑎𝑛] ≡ 𝑎1 | 𝑎2 |…| 𝑎𝑛\n⚫Range: [a-z] ≡‘a’ | ‘b’ | … | ‘z’ \nCommon REs[常用表达]\n26\n"
+  },
+  {
+    "page": 27,
+    "text": "⚫Excluded range: complement[补集] of [a-z] ≡ [^a-z]\n⚫Symbol ^ is also used to match the left end of a line. Symbol $ matches the \nright end of a line.\nE.g., ^[^aeiou]*$ matches any complete line not containing a lower-case vowel[元音]\n⚫The context will make the meaning of ^ clear.\n• Identifier: strings of letters or digits, starting with a letter\nletter = ‘A’ | … | ‘Z’ | ‘a’ | … | ‘z’ or,\nletter = [A-Za-z]\ndigit = [0-9]\nidentifier = letter (letter | digit) *\nCommon REs[常用表达] Cont.\n27\n"
+  },
+  {
+    "page": 28,
+    "text": "Revisit\n28\nFrom Specification to Implementation\nLanguage \nSpecification\nToken\nRegular \nExpression\nPattern\nLexical\nAnalyzer\nToken\nExpress\nMatch\n（Class, Lexeme）\nSource code\nConsist\nLexeme\nAbstract\nInstance\nSpecify\nImpl.\n"
+  },
+  {
+    "page": 29,
+    "text": "⚫What is lexical analysis?\n⚫Scan the substrings and generate tokens that match the language pattern\n⚫Token: the smallest unit in language -- (class, lexeme)\n⚫Class: numbers, keyword, whitespace, identifier...\n⚫Language: any countable set of strings over some fixed alphabet\n⚫Alphabet ∑[字母表]: A finite set of symbols\n⚫Example: {0, 1}, {a, b, c}\n⚫String[串]: a finite sequence of symbols\n⚫Example: abc (length: |abc|=3), ε (empty string, length: |ε|= 0)\n⚫Union[并] (𝐴|𝐵), Concatenation[连接] (𝐴𝐵), Closure[闭包] (Kleene 𝐴∗and Positive 𝐴+)\nRevisit\n29\n"
+  },
+  {
+    "page": 30,
+    "text": "⚫How to build machine processable languages?\n⚫Follow certain pattern\n⚫Regular Expression is a good way to describe computer languages\n⚫(r): L(r),   (r)|(s): L(r)∪L(s),   (r)(s): L(r)∪L(s),   (r)*: (L(r))*\n⚫Common REs:\n• One or more instances: 𝐴+ ≡𝐴𝐴∗\n• Zero or one instance: 𝐴? ≡𝐴| 𝜀\n• Characters: [𝑎1𝑎2 … 𝑎𝑛] ≡ 𝑎1 | 𝑎2 |…| 𝑎𝑛\n⚫Range: [a-z] ≡‘a’ | ‘b’ | … | ‘z’ \n⚫Complement[补集] of [a-z]: [^a-z]\n⚫Letter: [A-Za-z]\n⚫Digit: [0-9]\n⚫Identifier: letter (letter | digit)*\nRevisit\n30\n"
+  },
+  {
+    "page": 31,
+    "text": "RE Examples\n31\nRegular Expression\nExplanation\na*\n0 or more a’s (ε, a, aa, aaa, aaaa, …)\na+\n1 or more a’s (a, aa, aaa, aaaa, …)\n(a | b)(a | b)\n(aa, ab, ba, bb)\n(a | b)*\nall strings of a’s and b’s (including ε)\n(aa | ab | ba | bb)*\nall strings of a’s and b’s of even length\n[a-zA-Z]\nshorthand for “a|b|…z|A|B|…|Z”\n[0-9]\nshorthand for “0|1|2|…|9”\n0([0-9])*0\nStrings of numbers that start and end with 0\n1*(0|ε)1*\nbinary strings that contain at most one zero\n(0|1)*00(0|1)*\nall binary strings that contain ‘00’ as substring\nQ : are (a*b*) and (ab)* equivalent?\nQ : are (a|b)* and (a*b*)* equivalent?\nQuiz\nQuiz\n"
+  },
+  {
+    "page": 32,
+    "text": "• (a|b)* = ?\n(L(a|b))* = (L(a) ∪L(b))* = ({a} ∪{b})* = {a, b}*\n= {a, b} 0 ∪{a, b} 1 ∪{a, b} 2 ∪…\n= {ε, a, b, aa, ab, ba, bb, aaa, …}\n• (a*b*)* = ?\n(L(a*b*))* = (L(a*)L(b*))*\n= L({ε, a, aa, …}{ε, b, bb, …})*\n= L({ε, a, b, aa, ab, bb, …})*\n= ε ∪{ε, a, b, aa, ab, bb, …} 1 ∪{ε, a, b, aa, ab, bb, …} 2\n∪{ε, a, b, aa, ab, bb, …} 3 ∪…\nDifferent REs of the Same Language\n32\nRE           Language\n(r)|(s)     L(r) ∪ L(s)\n(r)(s)       L(r)L(s)\n(r)*         (L(r))*\n"
+  },
+  {
+    "page": 33,
+    "text": "• Typical regular expression for tokens, let \n◆RE:\nletter = [A-Za-z]\n◆RE:\ndigit = [0-9]\n• Keywords: ‘if’, ‘else’, ‘then’, ‘for’\n◆RE:\n‘i’ ’f’ | ‘e’ ’l’ ’s’ ’e’ | … = ‘if’ | ‘else’ | ‘then’ | …\n• Unsigned Integer: digit digit*\n• Whitespace: a non-empty sequence of blanks, newline and tabs\n◆‘ ’ | ‘\\n’ | ‘\\t’\nMore Example\n33\n"
+  },
+  {
+    "page": 34,
+    "text": "REs in Programming Language\n34\nSymbol\nMeaning\n\\d\nAny decimal digit, i.e. [0-9]\n\\D\nAny non-digit char, i.e., [^0-9]\n\\s\nAny whitespace char, i.e., [\\t\\n\\r\\f\\v]\n\\S\nAny non-whitespace, i.e., [^\\t\\n\\r\\f\\v]\n\\w\nAny alphanumeric char or an underscore, i.e., [a-zA-Z0-9_]\n\\W\nAny char that not alphanumeric or underscore, i.e., [^a-zA-Z0-9_]\n.\nAny char\n\\.\nMatching “.”\n[a-f]\nChar range\n[^a-f]\nExclude range\n^\nMatching string start\n$\nMatching string end\n(…)\nCapture matches\nhttps://docs.python.org/3/howto/regex.html\n"
+  },
+  {
+    "page": 35,
+    "text": "• S0: write a regex for the lexemes of each token class\n◆Numbers = digit+\n◆Keywords = ‘if’ | ‘else’ | …\n◆Identifiers = letter(letter | digit)*\n• S1: construct R, matching all lexemes for all tokens\nR = numbers + keywords + identifiers + … = R1 + R2 + R3 + …\n• S2: let input be x1 … xn, for 1 ≤ i ≤ n, check x1 … xi ∈L(R)\n• S3: if successful, then we know x1 … xi ∈L(Rj) for some j\n• S4: remove x1 … xi from input and go to step S2\nLexical Specification of a Language\n35\n"
+  },
+  {
+    "page": 36,
+    "text": "• Some strings can be matched by different regular expressions\n• Language definition must give disambiguating rules\n◆When a string can be either an identifier or a keyword, keyword \ninterpretation is preferred[关键字优先识别]\n◆Always choose the longer token to match (Maximal match[最长匹配] )\n◆Rule of thumb: choose the one listed first[匹配顺序]\n◆if no rule matches?\nx1 … xi ⊄L(R)  →Error\nAmbiguity[二义性]\n36\nif (a == 3.14)\n    stmt1;\nelse\n    stmt2;\n‘==’ will always be identified first\ndue to the rule of Maximal match \n"
+  },
+  {
+    "page": 37,
+    "text": "• Concepts\n• Token & Lexeme\n• Alphabet & String & Language\n• Use Regular expressions to specify tokens for lexical analysis.\n• Build Regular Expressions.\n• Regular expression is only a language specification:\n◆An implementation is still needed\n◆Next: to construct a token recognizer for languages given by regular \nexpressions – by using finite automata.\nSummary\n37\n"
+  },
+  {
+    "page": 38,
+    "text": "Summary\n38\nLanguage \nSpecification\nToken\nRegular \nExpression\nNFA\nDFA\nTable-Driven \nImplementation\nPattern\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nExpress\nMatch\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nTranslation\nTranslation\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\nLexeme\nAbstract\nInstance\nSpecify\nFrom Specification to Implementation\nAutomatic\n"
+  },
+  {
+    "page": 39,
+    "text": "• lexical analysis of “if i == 0”? Write the token sequence.\n• <keyword, ‘if’>, <id, ‘i’ >, <op, ‘==’>, <num, ‘0’>\n• Usage of RE and FA in lexical analysis?\n• RE: specify the token pattern; FA: implement the token recognizer\n• Regular expression (x | y)(x | y) denotes the set\n• {xx, xy, yx, yy}  \n• The languages over the {0,1} described by (0|1)*0(0|1)*0(0|1)*\n• Strings with at least two 0’s\nExercise\n39\n"
+  },
+  {
+    "page": 40,
+    "text": "Exercise\n40\nQue.\nWhich of the following are Lexemes?\na.\nIdentifiers\nb.\nConstants\nc.\nKeywords\nd.\nAll of the mentioned\nAnswer: All of the mentioned\n"
+  },
+  {
+    "page": 41,
+    "text": "Exercise\n41\nQue.\nRegular expression a|b denotes the set\na.\n{a}\nb.\n{ε, a, b}\nc.\n{a, b}\nd.\n{a b}\nAnswer: {a, b}\n"
+  },
+  {
+    "page": 42,
+    "text": "• Write regular definitions for the following languages\n1.\nAll strings of a's and b's which contains the substring aba\n(a|b)*aba(a|b)*\n2.\nA language comprising all possible strings of even[偶数] length over the \nalphabet {a,b}\n(aa | ab| ba | bb)*\n3*.   All strings of a’s and b’s that DO NOT contain the substring abb\nb*(a | ab)*\nExercise\n42\nε\nbbb...\naaa...\na..ba..\n"
+  },
+  {
+    "page": 43,
+    "text": "• Dragon Book\n◆Comprehensive Reading: \nSection 1.1, 1.2, 1.6\nSection 2.6 and 3.1–3.2 for introduction to scanner. \nSection 3.3 for regular expressions and regular definitions. \n◆Skip Reading:\nSection 1.3, 1.4, 1.5\nSection 3.4–3.5 and 3.8 for scanner generator. \nFurther Reading\n43\n"
+  }
+]

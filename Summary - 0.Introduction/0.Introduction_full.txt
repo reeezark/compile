@@ -1,0 +1,1124 @@
+
+
+===== PAGE 1 =====
+赵帅
+计算机学院
+中山大学
+Introduction to 
+Compilation Principle
+
+
+===== PAGE 2 =====
+• 年级：
+u 大三年级学生、第二学期
+• 先修课程：
+u 计算机组成原理、汇编语言、数据结构、编程语言设计等
+• 理论课：
+u 核心问题：一个高级语言编写的程序，最后如何在计算机上运行？
+u 讲解编译原理中的核心理论与技术方法
+p 词法分析、语法分析、语义分析、代码生成、代码优化等
+• 实验课：
+u 独立课程、配合理论课协同进行
+u 应用编译原理中的技术方法
+p Java编程、语言处理、逆向工程工具等
+The Module[课程介绍]
+2
+
+
+===== PAGE 3 =====
+• 教育经历：
+u 2013.10 - 2018.08，硕&博，约克大学
+u 2008.09 – 2012.07，本科，西安工业大学
+• 工作经历：
+u 2022.09 - 至今，中山大学，副教授
+u 2018.10 - 2022.09，博士后，约克大学
+• 研究方向：嵌入式与实时系统，操作系统
+u 任务调度与分配
+u 系统资源管理
+u 软硬件协同设计
+u 安全关键编程
+• 课程：
+u 本科《编译原理》、《编译器构造实验》
+u 研究生《嵌入式系统》
+The Instructor[关于教师]
+3
+https://www.tiempo-secure.com/blog/
+https://en.wikipedia.org/wiki/Regulation_of_unmanned_aerial_vehicles
+https://ec.europa.eu/eurostat/web/products-eurostat-news/-/ddn-20171023-1
+https://web.uettaxila.edu.pk/cped/SwarmRoboticsLab.asp
+
+
+===== PAGE 4 =====
+The Instructor[关于教师]
+4
+赵帅
+研究方向及成果
+1
+智能安全攸关工业软件：自动驾驶/无人机/工业机器人/手术机器人系统、实时操作系统
+2
+安全攸关系统顶会RTSS 7 篇，DAC 6 篇、顶刊TC、TPDS、TCAD 等9篇，共发表论文60余篇
+3
+RTSS'25、RTSS'24 杰出论文， SIES'24、ICITES'24 最佳论文等 7 次最佳论文奖/提名
+4
+获得ACM SIGBED中国新星奖（全国3人）、约克大学海外研究生奖
+5
+入选教育部海外引才专项、广东省青年拔尖人才等项目
+教育和工作经历
+2022.09 - 至今
+中山大学，计算机学院
+副教授
+人工智能与机器人研究所
+2018.10 - 2022.09
+英国约克大学，计算机学院
+博士后
+导师：Iain Bate 教授
+2014.10 - 2018.10
+英国约克大学，计算机学院
+博士
+导师：Alan Burns 院士
+2013.10 - 2014.10
+英国约克大学，计算机学院
+硕士
+导师：Andy Wellings 教授
+项目经历
+1
+国家重点研发计划青年科学家项目，2024.11~2027.12，课题负责人
+2
+国家重点研发计划，2023.11~2026.10，子课题负责人
+3
+国家自然科学基金青年科学基金项目,  2024.01~2026.12，项目负责人
+4
+广东省基础与应用基础研究基金自然科学基金面上项目，2024.01~2026.12，项目负责人
+5
+CCF-华为胡杨林基金系统软件专项，2023.07~2024.06，项目负责人
+
+
+===== PAGE 5 =====
+• 常年招收硕/博士研究生（推荐大三暑假进组），也欢迎感兴趣的本科生加入
+u 研究招收方向：操作系统、CPU+GPU/NPU异构系统设计优化，无人车/无人机/机器人系统设
+计优化、端到端时延分析技术、安全攸关编程语言/模型设计等
+• 课题
+u  复杂实时系统设计与分析：《面向CPU+GPU/NPU的高性能实时系统关键技术》
+u  大模型驱动机器人/无人机控制：《大模型驱动的机器人/无人机控制技术及可靠性保障》
+u  大规模SoC设计：《面向多芯粒的差异化缓存一致性保障及设计优化》
+u  共同感兴趣的研究题目（如LLM-Driven 3D sense generation）
+• 竞赛
+u 全国大学生计算机系统能力大赛 — 操作系统设计赛 [组队中]
+u  “挑战杯” 大学生创业大赛 [组队中]
+• 往届竞赛
+u  2023年中国计算机学会（CCF）移动机器人抓取和导航挑战赛          全国一等奖 
+u  2023年全国大学生计算机系统能力大赛操作系统功能挑战赛            全国二、三等奖
+u  2024年粤港澳大湾区IT应用系统开发大赛
+             一等奖、技术创新先锋奖
+The Laboratory[关于实验室]
+5
+中国机器人及人工
+智能大赛(CRAIC)官
+方公众号
+
+
+===== PAGE 6 =====
+Teaching Assistants[助教]
+6
+26级硕士研究生
+苟睿哲
+26级硕士研究生
+ 罗宇烔
+26级硕士研究生
+姚凯文
+25级硕士研究生 
+林志扬（组长）
+25级硕士研究生
+聂湛尚（组长）
+25级硕士研究生
+ 程彤
+25级硕士研究生
+何松阳
+26级硕士研究生
+  丁海桐
+26级硕士研究生
+  談卓恒
+
+
+===== PAGE 7 =====
+• 任课教师
+u 计算机学院，人工智能与机器人研究所，D104C
+• 课程主页：
+u https://rtscompiler2026.github.io/dcs290/2026Spring/
+u 教材，资料
+u 作业，公告
+• 交流方式
+u 邮件：zhaosh56@mail.sysu.edu.cn
+u QQ群：1083702060（进群更改名称：学号+姓名）
+Contacts[联系方式]
+7
+
+
+===== PAGE 8 =====
+• 主要教材：
+u 《Compilers: Principles, Techniques, and Tools》, 第二版
+u   课程将覆盖章节1-6与附件A
+• 其他参考材料：
+u 《Modern compiler implementation in Java》
+u 《Advanced Compiler Design and Implementation》 
+u 《程序员的自我修养 – 链接、装载与库》等等
+Textbook & Materials[教材资料]
+8
+
+
+===== PAGE 9 =====
+• 理论课
+u排课：
+p 周一：第 1-9 周
+p 周三：第 1-17 周
+u时间：
+p 第  5  节：14:20 – 15:05
+p 第  6  节：15:15 – 16:00
+u地点：
+p 教学大楼东D302
+Module Time & Location[时间地点]
+9
+• 实验课
+u排课：
+p 周三：第 1-17 周
+u时间：
+p 第  7  节：16:30 – 17:15
+p 第  8  节：17:25 – 18:10
+u地点：
+p 北实验楼 B202
+
+
+===== PAGE 10 =====
+Schedule[进度安排]
+10
+周次
+课程内容
+周次
+课程内容
+第1周 (3.2 & 3.4)
+周一：课程介绍、周三：词法分析
+第10周 (5.6)
+周三：中间代码
+第2周 (3.9 & 3.11)
+周一：词法分析、周三：词法分析
+第11周 (5.13)
+周三：中间代码
+第3周 (3.16 & 3.18)
+周一：词法分析、周三：语法分析
+第12周 (5.20)
+周三：代码优化
+第4周 (3.23 & 3.25)
+周一：语法分析、周三：语法分析
+第13周 (5.27)
+周三：代码优化
+第5周 (3.30 & 4.1)
+周一：语法分析、周三：语法分析
+第14周 (6.3)
+周三：代码优化
+第6周 (4.6 & 4.8)
+周一：语法分析、周三：语法分析
+第15周 (6.10)
+周三：目标代码生成
+第7周 (4.13 & 4.15)
+周一：语法分析、周三：语义分析
+第16周 (6.17)
+周三：目标代码生成
+第8周 (4.20 & 4.22)
+周一：语义分析、周三：语义分析
+第17周 (6.24)
+周三：课程复习
+第9周 (4.27 & 4.29)
+周一：语义分析、周三：中间代码
+第18-19周
+考试周
+词法分析 (4)
+语法分析 (8)
+语义分析 (4)
+中间代码 (3)
+代码优化 (3)
+代码生成 (2)
+Subject to changes
+
+
+===== PAGE 11 =====
+• 学分与学时：
+u   理论课：3学分、54学时
+u   实验课：1学分、36学时
+• 理论课分数：
+u （40%）平时成绩
+u （60%）闭卷考试
+• 实验课分数：
+u （10%）实验一：使用Java实现一个所得税计算器
+u （25%）实验二：改进一个已有的语言处理程序
+u （30%）实验三：实现一个基于表达式的计算器
+u （35%）实验四：开发一个程序逆向工程工具
+Grading[成绩构成]
+11
+
+
+===== PAGE 12 =====
+What is a Compilation[什么是编译]
+12
+• 问题：大家写程序都用过什么语言？
+u 高级语言C、C++、Java、Python、Ruby等等
+u 系统工程师可以理解、使用这些语言
+u 专注于程序功能，不过多考虑计算机底层运行细节
+• 计算机理解这些高级编程语言吗？
+u 计算机只懂得机器语言，即二进制码
+u 不能直接理解并执行高级语言
+• 如何让计算机执行高级语言编写的程序？
+u 需要将高级语言翻译为机器码
+u 兼具查错功能、性能、移植性等
+while (y<z){
+    int x = a + b;
+    y += x;
+}
+HOW？
+   eb 06      jmp   L2
+   8b 55 f4   mov   edx, DWORD PTR [rbp-12]
+   8b 45 f0   mov   eax, DWORD PTR [rbp-16]
+   01 d0      add   eax, edx
+   89 45 ec   mov   DWORD PTR [rbp-20], eax
+L3:8b 45 ec   mov   eax, DWORD PTR [rbp-20]
+   01 45 fc   add   DWORD PTR [rbp-4], eax
+L2:8b 45 fc   mov   eax, DWORD PTR [rbp-4]
+   3b 45 f8   cmp   eax, DWORD PTR [rbp-8]
+   7c f2      jl    L3
+
+
+===== PAGE 13 =====
+What is a Compilation[什么是编译]
+13
+• 不同编程语言有不同的翻译方式
+u 编译：通常针对较为“底层”的语言
+p C、C++
+p 执行前全文翻译（Ahead of Time, AOT）
+u 解释：通常针对较更“上层”的语言
+p Python、Ruby
+p 边翻译边执行（During Execution）
+u 混合：编译 + 即时编译（Just-In-Time, JIT）
+p Java
+C/C++
+编译
+机器码
+Python/Ruby
+解释
+执行结果
+Java
+编译
+中间代码
+机器码
+JIT
+Bytecode (.class)
+Application
+Compiler / Libraries
+Operating system
+Instruction set (ISA)
+Computer System Organization
+Circuits (hardware functions)
+Semiconductor physics
+SOFTWARE
+COMPUTER
+ARCHITECTURE
+HARDWARE
+
+
+===== PAGE 14 =====
+l 编译：翻译成机器语言后方能运行 
+u 目标程序独立于源程序（修改→再编译→运行）
+u 分析程序上下文，易于整体性优化
+u 性能更好（因此核心代码通常为C/C++） 
+l 解释：源程序作为输入，边解释边执行 
+u 不生成目标程序，可迁移性高
+u 逐句执行，很难进行优化
+u 性能通常不会太好
+Interpret vs Compile[解释 vs. 编译] 
+14
+Interpreter
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+Quiz: Java是解释型还是编译型语言？
+
+
+===== PAGE 15 =====
+l 即时编译 (Just-In-Time Compiler)： 运行时执行程序编译操作 
+u 弥补解释执行的不足 
+p 把翻译过的机器代码保存起来，以备下次使用 
+u 传统编译 (AOT, Ahead-Of-Time)：先编译后运行 
+l JIT vs. AOT
+u JIT具备解释器的灵活性 
+p 只要有JIT编译器，代码即可运行 
+u 性能上基本和AOT等同 
+p 运行时编译操作带来一些性能上的损失 
+p 但可以利用程序运行特征进行动态优化 
+JIT[即时编译] 
+15
+
+
+===== PAGE 16 =====
+#include <stdio.h>
+int main( )
+{
+    printf(“Hello World!\n”);
+    return 0;
+}
+55
+48 89 e5
+Bf d0 05 40 00
+E8 d6 fe  ff   ff
+B8 00 00 00 00
+5d
+c3
+Compilation for C [C语言编译]
+16
+• 源程序（source.c）→ 可执行文件（a.out）
+u 预处理（preprocessing）
+p 汇合源程序，展开宏定义，生成.i文件 
+u 编译（compiling）
+p 将.i文件翻译为.s文件（汇编代码，assembly）
+u 汇编（assembling）
+p .s文件转换为.o文件（可重定位对象，machine code）
+u 连接（linking）
+p 连接库代码生成可执行文件（机器码，machine code ）
+$ gcc source.c –o a.out
+$ ./a.out
+
+
+===== PAGE 17 =====
+Compilation for C (Cont.)
+17
+• Preprocessing：源代码 (c code) → 展开后的代码 (c code)
+• Compiling：展开后的代码 (c code) → 汇编代码 (assembly)
+• Assembling：汇编代码 (assembly) → 目标/机器码文件 (machine code)
+• Linking：目标/机器码文件 (machine code) → 可执行文件
+
+
+===== PAGE 18 =====
+Why Compiler [为什么学编译原理]
+18
+• 为了更好的编程？
+u 有助于产出高质量代码
+u 大部分编程工作并不需要编译器知识
+• 找到好工作？
+u 编译器研究员（华为）、游戏编译器工程师（腾讯）、编译器优化工程
+师（英特尔）等等
+u 大部分计算机相关工作并不要求编译器背景
+• 包含计算机学科的主要设计理念:抽象，自顶 (底) 向下 (上) 等
+• 提供理论方法与实践应用的深度结合
+
+
+===== PAGE 19 =====
+Overview of Compiler [编译结构总览]
+19
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generation
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+Character Stream
+(Source Code)
+syntax  tree
+Code Optimizer
+Target-Machine  Code
+（executable）
+Front End
+Back End
+
+
+===== PAGE 20 =====
+• 前端 (for Analysis)：对源程序，识别语法结构
+信息，理解语义信息，反馈出错信息
+u 词法分析（Lexical Analysis）
+u 语法分析（Syntax Analysis） 
+u 语义分析（Semantic Analysis）
+• 后端 (for Synthesis)：综合分析结果，生成语
+义上等价于源程序的目标程序
+u 中间代码生成（Intermediate Code Generation） 
+p Intermediate Representation (IR)
+u 代码优化（Code Optimizer）
+u 目标代码生成（Code Generation）
+p Target Machine Code
+Compilation Procedure[编译过程]
+20
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+Front End
+Back End
+syntax  tree
+Code Optimizer
+Target Machine Code
+
+
+===== PAGE 21 =====
+• 扫描源程序字符流，识别并分解出有词法意义的
+单词或符号（token）
+u 输入：源程序；输出：token序列
+u token表示：（类别，属性值）
+p 关键字、标识符、常量、运算符等
+u token是否符合词法规则？
+p 0var, $num
+Lexical Analysis[词法分析]
+21
+(keyword, while)
+(id, y)
+(sym, <)
+(id, z)
+(id, x)
+(id, a)
+(sym, +)
+(id, b)
+(sym, ;)
+(id, y)
+(sym, +=)
+(id, x)
+(sym, ;)
+while (y<z){
+    int x = a + b;
+    y += x;
+}
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+Token Stream
+Source Code
+
+
+===== PAGE 22 =====
+Lexical Analysis[词法分析]
+22
+Language 
+Specification
+Token
+Regular 
+Expression
+NFA
+DFA
+Table-Driven 
+Implementation
+Pattern
+Lexical
+Analyzer
+Token
+Partition
+Algorithm
+One of
+Express
+Match
+Thompson
+Algorithm
+Subset-
+Construction
+Algorithm
+Translation
+Translation
+Impl.
+（Class, Lexeme）
+Minimizing
+Source code
+Consist
+Lexeme
+Abstract
+Instance
+Specify
+
+
+===== PAGE 23 =====
+l 解析源程序对应的token序列，生成语法分
+析结构（syntax tree, 语法分析树）
+u 输入：单词流；输出：语法树
+u 输入程序是否符合语法规则？
+p x*+
+p a += 5;
+Syntax Analysis[语法分析]
+23
+while
+<
+body
+=
+x
++
+a
+z
+=
+y
++
+y
+x
+y
+b
+Abstract Syntax Tree (AST)
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+(keyword, while)
+(id, y)
+(sym, <)
+(id, z)
+(id, x)
+(id, a)
+(sym, +)
+(id, b)
+(sym, ;)
+(id, y)
+(sym, +=)
+(id, x)
+(sym, ;)
+Token Stream
+
+
+===== PAGE 24 =====
+Syntax Analysis[语法分析]
+24
+define
+Chomsky’s Grammar Hierarchy
+Syntax
+Context-Sensitive
+Unrestricted
+Context-Free
+Regular Expr.
+class 0
+class 1
+class 2
+class 3
+Derivation
+Grammar to language
+Class
+Leftmost Derivation
+Rightmost Derivation
+Parse Tree
+ambiguity
+determine
+Specify precedence
+Specify associativity
+representation
+Basic Concept
+remove ambiguity
+
+
+===== PAGE 25 =====
+Syntax Analysis[语法分析]
+type 1
+type 2
+Top-down parser
+Parser Type
+LR(0) 
+parsing table
+LR(0) automation
+constructed by
+States
+Transitions
+GOTO function
+CLOSURE 
+function
+are computed by 
+consist of
+LR(0) 
+conflicts
+exist conflicts
+type 1
+Bottom-up parser
+focus on
+LR family parsers
+Parser table
+tool
+SLR(1) 
+parsing table
+LALR(1) 
+parsing table
+LR(1) 
+parsing table
+limit reduce 
+actions
+Based on LR(0)
+LR(0) item + 
+lookaheads
+Limit reduce 
+actions
+add extra info
+precisely indicate
+compromise  
+LR(1) and SLR(1)
+type 2
+type 3
+type 4
+are given by 
+problem
+solve
+First 
+Sets
+Follow 
+Sets
+RD-backtrack 
+parser
+Predictive 
+parser
+Left Recursion
+Remove left 
+recursion
+LL(1) grammar
+compute
+LL(1) table
+construct
+tool
+
+
+===== PAGE 26 =====
+• 基于语法结果进一步分析语义
+u 输入：语法树；输出：语法树+符号表
+u 收集标识符的属性信息（type, scope等）
+u 输入程序是否符合语义规则？
+p 变量未声明即使用，重复声明
+Semantic Analysis[语义分析]
+26
+int
+bool
+int
+int
+int
+int
+int
+int
+int
+int
+int
+int
+void
+void
+int
+while
+<
+body
+=
+x
++
+a
+z
+=
+y
++
+y
+x
+y
+b
+Annotated AST/Decorated AST
+[带标注的抽象语法树]
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+while
+<
+body
+=
+x
++
+a
+z
+=
+y
++
+y
+x
+y
+b
+Abstract Syntax Tree (AST)
+[抽象语法树]
+
+
+===== PAGE 27 =====
+Semantic Analysis[语义分析]
+27
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD
+L-SDD
+LR-parsable 
+grammar
+LL-parsable 
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope
+method
+class
+  depended by 
+application
+ semantic rules
+ convert S-SDD
+ add actions at 
+production end
+ semantic actions
+ extend stack
+Impl. for LR parser
+ convert L-SDD
+LL RDP
+ extend stack
+LL
+marker
+LR
+stack
+chaining
+ improve
+ offer info
+ static
+dynamic
+at execution
+ at compile
+
+
+===== PAGE 28 =====
+l 初步翻译，生成等价于源程序的中间表示（IR）：
+u 输入：语法树；输出：IR 
+u 建立源和目标语言的桥梁，易于翻译过程的实现，利
+于实现某些优化算法 
+u  IR形式：例如三地址码（TAC, Three Address Code ）
+ 
+      
+Intermediate Code[中间代码生成] 
+28
+goto L1
+L2:
+        t1 := a + b
+        x := t1 
+        t2 := y + x 
+        y := t2
+L1:
+        if y < z goto L2
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+int
+bool
+int
+int
+int
+int
+int
+int
+int
+int
+int
+int
+void
+void
+int
+while
+<
+body
+=
+x
++
+a
+z
+=
+y
++
+y
+x
+y
+b
+Annotated AST/Decorated AST
+Intermediate Representation
+
+
+===== PAGE 29 =====
+Intermediate Code[中间代码生成] 
+29
+BackPatching
+Intermediate Code 
+Representation
+Static Type 
+Check
+Intermediate 
+Code Generation
+Abstract 
+Syntax Tree
+DAG
+Three-Address 
+Code
+SSA
+Variable 
+Definition
+Assignment
+Process
+Boolean
+Expression
+Direct 
+Translation
+Indirect 
+Translation
+Jumping
+Facilitate 
+Optimization
+Low Level
+Simplify
+High Level
+One-Pass
+Two-Pass
+Control-Flow
+One-Pass
+quadruples
+triples
+indirect 
+triples
+Array
+Reference
+Control
+
+
+===== PAGE 30 =====
+l 加工变换中间代码使其更好（代码更短、性能更
+高、内存使用更少）
+u 输入：IR；输出：(优化的）IR 
+u 机器无关（machine independent） 
+u 例如：重复运算识别；运算操作替换
+Code Optimization[代码优化] 
+30
+t1 = a + b
+goto L1
+L2:
+        t2 := y + t1 
+        y := t2
+L1:
+        if y < z goto L2
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+Quiz: 这里做了
+什么优化？
+goto L1
+L2:
+        t1 := a + b
+        x := t1 
+        t2 := y + x 
+        y := t2
+L1:
+        if y < z goto L2
+Intermediate Representation
+Optimized Intermediate 
+Representation
+
+
+===== PAGE 31 =====
+Code Optimization[代码优化] 
+31
+Layout-related 
+Transformations
+Code 
+Optimization
+Code-related 
+Transformations
+Code
+Data
+Control-Flow 
+Analysis
+Dead Code 
+Elimination
+Common 
+Subexpression 
+Elimination
+Local 
+Optimizations
+Global 
+Optimizations
+Constant 
+Propagation
+Global Constant 
+Propagation
+Dataflow 
+Analysis
+In Basic Block
+Across Basic Block
+Include
+Include
+Build Basic Blocks
+Help
+Base on
+Base on
+Construct CFG
+ Constant 
+Folding
+Directed Acyclic 
+Graph (DAG)
+Provide info
+
+
+===== PAGE 32 =====
+l 为特定机器产生目标代码（e.g., 汇编）
+u  输入：(优化的) IR；输出：目标代码
+u 寄存器分配：放置频繁访问数据
+u 指令选取：确定机器指令实现IR操作 
+u 进一步的机器有关优化 
+p 例如：寄存器及访存优化 
+ 
+Target Code[目标代码生成] 
+32
+   8b 55 f4   mov   edx, DWORD PTR [rbp-12]
+   8b 45 f0   mov   eax, DWORD PTR [rbp-16]
+   01 d0      add   eax, edx
+   89 45 ec   mov   DWORD PTR [rbp-20], eax
+   eb 06      jmp   L2
+L3:8b 45 ec   mov   eax, DWORD PTR [rbp-20]
+   01 45 fc   add   DWORD PTR [rbp-4], eax
+L2:8b 45 fc   mov   eax, DWORD PTR [rbp-4]
+   3b 45 f8   cmp   eax, DWORD PTR [rbp-8]
+   7c f2      jl    L3
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generator
+Code Generator
+token  stream
+syntax  tree
+intermediate  representation
+intermediate  representation
+syntax  tree
+Code Optimizer
+Target Machine Code
+t1 = a + b
+goto L1
+L2:
+        t2 := y + t1 
+        y := t2
+L1:
+        if y < z goto L2
+Optimized Intermediate 
+Representation
+Target Machine Code
+
+
+===== PAGE 33 =====
+Target Code[目标代码生成] 
+33
+Code 
+Generation
+Primary 
+Task
+Instruction 
+Selection
+Register 
+allocation
+Instruction 
+Ordering
+Type
+Expression
+Conditional
+Function call
+Activation 
+Record
+Caller/Callee 
+Conventions
+Object
+Dispatch
+Inheritance
+Peephole 
+Optimization
+Register 
+Allocation
+Instruction 
+Scheduling
+Instruction 
+Selection
+Machine 
+Optimization
+
+
+===== PAGE 34 =====
+Introduction
+34
+Enjoy the Journey!

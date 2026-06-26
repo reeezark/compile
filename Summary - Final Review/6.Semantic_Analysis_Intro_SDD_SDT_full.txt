@@ -1,0 +1,2966 @@
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 1 =====
+编译原理
+Complier Principles
+Lecture 6
+Semantic Analysis: Intro & SDD & SDT
+赵帅
+计算机学院
+中山大学
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 2 =====
+Compilation Phases[编译阶段]
+2
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generation
+Code Generator
+token stream
+syntax tree
+intermediate representation
+intermediate representation
+Character Stream
+(Source Code)
+syntax tree
+Code Optimizer
+Target Machine Code
+（executable）
+Front End
+Back End
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 3 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 4 =====
+Compilation Phases[编译阶段]
+4
+Abstract Syntax Tree(AST)
+int
+bool
+int
+int
+int int
+int int
+int int
+intint
+void
+void
+int
+while
+< body
+=
+x +
+a
+z =
+y +
+y x
+y
+b Annotated AST/Decorated AST
+[带标注的抽象语法树]
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 5 =====
+• Because programs use symbols (a.k.a. identifiers)
+◆ Identifiers require context to figure out the meaning
+• Consider the English sentence: “He ate it”
+◆ This sentence is syntactically correct
+◆ But it makes sense only in the context of a previous sentence: “Sam bought 
+a pizza.” (what if “Sam bought a car.”?)
+• Semantic analysis
+◆ Associates identifiers with objects they refer to[关联]
+ ”He” --> “Sam”
+ “it” --> “pizza”
+◆ Checks whether identifiers are used correctly[检查]
+ “He” and “it” refer to some object: def-use check
+ “it” is a type of object that can be eaten: type check
+Why Semantic Analysis? [语义分析]
+5
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 6 =====
+• Semantic of a language is more difficult to describe than syntax
+[语义比语法更难描述]
+◆ Syntax: describes the proper form of the programs [仅形式]
+◆ Semantics: defines the meaning of programs (i.e., what each program does 
+when it executes) [到意义]
+• Context cannot be analyzed using a CFG parser[CFG不能分析上下文信息]
+◆ Associating IDs with objects require expressing the pattern:
+{wcw | w ∊ (a|b)*}
+ The first w represents the definition of an ID
+ The c represents arbitrary intervening code
+ The second w represents the use of the ID
+Why Semantic Analysis?
+6
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 7 =====
+• Deeper check into the source program[对程序进一步分析]
+◆ Last stage of the front end[前端最后阶段]
+◆ Compiler’s last chance to reject incorrect programs[最后拒绝机会]
+◆ Verify properties that aren’t caught in earlier phases
+ Variables declaration before use [先声明后使用]
+ Type consistency when using IDs [变量类型一致]
+ Correct expressions types [表达式类型]
+• Gather useful info about program for later phases[收集后续信息]
+◆ Determine what variables are meant by each identifier
+◆ Build an internal representation of inheritance hierarchies
+◆ Count how many variables are in scope at each point
+Semantic Analysis
+7
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 8 =====
+• Attribute grammars[属性文法]
+◆ One-pass compilation
+ Semantic analysis is done along with parsing
+◆ Augment rules to do checking during parsing
+◆ The approach suggested in the Compilers book
+• AST walk[语法树遍历]
+◆ Two-pass compilation
+ First pass digests the syntax and builds a parse tree
+ The second pass traverses the tree to verify that the program respects 
+all semantic rules
+◆ Strict phase separation of Syntax Analysis and Semantic Analysis
+Semantic Analysis: Implementation
+8
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 9 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Definitions (SDD)
+Syntax Directed 
+Translation (SDT)
+semantic rules semantic actions
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 10 =====
+• Syntax Directed Translation[语法制导翻译]
+Syntax Directed Translation
+10
+Semantic Analysis
+[语义分析]
+Syntax Directed 
+Translation
+[语法制导翻译]
+Lexical Analyzer
+Syntax Analyzer
+Semantic Analyzer
+Intermediate
+Code Generation
+Code Generator
+token stream
+syntax tree
+intermediate representation
+intermediate representation
+syntax tree
+Code Optimizer
+Target code
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 11 =====
+• Translate based on the program’s grammar structure[语法结构]
+◆ Syntactic structure: structure of a program given by grammar[文法]
+◆ The parsing process and parse trees are used to direct semantic analysis and 
+the translation of the program, i.e., CFG-driven translation[CFG驱动的翻译]
+• How? Augment the grammar used in parser[对语法的进一步加强]:
+◆ Attach semantic attributes[语义属性] to each grammar symbol
+ The attributes describe the symbol properties [符号特征] 
+ An attribute has a name and an associated value: a string, a number, a 
+type, a memory location, an assigned register…
+◆ For each grammar production, give semantic rules or actions[语义规则或动作]
+ The actions describe how to compute the attribute values associated 
+with each symbol in a production
+Syntax Directed Translation[语法制导翻译]
+11
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 12 =====
+• Attributes can represent anything depending on the task[属性可
+以表示任意含义]
+◆ If computing expression: a number (value of expression)
+◆ If building AST: a pointer (pointer to AST for expression)
+◆ If generating code: a string (assembly code for expression)
+◆ If type checking: a type (type for expression)
+• Attributes are associated directly with the grammar symbols
+• Format: X.a (X is a symbol, a is one of its attributes)
+Attributes[语义属性]
+12
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 13 =====
+Associating semantic rules with grammar rules (productions) 
+involves two concepts:
+• Syntax Directed Definitions (SDD) [语法制导定义]
+• Syntax Directed Translation scheme (SDT) [语法制导翻译方案]
+SDD & SDT
+13
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 14 =====
+• Syntax Directed Definitions (SDD) [语法制导定义]
+◆ A syntax-directed definition (SDD) is a context-free grammar(CFG) together 
+with attributes and rules
+◆ Add Attributes + semantic rules[语义规则] in CFG
+◆ A generalization of CFG
+ Attributes for grammar symbols [文法符号和语义属性关联]
+ Semantic rules for productions [产生式和语义规则关联]
+Syntax Directed Definitions (SDD)
+14
+Productions Attributes Semantic rules
+E -> E1 + E2
+E -> id 
+E.val; E1.val; E2.val
+E.val; id.lexval
+E.val = E1.val + E2.val
+E.val = id.lexval
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 15 =====
+• Syntax Directed Translation scheme (SDT) [语法制导翻译方案]
+◆ SDT is a CFG with program fragments embedded in the right part of the 
+production, and these program fragments are called semantic actions.
+◆ Attributes + semantic actions[语义动作]
+◆ Example actions for computing the value of an expression
+Syntax Directed Translation (SDT)
+15
+E -> E1 + E2 {E.val = E1.val + E2.val}
+E -> id {E.val = id.lexval}
+…
+The position of a semantic action in a production determines 
+the execution point of the action
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 16 =====
+• SDD[语法制导定义]: 是CFG的推广，翻译的高层次规则说明
+◆ A CFG grammar together with attributes and semantic rules
+◆ A subset of them are also called attribute grammars[属性文法]
+◆ Semantic rules imply no order to attribute evaluation
+• SDT[语法制导翻译方案]: SDD的补充，具体翻译实施方案
+◆ An executable specification of the SDD
+ Program fragments are attached to different points in production rules
+◆ The execution order is important
+SDD v.s. SDT
+16
+D -> TL
+T -> int
+T -> float
+L -> L1, id
+L.inh = T.type
+T.type= int
+T.type= float
+L1.inh = L.inh
+D ->T {L.inh = T.type} L
+T -> int {T.type= int}
+T -> float {T.type= float}
+L -> {L1.inh = L.inh} L1, id
+SDDGrammar SDT
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 17 =====
+• Syntax: A -> ⍺ {action1} β {action2} γ …
+• Actions are executed “at that point” in the RHS
+◆ action1 executes after ⍺ has been produced but before β
+◆ action2 executes after ⍺, action1, β but before γ
+• Semantic rule v.s. Action[语义规则 vs. 语义动作]
+◆ Semantic rules are not associated with locations in RHS
+ SDD doesn’t impose any order other than dependences
+◆ Location of action in RHS specifies when it should occur
+ SDT specifies the execution order and time of each action
+SDD v.s. SDT
+17
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 18 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+depended by
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 19 =====
+• SDD是CFG的增广
+◆ Grammar symbols together with semantic attributes 
+◆ Productions associated with a set of semantic rules to compute the value 
+of an expression
+• SDD has two types of attributes [文法符号的两种属性]
+◆ Synthesized attribute [综合属性]
+◆ Inherited attribute [继承属性]
+Syntax Directed Definitions (SDD)
+19
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 20 =====
+• Synthesized attribute[综合属性]
+◆ Defined by a semantic rule associated with the production at N
+ The production must have A as its head (i.e., A -> …)
+◆ A synthesized attribute of node N is defined only by attributes of N’s children
+and N itself[子节点或自身]
+• Inherited attribute[继承属性]
+◆ Defined by a semantic rule associated with the production at the parent of N
+ The production must have A as a symbol in its body (i.e., … -> …A…)
+◆ An inherited attributed of node N is defined only by attribute values at N’s 
+parent, N itself, and N’s siblings[父节点、自身或兄弟节点]
+Syntax Directed Definitions (SDD)
+20
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 21 =====
+• Synthesized attribute for non-terminal A of parse-tree node N[非终结符
+的综合属性]
+◆ Only defined by N’s children and N itself
+ Passed up the tree
+ P .syn_attr = f(P .attrs, C1.attrs, C2.attrs, C3.attrs)
+◆ Example
+• Terminals CAN have synthesized attributes[终结符可以具有综合属性]
+◆ Lexical values supplied by the lexical analysis
+◆ Thus, no semantic rules in SDD for terminals
+Synthesized Attribute[综合属性]
+21
+Productions Semantic rules
+E -> E1 + T E.val = E1.val + T.val
+E.val
+E1.val T.val+
+P
+C1 C2 C3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 22 =====
+• Inherited attribute for non-terminal A of parse-tree node N[非终结符继
+承属性]
+◆ Only defined by N’s parent, N’s siblings and N itself
+ Passed down a parse tree
+ C2.inh_attr = f(P .attrs, C1.attrs, C2.attrs, C3.attrs)
+◆ Example
+• Terminals CANNOT have inherited attributes[终结符无继承属性]
+◆ Only synthesized attributes from lexical analysis
+Inherited Attribute[继承属性]
+22
+Productions Semantic rules
+D -> T L L.inh = T.type
+D
+T.type L.inh
+P
+C1 C2 C3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 23 =====
+• Attribute dependencies in a production rule[产生式中的属性依赖]
+• SDD has rule of the form for each grammar production
+◆ b = f(A.attrs, ⍺.attrs, β.attrs, γ.attrs)
+• b is either an attribute in LHS (an attribute of A)
+◆ In which case b is a synthesized attribute
+◆ Why? From A’s perspective ⍺, β, γ are children
+• Or, b is an attribute in RHS (e.g., of β)
+◆ In which case b is an inherited attribute
+◆ Why? From β’s perspective A, ⍺, γ are parent or siblings
+SDD[语法制导定义]
+23
+A -> α β γ
+Inherited
+Synthesized
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 24 =====
+Example: Synthesized attribute 
+24
+Attribute grammar for simple integer arithmetic expression
+Grammar rule Semantic Rules
+E→E1+T
+E→T
+T→T1*F
+T→F
+F→(E)
+F→dight
+E.val ＝E1.val +T.val
+E.val ＝T.val
+T.val ＝T1.val * F.val
+T.val＝F.val
+F.val＝E.val
+F.val＝dight.val
+The val attribute is synthesized
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 25 =====
+Attribute grammar for variable
+Example: Inherited Attribute 
+25
+Grammar rule Semantic Rules
+decl -> type varlist
+type -> int
+type -> float
+varlist1 -> id, varlist2
+varlist -> id
+varlist.dtype = type.dtype
+type.dtype = integer
+type.dtype = real
+id.dtype = varlist1.dtype
+varlist2.dtype = varlist1.dtype
+id.dtype = varlist.dtype
+The dtype attribute is inherited
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 26 =====
+The Concepts
+26
+• Side effect[副作用]
+◆ 一般属性值计算（基于属性值或常量进行的）之外的功能
+◆ 例如：code generation, print results, modify symbol table …
+• Attribute grammar[属性文法]
+◆一个没有副作用的SDD
+◆The rules define the value of an attribute purely in terms of the value of other 
+attributes and constants[属性文法的规则仅仅通过其他属性值和常量来定义一个属性值]
+• Annotated parse-tree[标注分析树]
+◆ 每个节点都带有属性值的分析树
+ A parse tree showing the value(s) of its attribute(s)
+◆a.k.a., attribute parse tree[属性分析树]
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 27 =====
+Compilation Phases[编译阶段]
+27
+Abstract Syntax Tree(AST)
+int
+bool
+int
+int
+int int
+int int
+int int
+intint
+void
+void
+int
+while
+< body
+=
+x +
+a
+z =
+y +
+y x
+y
+b Annotated AST/Decorated AST
+[带标注的抽象语法树]
+A very simple illustrative case!
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 28 =====
+• SDD (Syntax-directed definition)
+• CFG + attributes for each symbol + semantic rules for each production
+• SDT (Syntax-directed definition)
+• CFG + attributes for each symbol + {semantic actions} in each production
+• Synthesized attribute
+• Terminals CAN have synthesized attributes
+• Inherited Attribute
+• Terminals CANNOT have inherited attributes
+Semantic Analysis Revisit
+28
+P
+C1 C2 C3
+P
+C1 C2 C3
+D -> TL
+T -> int
+T -> float
+L -> L1, id
+L.inh = T.type
+T.type= int
+T.type= float
+L1.inh = L.inh
+D ->T {L.inh = T.type} L
+T -> int {T.type= int}
+T -> float {T.type = float}
+L -> {L1.inh = L.inh} L1, id
+SDD (rules)Grammar SDT (actions)
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 29 =====
+• Dependence relationship[依赖关系]
+◆ Before evaluating an attribute at a node of a parse tree, we must evaluate all 
+attributes it depends on
+• Dependency graph[依赖图]
+◆ While the annotated parse tree shows the values of attributes, a dependency 
+graph helps determine how those values can be computed[决定属性值计算]
+◆ Depicts the flow of information among the attribute instances in a particular 
+parse tree[描绘了分析树的属性信息流]
+ Edges are dependence relationships between attributes
+ For each parse-tree node X, there’s a graph node for each attr of X
+ If X.a depends on Y .b, then there’s one directed edge from X.a to Y .b
+Dependence Graph[依赖图]
+29
+A -> α β γ
+Inherited
+Synthesized
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 30 =====
+SDD：
+Example: Dependency Graph
+30
+Productions Semantic rules
+D -> T L
+T -> int
+T -> float
+L -> L1, id
+L-> id
+L.inh = T.type
+T.Type= int
+T.Type= float
+L1.inh = L.inh
+addtype(id.entry,L.inh)
+addtype(id.entry,L.inh)
+Input:
+float a, b, c
+D
+type L
+float
+inh entry
+L , id
+L , id
+inh entry lexeme
+lexeme
+lexeme
+inh entry
+id
+‘entry’ is dummy attribute for the addtype()
+T
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 31 =====
+• Ordering the evaluation of attributes[计算顺序]
+◆ Dependency graph characterizes possible orders in which we can evaluate the 
+attributes at the various nodes of a parse-tree[依赖图描述了属性计算顺序]
+• If the graph has an edge from node M to node N, then the attribute associated 
+with M must be evaluated before N[用图的边来确定计算顺序]
+◆ Thus, the only allowable orders of evaluation are those sequences of nodes N1, 
+N2, …, Nk such that if there is an edge from Ni to Nj and i < j
+◆ This order embeds a directed graph into a linear order, called a topological 
+sort[拓扑排序] of the graph
+ If there’s any cycle in the graph, then there are no topological sorts, i.e., no 
+way to evaluate the SDD on this parse tree
+ If there are no cycles, then there is always at least one topological sort
+Evaluation Order[属性值计算顺序]
+31
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 32 =====
+Example: Evaluation Order
+32
+SDD：
+32
+Productions Semantic rules
+D -> T L
+T -> int
+T -> float
+L -> L1, id
+L-> id
+L.inh = T.type
+T.type= int
+T.type= float
+L1.inh=L.inh
+addtype(id.entry,L.inh)
+addtype(id.entry,L.inh)
+Input:
+float a,b,c
+float
+5 inh entry 6
+L , id
+L , id
+7 inh entry 8
+lexeme
+2
+lexeme
+1
+9 inh entry 10
+id
+D
+T type
+4
+L
+lexeme
+3
+Topological sort:
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 33 =====
+• Before evaluating an attribute at a node of a parse tree, we must 
+evaluate all attributes it depends on [依赖关系]
+◆ Synthesized: evaluate children first, then the node itself
+◆ Inherited: evaluate parent and dependent siblings first, then the node itself
+◆ For SDD’s with both inherited and synthesized attributes, there’s no guarantee 
+that there is even one evaluation order
+• Difficult to check circularities in a dependency graph
+◆ But, there are subclasses of SDD’s that guarantee an evaluation order
+ Such classes do not permit graphs with cycles
+Evaluation Order (cont.)
+33
+Production
+A-> B
+Semantic Rules
+A.s=B.i;
+B.i= A.s + 1;
+A.s
+B.i
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 34 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Definitions (SDD)
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+class
+only synthesized
+attr.
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 35 =====
+• An SDD is S-attributed if every attribute is synthesized[只具有综合属性]
+S-Attributed Definitions[S-属性定义]
+35
+Productions Semantic rules
+(1)L-> E
+(2)E-> E1+ T
+(3)E-> T
+(4)T-> T1* F
+(5)T-> F
+(6)F-> (E)
+(7)F-> digit
+print(E.val)
+E.val = E1.val+T.val
+E.val =T.val
+T.val= T1.valxF.val 
+T.val=F.val
+F.val=E.val
+F.val=digit.lexval
+• If an SDD is S-attributed (S-SDD)
+◆ Can evaluate its attributes in any bottom-
+up order of the nodes of the parse-tree[自底
+向上的顺序计算属性值]
+◆ Can be implemented during bottom-up 
+parsing[与自底向上的语法分析同时进行]
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 36 =====
+• An SDD is L-attributed (L-SDD) if
+◆ Between the attributes associated with a production body, dependency graph 
+edges can only go from left to right [依赖图的边只能从左到右]
+◆ Each attribute can be either synthesized, or inherited with the rules that 
+suppose A -> X1X2…Xi-1Xi, the inherited attribute Xi.a only depends on:
+1. Inherited attributes associated with A [A的继承属性, Why?]
+2. Either syn or inh attributes of X1, X2, …, Xi-1 located to the left of Xi [Xi的之前符
+号的综合/继承属性]
+3. Either syn or inh attributes of Xi itself, but no cycles formed by the 
+attributes of this Xi [Xi的综合/继承属性 (不能出现环形依赖)]
+◆ L-SDD是对S-SDD的拓展, Can be implemented during top-down/bottom-up 
+parsing [L属性的语义分析可在LL/LR分析中完成]
+L-Attributed Definitions[L-属性定义]
+36
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 37 =====
+L-Attributed Definitions (cont.)
+37
+Productions Semantic rules
+A -> BC A.s = B.b
+B.i = f(C.c,A.s)
+S-SDD or L-SDD?
+Not S-SDD: B.i is inh
+[S属性文法中不会出现
+继承属性]
+Not L-SDD: A.s is syn arrt, C is right to B 
+[L属性文法中, 继承属性 (B.I)不会依赖综合属性(A.s)]
+[L属性文法中, RHS不会出现从右到左的依赖关系]
+P
+C1 C2 C3
+P
+C1 C2 C3
+综合属性 继承属性
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 38 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+convert S-SDD
+add actions at 
+production end
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+extend 
+stack
+LL
+marker
+LR
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 39 =====
+• SDT (executable SDD) can be implemented in two ways
+◆Using a parse tree or AST[基于预先构建的分析树]
+ First build a parse tree, and then apply rules or actions at each node while 
+traversing the tree
+ All SDDs (without cycles) and SDTs can be implemented since the tree can be 
+traversed freely, implements any ordering
+◆During parsing, without building a parse tree[语法分析过程中]
+ Apply rules or actions at each production while parsing
+ Only a subset of SDDs and SDTs can be implemented 
+ Evaluation ordering restricted to parser derivation order
+Implementation[实现]
+39
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 40 =====
+• Two important classes of SDD’s[两个关键子类]
+◆ SDD is S-attributed, the underlying grammar is LR-parsable
+◆ SDD is L-attributed, the underlying grammar is LL-parsable
+• For both classes, semantic rules in an SDD can be converted into an 
+SDT with actions that are executed at the right time[允许SDD到SDT的转换]
+◆ During parsing, an action in a production body is executed as soon as all the 
+grammar symbols to the left of the action have been matched
+Implementation[实现]
+40
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 41 =====
+• Convert S-attributed SDD to SDT[SDD到SDT的转换]
+◆ Place each action at the end of the production[将每个语义动作都放在产生式的最后]
+◆ SDTs with all actions at the right ends of the production bodies are called Postfix 
+SDT [后缀/尾部SDT]
+Implement S-SDD
+41
+Productions Semantic rules
+(1)L-> E
+(2)E-> E1+ T
+(3)E-> T
+(4)T-> T1* F
+(5)T-> F
+(6)F-> (E)
+(7)F-> digit
+print(E.val)
+E.val= E1.val+T.val
+E.val=T.val
+T.val= T1.valxF.val 
+T.val=F.val
+F.val=E.val
+F.val=digit.lexval
+S-SDD
+CFG with actions
+(1)L-> E {print(E.val)}
+(2)E-> E1+ T {E.val= E1.val+T.val}
+(3)E-> T {E.val=T.val}
+(4)T-> T1* F {T.val= T1.valxF.val }
+(5)T-> F {T.val=F.val}
+(6)F-> (E) {F.val=E.val}
+(7)F-> digit {F.val=digit.lexval}
+SDT
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 42 =====
+• If the underlying grammar of S-SDD is LR parsable
+◆ Then the SDT can be implemented during LR parsing
+• Implement the converted SDT by reduction[借助归约实现]
+◆ Executing the action along with the reduction of LHS <- RHS
+Implement S-SDD (cont.)
+42
+CFG with actions
+(1)L-> E {print(E.val)}
+(2)E-> E1+ T {E.val = E1.val+T.val}
+(3)E-> T {E.val = T.val}
+(4)T-> T1* F {T.val= T1.valxF.val }
+(5)T-> F {T.val= F.val}
+(6)F-> (E) {F.val= E.val}
+(7)F-> digit {F.val= digit.lexval}
+SDT
+I0:
+E’ → ·E
+E → · E + T
+E → · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I1:
+E’ → E ·
+E → E · + T
+I2:
+E → T · 
+T → T · *F
+I3:
+T → F · 
+I4:
+E’ → (·E)
+E → · E + T
+E → · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I6:
+E → E + · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I7:
+T → T* · F
+F → · (E)
+F → · d
+I9:
+E → E + T ·
+T → T · *F
+I10:
+T → T*F · 
+I8:
+F → (E ·)
+E → E · +T
+I11:
+F → (E) ·
+I5:
+F → d ·
+d
+d
+d
+E
+E
+T
+T
+T
+F
+F
+F
+F
+d
+(
+( (
+)
++
+*
+(
+*
++ SLR Automaton
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 43 =====
+• Save synthesized attributes into the stack[栈中额外存放综合属性值]
+◆ Place the attributes along with the grammar symbols (or LR states that 
+associated with these symbols) in records on stack
+◆ If there are multiple attributes
+ Make the records large enough or by putting pointers to recordson the 
+stack [栈记录足够大，或栈记录中存放指针]
+• Example: A -> XYZ
+◆ x, y, z are attributes of X, Y , Z respectively
+◆ After the action, A and its attributes are at the top (i.e., m-2)
+Extend LR Parse Stack[扩展分析栈]
+43
+State:
+Symbol:
+Attribute:
+S0 … Sm-2 Sm-1 Sm
+$ … X Y Z
+- … X.x Y .y Z.z
+state ->
+Symbol ->
+Attribute ->
+S0 … Sm-2
+$ … A
+- … A.a
+top top
+A.a
+X.x Y .y Z.z
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 44 =====
+• Rewrite the actions to manipulate the parser stack
+◆ The manipulation can be done automatically by the parser
+Stack Manipulation[栈操作]
+44
+stack[top-2].symbol= A
+stack[top-2].val = f(stack[top-2].val, stack[top-1].val, stack[top].val)top = top-2
+A -> XYZ {A.a= f(X.x,Y .y,Z.z)}
+A.a
+X.x Y .y Z.z
+State:
+Symbol:
+Attribute:
+S0 … Sm-2 Sm-1 Sm
+$ … X Y Z
+- … X.x Y .y Z.z
+state ->
+Symbol ->
+Attribute ->
+S0 … Sm-2
+$ … A
+- … A.a
+top top
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 45 =====
+• Rewrite the actions to manipulate the parser stack
+◆ The manipulation can be done automatically by the parser
+Example
+45
+Productions Semantic rules Semantic Actions
+(1)L-> E print(E.val) {print(stack[top].val);}
+(2)E-> E1+ T E.val= E1.val+T.val { stack[top-2].val= stack[top-2].val + stack[top].val;
+top = top-2;}
+(3)E-> T E.val=T.val
+(4)T-> T1* F T.val= T1.val*F.val {stack[top-2].val= stack[top-2].val * stack[top].val;
+top = top-2;}
+(5)T-> F T.val=F.val
+(6)F-> (E) F.val=E.val {stack[top-2].val= (stack[top-1].val);
+top = top-2;}
+(7)F-> digit F.val=digit.lexval
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 46 =====
+Example
+46
+Productions Semantic Actions
+(1)L-> E
+(2)E-> E1+ T
+(3)E-> T
+(4)T-> T1* F
+(5)T-> F
+(6)F-> (E)
+(7)F-> digit
+{ print(stack[top].val);}
+{ stack[top-2].val=stack[top-2].val
++ stack[top].val; top = top-2;}
+{ stack[top-2].val=stack[top-2].val
+* stack[top].val; top = top-2;}
+{ stack[top-2].val= stack[top-1].val; 
+top = top-2;}
+Input: 3*5+4
+state ->
+Symbol ->
+Attribute ->
+S0 S2 S7 S10
+$ T * F
+- 3 - 5 (top)
+state ->
+Symbol ->
+Attribute ->
+S0 Sn
+$ T
+- 15 (top)
+I0:
+E’ → ·E
+E → · E + T
+E → · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I1:
+E’ → E ·
+E → E · + T
+I2:
+E → T · 
+T → T · *F
+I3:
+T → F · 
+I4:
+E’ → (·E)
+E → · E + T
+E → · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I6:
+E → E + · T
+T → · T*F
+T → · F
+F → · (E)
+F → · d
+I7:
+T → T* · F
+F → · (E)
+F → · d
+I9:
+E → E + T ·
+T → T · *F
+I10:
+T → T*F · 
+I8:
+F → (E ·)
+E → E · +T
+I11:
+F → (E) ·
+I5:
+F → d ·
+d
+d
+d
+E
+E
+T
+T
+T
+F
+F
+F
+F
+d
+(
+( (
+)
++
+*
+(
+*
++
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 47 =====
+Example
+47
+Input: 3*5+4
+Productions 
+(1)L-> E n
+(2)E-> E1+ T
+(3)E-> T
+(4)T-> T1* F
+(5)T-> F
+(6)F-> (E)
+(7)F-> digit
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 48 =====
+• We have examined S-SDD -> SDT -> implementation
+◆ S-SDD can be converted to SDT with actions at production ends
+◆ The SDT can be parsed and translated by bottom-up, as long as the 
+underlying grammar is LR-parsable
+• What about the more-general L-attributed SDD?
+◆ Rule for turning L-SDD into an SDT
+1. Embed the action that computes the inherited attributes for a nonterminal A
+immediately before the occurrence of A in the production body
+2. Place the actions that compute a synthesized attribute for the LHS at the end of 
+the production body
+Implement L-SDD
+49
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 49 =====
+• A -> B {C.inh} C {A.syn}
+◆ C的继承属性: 在C之前
+◆ A的综合属性: 在RHS末尾
+Example
+50
+Productions Semantic rules
+(1)T-> FT’
+(2)T’-> *FT1’
+(3)T’-> Ɛ
+(4)F-> digit
+T’.inh = F.val
+T.val= T’.syn
+T1’.inh = T’.int * F.val
+T’.syn = T1’.syn
+T’.syn = T’.inh
+F.val= digit.lexval
+SDT
+(1) T-> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’-> *F {T1’.inh = T’.int * F.val} T1’ {T’.syn = T1’.syn}
+(3) T’-> Ɛ {T’.syn = T’.inh}
+(4) F-> digit {F.val= digit.lexval}
+A
+B CC.inh A.syn
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 50 =====
+Implement L-SDD
+51
+• If the underlying grammar is LL-parsable, then the SDT of L-SDD can 
+be implemented during LL or LR parsing [若文法是LL可解析的，则可在LL或
+LR语法分析过程中实现]
+• Semantic translation during parsing
+◆ An LL recursive-descent parser[递归下降的LL分析]
+ Augment non-terminal functions to both parsing and attributes handling
+◆ An LL predictive parser[非递归的LL预测分析]
+ Extend the parse stack to hold actions and certain data items needed for attribute evaluation
+◆ An LR parser[LR分析]
+ Rewrite grammars to involve marker
+• For the top-down ones, we need to eliminate left recursion first!
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 51 =====
+• A motivating example: a simple case
+• Trick: treating actions as terminals if they do not calculate any attributes. 
+Eliminating left recursion
+52
+E → E + T { print('+') }
+E → T
+E → T R
+R → + T { print('+') } R
+R → 
+E → E + T
+E → T
+E → T R
+R → + T R | 
+E => E+T+T+T...* A → A⍺ | β A → βA’; A’ → ⍺A’ | ε
+a single terminal
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 52 =====
+• Implementing L-SDD: top-down/bottom-up
+• L-SDD -> SDT: 
+1. Embed the action that computes the inherited attributes for a nonterminal A
+immediately before the occurrence of A in the production body
+2. Place the actions that compute a synthesized attribute for the LHS at the end of 
+the production body
+• Eliminating left recursion！
+Semantic Analysis Revisit
+53
+A -> B {C.inh} C {A.syn}
+⚫ C的继承属性: 在C之前
+⚫ A的综合属性: 在RHS末尾
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 53 =====
+• A more complex case
+Eliminating left recursion
+54
+E → E1 + T { E.val = E1.val + T.val; }
+E → E1 – T { E.val = E1.val – T.val; }
+E → T { E.val = T.val; }
+T → ( E ) { T.val = E.val; }
+T → num { T.val = num.val; }
+E → T { R.i = T.val; } R { E.val = R.s; }
+R → + T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }
+R → – T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }
+R →  { R.s = R.i; }
+T → ( E ) { T.val= E.val; }
+T → num { T.val= num.val; }
+E → T R
+R → + T R1
+R → – T R1
+R → 
+T → ( E )
+T → num
+A → A⍺ | β 
+A → βA’; 
+A’ → ⍺A’ | ε
+解决左递归斩断了产生式 (及actions)
+E→E1 + T => E→TR R→ +TR R→ 
+用新引入的R，传递属性值，实现计算
+R.i (属性传递) R.s (属性返回)
+通过R-> ，将计算结果传回
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 54 =====
+Eliminating left recursion
+55
+E
+R.i = 9T.val= 9
+num.val = 9 T.val= 5 R.i = 4–
+T.val= 2 R.i = 6+
+num.val = 2
+num.val = 5
+E → T { R.i = T.val; } R { E.val = R.s; }
+R → + T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }
+R → – T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }
+R →  { R.s = R.i; }
+T → ( E ) { T.val= E.val; }
+T → num { T.val= num.val; }
+Input: 9 – 5 + 2
+R.s = 6
+R.s = 6
+R.s = 6
+E.val = 6
+
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 55 =====
+• General rules
+• Only available for S-SDD (postfix translation schemes), a subset of L-SDD 
+Eliminating left recursion
+56
+A → A1 Y { A.a = g(A1.a, Y .y) }
+A → X { A.a = f(X.x) }
+A → X { R.i = f(X.x) } R { A.a = R.s }
+R → Y { R1.i = g(R.i, Y .y) } R1 { R.s = R1.s }
+R →  { R.s = R.i }
+A => XYYY ...*A.a = g(g(f(X.x), Y1.y), Y2.y)
+A.a = g(f(X.x), Y1.y) Y2
+A.a = f(X.x) Y1
+X
+R.i = g(g(f(X.x), Y1.y), Y2.y)
+A
+R.i = f(X.x)X
+R.i = g(f(X.x), Y1.y)Y1
+
+Y2
+{ R.s = R.i }
+{ R.s = R1.s }
+{ R.s = R1.s }
+{ A.a = R.s }
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 56 =====
+• Evaluation order -> DAG -> topological sort -> circle is NOT allowed
+• SDD Subsets without circle: S-SDD and L-SDD
+• S-SDD: Synthesized attributes only
+• L-SDD: Synthesized and Inherited attributes (A -> X1X2…Xi-1Xi)
+• Xi.inh can depend on: (i) A.inh, (ii) Xj.attr, j<i, (iii) Xi.attr with no circles
+• Implementation:
+• Based on parser tree or AST
+• Any computation order without dependency circles
+• Along with Parser
+• Strictly follows the parsing order: Top-down or Bottom-up
+Semantic Analysis Revisit
+57
+L-SDD S/L-SDD
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 57 =====
+• Implementing S-SDD: bottom-up
+• S-SDD -> SDT: Place each action at the end of the production
+• Slack manuscription: enable automation
+• Example: A -> XYZ
+◆ x, y, z are attributes of X, Y , Z respectively
+◆ After the action, A and its attributes are at the top (i.e., m-2)
+Semantic Analysis Revisit
+58
+State:
+Symbol:
+Attribute:
+S0 … Sm-2 Sm-1 Sm
+$ … X Y Z
+- … X.x Y .y Z.z
+state ->
+Symbol ->
+Attribute ->
+S0 … Sm-2
+$ … A
+- … A.a
+top top
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 58 =====
+• Implementing L-SDD: top-down/bottom-up
+• L-SDD -> SDT: 
+1. Embed the action that computes the inherited attributes for a nonterminal A
+immediately before the occurrence of A in the production body
+2. Place the actions that compute a synthesized attribute for the LHS at the end of 
+the production body
+• Eliminating left recursion！
+Semantic Analysis Revisit
+59
+A -> B {C.inh} C {A.syn}
+⚫ C的继承属性: 在C之前
+⚫ A的综合属性: 在RHS末尾
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 59 =====
+• A more complex case
+Eliminating left recursion
+60
+E → E1 + T { E.val = E1.val + T.val; }
+E → E1 – T { E.val = E1.val – T.val; }
+E → T { E.val = T.val; }
+T → ( E ) { T.val = E.val; }
+T → num { T.val = num.val; }
+E → T { R.i = T.val; } R { E.val = R.s; }
+R → + T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }
+R → – T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }
+R →  { R.s = R.i; }
+T → ( E ) { T.val= E.val; }
+T → num { T.val= num.val; }
+E → T R
+R → + T R1
+R → – T R1
+R → 
+T → ( E )
+T → num
+A → A⍺ | β 
+A → βA’; 
+A’ → ⍺A’ | ε
+解决左递归斩断了产生式 (及actions)
+E→E1 + T => E→TR R→ +TR R→ 
+用新引入的R，传递属性值，实现计算
+R.i (属性传递) R.s (属性返回)
+通过R-> ，将计算结果传回
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 60 =====
+• General rules
+• Only available for S-SDD (postfix translation schemes), a subset of L-SDD 
+Eliminating left recursion
+61
+A → A1 Y { A.a = g(A1.a, Y .y) }
+A → X { A.a = f(X.x) }
+A → X { R.i = f(X.x) } R { A.a = R.s }
+R → Y { R1.i = g(R.i, Y .y) } R1 { R.s = R1.s }
+R →  { R.s = R.i }
+A => XYYY ...*A.a = g(g(f(X.x), Y1.y), Y2.y)
+A.a = g(f(X.x), Y1.y) Y2
+A.a = f(X.x) Y1
+X
+R.i = g(g(f(X.x), Y1.y), Y2.y)
+A
+R.i = f(X.x)X
+R.i = g(f(X.x), Y1.y)Y1
+
+Y2
+{ R.s = R.i }
+{ R.s = R1.s }
+{ R.s = R1.s }
+{ A.a = R.s }
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 61 =====
+• A recursive-descent parser has a function A for each nonterminal A 
+[递归预测分析方法]
+◆ Non-terminal expansion implemented by a function call
+ (Recursive) calls to functions for non-terminals in RHS
+• Synthesized attributes: evaluate at end of function[综合属性: 最后计算]
+◆ All calls for RHS would have done by then
+• Inherited attributes: pass as argument to function[继承属性：参数传递]
+◆ Values may come from parent or siblings
+◆ L-attributed guarantees they have been computed 
+(can only come from already computed portion of RHS)
+L-SDD in Recursive Decent Parsing
+62
+It becomes clearer here that the 
+inherited attributes of symbols at 
+RHS cannot depend on the 
+synthesized attribute of the LHS
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 62 =====
+• Function arguments and return[参数和返回值]
+◆ Inherited: arguments
+◆ Synthesized: return
+Augmentation:
+• Use local variables[增加局部变量]
+• Embed semantic actions[嵌入语义动作]
+Example
+63
+SDT
+(1) T-> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’-> *F {T1’.inh = T’.inh * F.val} T1’ {T’.syn = T1’.syn}
+(3) T’-> Ɛ {T’.syn = T’.inh}
+(4) F-> digit {F.val= digit.lexval}
+T’.syn T’(token, T’.inh) {
+if token = “*”, then{
+getnext(token);
+F.val= F(token);
+T1’.inh = T’.inh * F.val
+getnext(token);
+T1’.syn = T1’(token, T1’.inh);
+T’.syn = T1’.syn
+return T’.syn
+} else if token = “$”, then {
+T’.syn = T’.inh;
+return T’.syn;
+} else
+Error;
+}
+D: F.val-> T1’.inh -> T1’.syn
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 63 =====
+• Extend the stack to hold actions and certain data items needed 
+for attribute evaluation[扩展语法分析栈]
+◆ Action-record[动作记录]: represent the actions to be executed
+◆ Synthesize-record[综合记录]: hold synthesized attributes for non-terminals
+◆ Typically, the data items are copies of attributes[属性备份]
+• Manage attributes on the stack[管理属性信息]
+◆ The inherited attributes of a nonterminal A are placed in the stack that 
+represents that terminal[A的继承属性直接放在符号位]
+ Action-record to evaluate these attributes are immediately above A
+◆ The synthesized attributes of a nonterminal A are placed in a separate 
+synthesize-record that is immediately below A[A的综合属性另存放在A后]
+L-SDD in LL Parsing[非递归预测]
+64
+Action Code
+A Inh Attr.
+A.syn Syn Attr.
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 64 =====
+• Table-driven LL-parser
+◆ Mimics a leftmost derivation -> stack expansion
+• A-> BC, suppose nonterminal C has an inherited attr C.i
+◆ C.i may depend not only on the inherited attr A.i, but on all attrs of B
+◆ As an L-SDD, it ensures A.i are available when A is on the stack top
+ Thus, available to be copied into C
+◆ A’s synthesized attrs A.s remain on the stack, 
+below B and C when expansion happens
+L-SDD in LL Parsing (cont.)
+65
+Action Code
+A Inh Attr.
+A.syn Syn Attr.
+Action Code
+B Inh Attr.
+B.syn Syn Attr.
+C Inh Attr.
+C.syn Syn Attr.
+A.syn Syn Attr.
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 65 =====
+• A-> BC: C.i may depend not only on the inherited attr A.I, but 
+on all the attrs of B
+◆ Thus, need to process B completely before C.i can be evaluated
+◆ Save temporary copies of all attrs needed by C.i in the action-record that 
+evaluates C.i; 
+◆ Otherwise, when the parser replaces A on top of the stack by BC, the A.i
+will be gone, along with its stack record
+1. 左部展开时（i.e., 左部符号本身的记录出栈时），若其含有
+继承属性，则要将继承属性复制给后面的动作记录
+2. 综合属性出栈时，要将综合属性值复制给后面的动作记录
+L-SDD in LL Parsing (cont.)
+66
+Action Code
+B Inh Attr.
+B.syn Syn Attr.
+C Inh Attr.
+C.syn Syn Attr.
+A.syn Syn Attr.
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 66 =====
+Example
+67
+(1) T -> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’-> *F {T1’.inh = T’.int x F.val} T1’ {T’.syn = T1’.syn}
+(3) T’-> Ɛ {T’.syn = T’.inh }
+(4) F -> digit {F.val= digit.lexval }
+Three kinds of symbols:
+(1) Terminal
+(2) Non-terminal
+(3) Action symbol (1)T-> F {a1} T’ {a2} 
+(2)T’-> * F {a3} T1’ {a4} 
+(3)T’-> Ɛ {a5} 
+(4)F-> digit {a6} 
+a1: T’.inh = F.val
+a2: T.val= T’.syn
+a3: T1’ inh = T’.inh x F.val
+a4: T’.syn = T1’ .syn
+a5: T’.syn = T’.inh
+a6: F.val= digit.lexval
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 67 =====
+Example (cont.)
+68
+Input: 3*5
+Stack top ‘digit’ matches the input ‘3’
+• pop ‘digit’, but value copy is needed
+a6: stack[top-1].val= stack[top].d_lexval
+digit {a6} F’syn {a1} T’ T’syn {a2} Tsyn $
+lexv=3 d_lexv=3 val=3 val=3 inh val val
+(1)T-> F {a1} T’ {a2} 
+(2)T’-> * F {a3} T1’ {a4} 
+(3)T’-> Ɛ {a5} 
+(4)F-> digit {a6} 
+a1:T’.inh = F.val
+a2:T.val = T’.syn
+a3:T1’ inh = T’.inh x F.val
+a4:T’.syn = T1’ .syn
+a5:T’.syn = T’.inh
+a6:F.val = digit.lexval
+T -> F {a1} T’ {a2}
+F -> digit {a6}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 68 =====
+• What we already learnt
+◆ LR > LL, w.r.tparsing power
+ We can do bottom-up if we can do top-down
+◆ S-attributed SDD can be implemented in bottom-up way
+ All semantic actions are at the end of productions, i.e., triggered in reduce
+• For L-SDD on an LL grammar, can it be implemented during 
+bottom-up parsing?
+◆ Problem: semantic actions can be in anywhere of the production body
+L-SDD in LR Parsing
+69
+(1) T -> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’-> *F {T1’.inh = T’.int x F.val} T1’ {T’.syn = T1’.syn}
+(3) T’-> Ɛ {T’.syn = T’.inh }
+(4) F -> digit {F.val= digit.lexval }
+Action Code
+B Inh Attr.
+B.syn Syn Attr.
+C Inh Attr.
+C.syn Syn Attr.
+A.syn Syn Attr.
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 69 =====
+• It is not natural to evaluate inherited attributes
+◆ Example: how to get T’.inh
+• Claims: inherited attributes are on the stack
+◆ L-SDD guarantee they’ve already been computed
+◆ But computed by previous productions - deep in the stack
+• Solution
+◆ Hack the stack to dig out those values
+L-SDD in LR - The Problem
+70
+T
+T’
+T1’F*F
+digit digit ε
+(1) T -> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’-> *F {T1’.inh = T’.int x F.val} T1’ {T’.syn = T1’.syn}
+(3) T’-> Ɛ {T’.syn = T’.inh }
+(4) F -> digit {F.val= digit.lexval }
+F.inh
+？ T’.inh
+12
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 70 =====
+• Given the following SDD, where |⍺| ≠ |β|
+◆ A-> X⍺ {Y .in= X.s}Y | Xβ {Y .in= X.s}Y
+◆ Y-> γ {Y .s= f(Y .in)}
+• Problem: cannot generate stack location for Y .in
+◆ Because X.s is at different relative locations from Y in the stack
+• Solution: insert markers M1, M2 right before Y 
+◆ A-> X ⍺ M1Y | X β M2 Y
+◆ M1-> ε {M1.s= stack[top-|⍺|].s} // M1.s= X.s
+◆ M2-> ε {M2.s= stack[top-|β|].s} // M2.s= X.s
+◆ Y -> γ {Y .s= f(stack[top-|γ|].s) } // Y .s= M1.s or Y .s= M2.s 
+• Marker: a non-terminal marking a location that is the same with the symbol that 
+has an inherited attribute 
+• Always produces ε since it is only a placeholder for an action
+L-SDD in LR - Marker
+71
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 71 =====
+• Given an L-SDD on an LL grammar, we can adapt the grammar to 
+compute the same SDD during an LR parse
+◆ Put a marker non-terminal[标记非终结符] in the place of each embedded action
+ Each of such places gets a distinct marker, say M, where M -> ε [空产生式]
+◆ Modify the action {a} if marker M replaces it in some production A->⍺ {a} β, 
+and associate with M -> ε an action {a’} that
+1. Copies, as inherited attrs of M, any attrs of A or symbols of ⍺ that action {a} needs (e.g., 
+M.i=A.i)[M的继承属性为{a}的输入]
+2. Compute sattrs in the same way as {a}, but makes those attrs be synthesized attrs of M (e.g., 
+M.s= f(M.i)) [M的综合属性为{a}中的输出]
+Modify Grammar with Marker
+72
+A -> {B.i= f(A.i)} BC A-> M B C
+M-> ε {M.i=A.i; M.s= f(M.i)}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 72 =====
+Example
+73
+(1)T -> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’ -> *F {T1’ .inh = T’.int * F.val} T1’ {T’.syn = T1’ .syn}
+(3) T’ -> Ɛ {T’.syn = T’.inh }
+(4) F -> digit {F.val= digit.lexval }
+(1)T-> F M T’ {T.val= T’.syn}
+M->ε {M.i=F.val; M.s= M.i;}
+(2) T’-> *F N T1’ {T’.syn = T1’ .syn}
+N->ε {N.i1=T.inh; N.i2= F.val; N.s = N.i1 * N.i2 }
+(3) T’-> Ɛ {T’.syn = T’.inh }
+(4) F-> digit {F.val= digit.lexval }
+A -> {B.i= f(A.i)} BC
+A-> M B C
+M-> ε {M.i=A.i; M.s= f(M.i)}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 73 =====
+Stack Manipulation[栈操作]
+74
+(1)T -> F {T’.inh = F.val} T’ {T.val= T’.syn}
+(2) T’ -> *F {T1’ .inh = T’.int x F.val} T1’ {T’.syn = T1’ .syn}
+(3) T’ -> Ɛ {T’.syn = T’.inh }
+(4) F -> digit {F.val= digit.lexval }
+(1)T-> F M T’ {T.val= T’.syn}
+M->ε {M.i=F.val; M.s= M.i;}
+(2) T’-> *F N T1’ {T’.syn = T1’ .syn}
+N->ε {N.i1=T.inh; N.i2= F.val; N.s = N.i1 * N.i2 }
+(3) T’-> Ɛ {T’.syn = T’.inh }
+(4) F-> digit {F.val= digit.lexval }
+(1)T-> FMT’ {stack[top-2].val= stack[top].syn; top = top-2;}
+M->ε {stack[top+1].T’inh= stack[top].val; top = top + 1; }
+(2)T’-> * FNT1’ { stack[top-3].syn= stack[top].syn; top = top-3;}
+N->ε {stack[top+1].T’inh= stack[top-2].T’inh * stack[top].val; top = top + 1; }
+(3)T’->ε {stack[top+1].syn= stack[top].T’inh; top = top + 1;}
+(4)F-> digit {stack[top].val=stack[top].lexval;}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 74 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+class
+depended by 
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+extend 
+stack
+LL
+marker
+LR
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 75 =====
+Content
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+Syntax Directed 
+Translation (SDT)
+handle
+symbol 
+table
+type 
+checking
+scope method
+application
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 76 =====
+Binding [绑定]
+• Binding: matching identifier use with definition[使用-定义] 
+◆ Definition: associating an id with a memory location 
+◆ Binding is an essential step before machine code generation
+• If there are multiple definitions, which one to use?
+86
+void foo() 
+{ 
+char x; /* allocated at mem[0x100] */
+...
+{ 
+int x; /* allocated at mem[0x200] */
+… 
+} 
+x = x + 1; /* add mem[0x100],1 ? add mem[0x200],1 ?
+}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 77 =====
+Scope [作用域]
+• Scope: program region where a definition can be bound 
+◆Uses of identifier in the scope is bound to that definition 
+◆For Java: private, global, static, etc...
+• Some properties of scopes 
+◆Use not in scope of any definition results in undefined error 
+◆Scopes for the same identifier can never overlap 
+ There is at most one binding at any given time 
+• Two types: static scoping and dynamic scoping [静态/动态作用域]
+◆Depending on how scopes are formed
+87
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 78 =====
+Static Scoping [静态作用域]
+• Scopes formed by where definitions are in program text[声明起作用
+的那段区域] 
+◆Also known as lexical scoping since related to program text C/C++, Java, 
+Python, JavaScript[也叫词法作用域] 
+• Rule: bind to the closest enclosing definition 
+88
+void foo() 
+{ 
+char x;
+...
+{ 
+int x;
+… 
+} 
+x = x + 1;
+}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 79 =====
+Dynamic Scoping[动态作用域]
+• Scopes formed by when definitions happen during runtime[运行时
+决定] 
+◆Perl, Bash, LISP , Scheme 
+• Rule: bind to most recent definition in current execution 
+• Which x’s definition is the most recent? 
+◆Execution (a): ...(1)...(2)...(5) 
+◆Execution (b): ...(1)...(2)...(3)...(4)...(5)
+89
+void foo()
+{
+(1) char x;
+(2) if (...) {
+(3) int x;
+(4) x=x+1;
+}
+(5) x=‘a’;
+}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 80 =====
+Static vs. Dynamic Scoping[对比]
+• Most languages that started with dynamic scoping (LISP , Scheme, 
+Perl) added static scoping afterwards 
+• Why? With dynamic scoping... 
+◆All bindings are done at execution time 
+◆Hard to figure out by eyeballing, for both compiler and human 
+• Pros of static scoping[静态的好处]
+◆Static scoping leads to fewer programmer errors 
+ Bindings readily apparent from lexical structure of code 
+◆Static scoping leads to more efficient code 
+ Can determine bindings at compile time – allow code optimization
+90
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 81 =====
+What is Symbol Table[符号表]
+• Symbol: same thing as identifier (used interchangeably) 
+• Symbol table: a data structure that tracks info about all symbols 
+◆Each entry represents a definition of that identifier[标识符的定义] 
+◆Maintains definitions that reach current program point[当前作用域中的定义] 
+◆List updated whenever scopes are entered or exited [随作用域改变而更新]
+◆Used to perform binding of identifier uses [用于绑定变量定义与使用]
+ Traversing the parse tree in a separate pass after parsing [单独扫描语法树]
+ Using semantic actions as an integral part of parsing pass [或与语义分析同时]
+◆Usually discarded after generating executable binary
+ Machine code instructions no longer contain symbols 
+◆For use in debuggers, symbol tables may be included 
+ To display symbol names instead of addresses in debuggers 
+ For GCC, using ‘gcc -g” includes debug symbol tables 91
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 82 =====
+Maintaining Symbol Table[维护]
+• Basic idea: 
+int x=0; ... void foo() { int x=0; ... x=x+1; } ... x=x+1 ...
+◆Start processing foo: 
+ Add definition of x, overriding old definition of x if any 
+◆After processing foo: 
+ Remove definition of x, restoring old definition of x if any 
+92
+• Operations: 
+◆enter_scope() start a new scope 
+◆exit_scope() exit current scope
+◆find_symbol(x) find the information about x 
+◆add_symbol(x) add a symbol x to the symbol table 
+◆check_symbol(x) true if x is defined in current scope
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 83 =====
+Symbol Table Structure [结构]
+• Front-end time is affected by symbol table access time[符号表访问
+时间影响编译前端性能] 
+◆ Front-end: lexical, syntax, semantic analysis 
+◆ Frequent searches on any large data structure is expensive 
+◆ Symbol table design is important for compiler performance 
+• What data structure to choose? [可选数据结构] 
+◆ List[线性表] 
+◆ Binary tree[二叉树] 
+◆ Hash table[哈希表] 
+• Tradeoffs: time vs. space[空间和时间的权衡] 
+◆ Let us first consider the organization without scope
+93
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 84 =====
+Symbol Table Structure (cont.)
+• Array: no space wasted, insert/delete: O(n) , search: O(n) 
+• Linked list: extra pointer space, insert/delete: O(1), search: O(n)
+◆Optimization: move recently used identifier to the head
+◆Frequently used identifiers are found more quickly 
+• Binary tree: use more space than array/list 
+◆But insert/delete/search is O(logn) on balanced tree
+◆In the worst case, tree may reduce to linked list 
+ Then insert/delete/search becomes O(n) 
+94
+id1 info1
+id2 info2
+id1 info1 id2 info2
+v_city
+v_salary v_age
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 85 =====
+• S-SDD & LR: Slack manipulation
+• L-SDD: Remove Left Recursion
+• L-SDD & RDP: Extend RDP Function + Slack manipulation
+◆ Inherited: arguments; Synthesized: return
+◆ Use local variables[增加局部变量]
+◆ Embed semantic actions[嵌入语义动作]
+◆ Inherited: along with the symbol; Synthesized: right below the symbol
+• L-SDD & LL(1): Slack manipulation
+• L-SDD & LR: Marker + Slack manipulation
+SDD Implementation Revisit
+95
+1. 左部展开时（i.e., 左部符号本身的记录出栈时），
+若其含有继承属性，则要将继承属性复制给后面
+的动作记录
+2. 综合属性出栈时，要将综合属性值复制给后面的
+动作记录
+A-> X⍺ {Y .in= X.s}Y | Xβ {Y .in= X.s}Y
+Y-> γ {Y .s= f(Y .in)}
+A-> X ⍺ M1Y | X β M2 Y
+M1-> ε {M1.s= stack[top-|⍺|].s} // M1.s= X.s
+M2-> ε {M2.s= stack[top-|β|].s} // M2.s= X.s
+Y -> γ {Y .s= f(stack[top-|γ|].s) } // Y .s= M1.s or Y .s= M2.s 
+A -> {B.i= f(A.i)} BC
+A-> M B C
+M-> ε {M.i=A.i; M.s= f(M.i)}
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 86 =====
+Symbol Table Revisit
+• Binding: matching identifier use with definition[使用-定义] 
+• Scoping:
+• Static: Can be obtained by static code analysis
+• Dynamic: becomes clear only during execution
+• Symbol: same thing as identifier
+• Symbol table: a data structure that tracks info about all symbols 
+• Constructing Symbol table: a tradeoff between time and space
+• Array, Linked list, Binary tree, Hash table
+96
+id1 info1
+id2 info2
+id1 info1 id2 info2
+v_city
+v_salary v_age
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 87 =====
+Symbol Table Structure (cont.)
+• hash(id_name) → index[哈希表]
+◆ A hash function decides mapping from identifier to index 
+◆ Conflicts resolved by chaining multiple IDs to same index 
+• Memory consumption from hash table (N << M)
+◆ M: the size of hash table
+◆ N: the number of stored identifiers 
+• But insert/delete/search in O(1) time
+◆ Can become O(n) with frequent conflicts and long chains 
+• Most compilers choose hash table for its quick access time
+97
+id1 info1
+id3 info3
+id2 info2 nil
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 88 =====
+• To handle multiple scopes in a program [处理多个作用域] 
+◆ Conceptually, need an individual table for each scope 
+ In order to be able to enter and exit scopes 
+◆ Sometimes symbols in scope can be discarded on exit:
+◆Sometimes not:
+• How can scoping be enforced without discarding symbols? 
+◆ Keep a stack of active scopes at a given point 
+◆ Keep a list of all reachable scopes in the entire program
+Adding Scope to Symbol Table[作用域]
+98
+if (...) { int v; } /* block scope */ 
+/* v is no longer valid */
+class X { ... void foo() {...} ... } /* class scope */
+/* foo() is no longer valid */
+X v;
+call v.foo(); /* v.foo() is still valid */
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 89 =====
+Handle Scopes with Stack
+• Organize all symbol tables into a scope stack[作用域栈] 
+◆An individual symbol table for each scope 
+ Scope is defined by nested lexical structure, e.g., { C1 {C2 {C3}} {C4} } 
+◆Stack holds one entry for each open scope 
+ Inner-most scope is stored at the top of the stack 
+• Stack push/pop happen when entering/exiting a scope
+99
+Parsing here
+Symbol tables Scope stack
+C1
+C2
+C3
+C4
+C1’s Symbol Table
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 90 =====
+Handle Scopes with Stack (cont.)
+• Operations: 
+◆When entering a scope 
+ Create a new symbol table to hold all variables declared in that scope 
+ Push a pointer to the symbol table on the stack 
+◆Pop the pointer to the symbol table when exiting scope 
+◆Search from the top of the stack
+100
+Parsing here
+Symbol tables Scope stack
+C2
+C3
+C4
+C1 ‘s Symbol Table
+C2 ‘s Symbol Table
+C3 ‘s Symbol TableC1
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 91 =====
+Info Stored in Symbol Table
+• Entry in symbol table 
+◆String: the name of identifier 
+◆Kind: variable, function, struct type, class type
+• Attributes vary with the kind of symbols 
+◆variable: type, address of variable 
+◆function: prototype, address of function body 
+◆struct type: field names, field types 
+◆class type: symbol table for class
+102
+string kind attributes
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 92 =====
+Attribute List in Symbol Table
+• Type info can be arbitrarily complicated 
+◆ Type can be an array with multiple dimensions 
+char arr[20][20]; 
+◆ Type can be a struct with multiple fields 
+• Store all type info in an attribute list 
+◆ Entry for an array variable with 2 dimensions
+◆ Entry for a struct variable
+◆ Entry for a struct type with 2 fields
+103
+struct Point {
+float x;
+float y;
+} point;
+id array variable base type 1st dimension size 2nd dimension size
+id struct variable point to struct type entry
+id struct type total size field1 id type size field2 id type size
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 93 =====
+Use Type Information[类型信息]
+• Each variable or function entry contains type info 
+• Type info is used in later code generation stage[代码生成]
+◆To calculate how much memory to alloc for a variable 
+ Should a variable assignment be a 4 byte or 8 byte copy? 
+◆To translate uses of variables to machine instructions 
+ Should a ’+’ on variable be an integer or a floating point add? 
+◆To translate calls to functions to machine instructions 
+ What are the types of arguments and return value of the function? 
+• Also used in later code optimization stage[代码优化] 
+◆To help compiler understand semantics of program 
+• Also used in semantic analysis stage for Type Checking
+◆Uses types to check semantic correctness of program 104
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 94 =====
+Type and Type Checking
+• Type: a set of values and a set of operations on these values 
+• Type checking: verifying type consistency across program
+◆A program is type consistent if all operators are consistent with the 
+operand value types 
+◆Much of what we do in semantic analysis is type checking 
+• Some type checking examples: 
+◆Given char *str = “Hello”; 
+ str[2] is consistent: char* type allows [] operator 
+ str/2 is not: char* type does not allow / operator 
+◆Given int pi = 3; 
+ pi/2 is consistent: int type allows / operator
+ pi=3.14 is not: = operator not allowed on different types 
+ Compiler must type convert implicitly to make it consistent 105
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 95 =====
+Static Type Checking[静态类型检查]
+• Static type checking at compile time
+◆Infers[推断] whether the program is type consistent through code analysis 
+ Collect info via declarations that store in symbol table 
+ Check the types involved in each operation 
+ E.g., int a, b, c; a = b + c; can be proven type consistent because the addition of two ints is 
+still an int
+• Difficult for a language to only do static type checking 
+◆Some type errors usually cannot be detected at compile time 
+ E.g., a and b are of type int, a * b may not in the valid range of int 
+ Typecasting can be a pretty risky thing to do - Basically, typecast suspends type checking
+unsigned a; (int) a;
+106
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 96 =====
+Dynamic Type Checking[动态检查]
+• Dynamic type checking at execution time
+◆Type consistency by checking types of runtime values 
+◆Include type info for each data location at runtime 
+ E.g., a variable of type double would contain both the actual double value and some kind 
+of tag indicating “double type” 
+ The execution of any operation begins by first checking these type tags
+ The operation is performed only if everything checks out
+ Otherwise, a type error occurs and usually halts execution 
+◆Array bounds check: 
+ Is int A[10], i; … A[i] = i; type consistent? 
+• Static type checking is always more desirable. Why?
+◆Always good to catch more errors before runtime 
+◆Dynamic type checking carries runtime overhead
+107
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 97 =====
+Static vs. Dynamic Typing[静态-动态]
+• Static typing: C/C++, Java, … 
+◆Variables have static types → hold only one type of value 
+ E.g. int x; → x can only hold ints
+ E.g. char *x; → x can only hold char pointers 
+◆How are types assigned to variables? 
+ C/C++, Java: types are explicitly defined 
+ int x; → explicit assignment of type int to x 
+• Pros/cons of static typing 
+◆ More programmer effort 
+ Programmer must adhere to strict type rules 
+ Defining advanced types can be quite complex (e.g. classes) 
+◆ Less bugs and execution time 
+ Thanks to static type checking
+108
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 98 =====
+Static vs. Dynamic Typing (cont.)
+• Dynamic Typing: Python, JavaScript, PHP , ... 
+◆Variables have dynamic types → can hold multiple types 
+var x; /* var declaration without a static type */ 
+x = 1; /* now x holds an integer value */ 
+x = "one"; /* now x holds a string value */ 
+◆How are types assigned to variables? 
+ Type is a runtime property → type tags stored with values 
+ Dynamic type checking must be done during runtime 
+• Pros/cons of dynamic typing 
+◆Less programmer effort 
+ Flexible type rule means program is more malleable[可塑性强] 
+ Absence of types declarations means shorter code 
+ Suitable for scripting or prototyping languages 
+◆More program bugs and execution time 
+ Due to dynamic type checking 109
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 99 =====
+Type System[类型系统]
+• Static/dynamic typing are type systems
+◆Type System: types and type rules of a language 
+• Static/dynamic type checking are methods
+◆Methods to enforce the rules of the given type system 
+• Static type checking is not used only for static typing 
+◆Also used for dynamic typing if types can be inferred at compile time 
+• Dynamic type checking is not used only for dynamic typing 
+◆Some features of statically typed languages require it 
+ e.g., downcasting[父类向子类的强制类型转换]
+110
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 100 =====
+Summary
+Syntax Directed 
+Definitions (SDD)
+attributes
+Synthesized 
+attribute
+Inherited 
+attribute
+calculation 
+order
+topological 
+order 
+Dependence 
+Graph
+S-SDD L-SDD
+LR-parsable 
+grammar
+LL-parsable
+grammar
+Syntax Directed 
+Translation (SDT)
+add actions at diff position 
+for synth. & inhe. attr
+augment 
+non-terminal 
+functions
+handle
+symbol 
+table
+type 
+checking
+scope method
+class
+depended by 
+application
+semantic rules
+convert S-SDD
+only synthesized
+attr.
+add actions at 
+production end
+semantic actions
+extend 
+stack
+Impl. for LR parser
+convert L-SDD
+LL RDP
+static
+dynamic stack
+chaining
+with diff 
+advantage improve
+offer info
+static
+dynamic
+at execution
+at compile
+extend 
+stack
+LL
+marker
+LR
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 101 =====
+• SDD & SDT
+• Synthesized & inherited attribute
+• Evaluation order – DAG & topological order
+• S-SDD & L-SDD
+• S-SDD -> SDT -> Implementation
+• (LR only) Postfix SDT -> stack extension -> stack manipulation
+• L-SDD -> SDT -> Implementation
+• LL: Eliminate left recursion
+• RDP: inherited attributes (arguments) and synthesized attributes (return values)
+• Predictive Parsing: stack extension (action and synthesized records)
+• LR: Marker -> postfix SDT -> stack extension -> stack manipulation
+Summary
+112
+P
+C1 C2 C3
+P
+C1 C2 C3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 102 =====
+Summary
+• Static and Dynamic Scoping
+◆ Pros of static: fewer errors + more efficient
+• Symbol and Symbol Table
+◆ Structuring: array, list, binary tree, hash table
+◆ Trade-off between time and space
+• Scope handling
+◆ Stack: Inefficient searching and use of memory
+◆ So chaining is introduced
+• Static and dynamic typing and type checking
+◆ Static: less bugs and execution time, but more effort
+◆ Dynamic: less effort, but more bugs and execution time 
+◆ Static ones are more desirable, but is often insufficient, e.g., downcasting
+113
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 103 =====
+• Dragon Book, 2nd Edition
+◆ Comprehensive Reading:
+ Section 5.1-5.3 on introduction to syntax-directed 
+translation.
+ Section 5.4-5.5 on the implementation of 
+translation schemes in top-down and bottom-up 
+LR parsing.
+Further Reading
+114
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 104 =====
+编译原理
+Complier Principles
+Exercise
+Syntax and Semantic Analysis
+赵帅
+计算机学院
+中山大学
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 105 =====
+• 对于一个无二义性文法G，它的一个句子的最左与最右推导产生的分析树一
+定是一样的吗?
+• 对的，是这样的。语法树会隐去推导顺序
+• 怎么样判断一个文法是否为LL(1)型文法?
+• 对文法中的每个产生式 A → α | β:
+• FIRST(α) ∩ FIRST(β) = ∅.
+• If β ⇒ ε, then FIRST(α) ∩ FOLLOW(A) = ∅.
+• LL(1)语法分析表行数与列数分别由哪些因素确定?
+• 行数是该文法的非终结符个数，列数为终结符个数+1（ 结束符号$ ）
+• 设句型aaAb 的最右推导为 S⇒aBb⇒ aaAb ，句柄为aA ，该句型的活前缀是?
+• a, aa, aaA
+Exercise
+116
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 106 =====
+• 找出以下文法中的句型的所有短语，直接短语，句柄
+• 文法: G(E): E → T | E+T; T → F | T*F; F → (E) | a | b | c
+• 句型: a * b + c
+• 第一步：画出语法树
+• 第二步：找出语法树的叶子节点
+• a, *, b, +, c
+• 第三步：由叶子节点找出短语
+• a, a*b, b, c, a*b+c (why not *b, b+c, *, +?)
+• 第四步：从短语中找出直接短语
+• a, b, c
+• 第五步：从直接短语中找出句柄
+• a
+Exercise
+117
+E
++E T
+FT
+*T F
+F
+a
+b
+c
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 107 =====
+• 给定一下文法G(S), 请构建该文法的LL(1)分析表
+• S → A
+• A → 
+• A → bbA
+• FIRST & Follow:
+• S → A: FIRST(α) = {b, }
+• A → : FIRST(α) = {}
+• A → bbA: FIRST(α) = {b}
+• FOLLOW(S) = {$}
+• FOLLOW(A) = {$}
+• Parse Table:
+Exercise
+118
+b $
+S
+A
+b $
+S S → A
+A A → bbA
+b $
+S S → A S → A
+A A → bbA A → 
+use FIRST
+use FOLLOW
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 108 =====
+• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表
+• S → A
+• A → A + A | B + +
+• B → y
+Exercise
+119
+I0:
+S→ · A, $
+A→ ·A+A, +/$
+A→ ·B++, +/$
+B→ ·y, +
+I1:
+B→ y ·, +
+y
+I2:
+S→ A · , $
+A→ A ·+A, +/$
+A
+B
+I3:
+A→B · ++, +/$
++
+I4:
+A→ A+ ·A, +/$
+A→ ·A+A, +/$
+A→ ·B++, +/$
+B→ ·y, +
+y
+B
+A I5:
+A→ A+A ·, +/$
+A→ A ·+A, +/$
++
++ I6:
+A→B+ · +, +/$
++ I7:
+A→B++ · , +/$
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 109 =====
+• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表
+• (1) S → A
+• (2) A → A + A
+• (3) A → B + +
+• (4) B → y
+Exercise
+120
+S ACTOION GOTO
+y + $ A B
+0
+1
+2
+3
+4
+5
+6
+7
+s1 2 3
+r4
+s4
+s6
+s1 5 3
+r2/s4 r2
+s7
+acc
+r3 r3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 110 =====
+• 该文法是LR(1)型文法吗? 若不是，应如何解决? (有多种选择)
+Exercise
+121
+S ACTOION GOTO
+y + $ A B
+0
+1
+2
+3
+4
+5
+6
+7
+s1 2 3
+r4
+s4
+s6
+s1 5 3
+s4 r2
+s7
+acc
+r3 r3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 111 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+122
+Stack Input ACTION GOTO
+0 $ y++$
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 112 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+123
+Stack Input ACTION GOTO
+0 $ y++$ s1
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 113 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+124
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 114 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+125
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 115 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+126
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 116 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+127
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+03 $B ++$ s6
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 117 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+128
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+03 $B ++$ s6
+036 $B+ +$ s7
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 118 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+129
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+03 $B ++$ s6
+036 $B+ +$ s7
+0367 $B++ $ r3(A → B + +)
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 119 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+130
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+03 $B ++$ s6
+036 $B+ +$ s7
+0367 $B++ $ r3(A → B + +)
+0 $A $ 2
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 120 =====
+• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? 
+(1) S → A; (2) A → A + A; (3) A → B + +; (4) B → y;
+Exercise
+131
+Stack Input ACTION GOTO
+0 $ y++$ s1
+01 $y ++$ r4(B → y)
+0 $B ++$ 3
+03 $B ++$ s6
+036 $B+ +$ s7
+0367 $B++ $ r3(A → B + +)
+0 $A $ 2
+02 $A $ acc
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 121 =====
+给定文法G(S): 
+S → Sb | bAa
+A → aSc | aSb | a 
+(1) 拓广文法后，用LR(0)项目构造一个识别G(S)所有活前缀的DFA
+(2) 判断该文法是否为LR(0)文法，并阐明原因
+(3) 判断该文法是否为LR(1)文法，并阐明原因。
+(4) 试构造该文法的SLR(1)分析表。
+Exercise
+132
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 122 =====
+给定文法G(S): 
+S → Sb | bAa
+A → aSc | aSb | a 
+(1) 拓广文法后，用LR(0)项目构造一个识别G(S)所有活前缀的DFA
+Exercise
+133
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 123 =====
+给定文法G(S): 
+S → Sb | bAa
+A → aSc | aSb | a 
+(2) 判断该文法是否为LR(0)文法，并阐明原因
+• 移进—归约：I1，I5
+• 归约—归约：I9
+Exercise
+134
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 124 =====
+给定文法G(S): 
+S → Sb | bAa
+A → aSc | aSb | a 
+(3) 判断该文法是否为LR(1)文法，并阐明原因
+• 该文法是SLR(1)的，所以自然就是LR(1)文法。
+• 理由: 
+• I1: 由于b ∉ FOLLOW(S’)，冲突可通过Lookahead解析
+• I5: 考虑b ∉ FOLLOW(A)，同理可解析
+• I9: FOLLOW(A) ∩ FOLLOW(S) = ∅
+Exercise
+LR(1) LALR(1) SLR(1) LR(0)
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 125 =====
+给定文法G(S): 
+S → Sb | bAa
+A → aSc | aSb | a 
+(4) 试构造该文法的SLR(1)分析表
+Exercise
+(1) S → Sb 
+(2) S → bAa
+(3) A → aSc
+(4) A → aSb
+(5) A → a 
+推荐写增广后的文法 也可以按照课件
+中的分析表写法
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 126 =====
+• 判断题
+• 在L-属性定义（L-Attributed Definition）中，每一个属性都是继承属性
+（Inherited Attribute）。
+• 错。在L-属性定义中，要么是综合属性，要么是受限的继承属性，并非都是继承属
+性。
+• 如果一个翻译模式（Translation Scheme）中存在嵌入在产生式右部的左
+边或中间的语义动作，则该翻译模式只适合使用递归下降预测翻译器
+（Recursive Descent Predictive Translator）来实现，无法使用LR分析技术
+来实现。
+• 错。翻译器分析技术的使用并不是由语义动作的实现决定，而是由文法的特点、语
+义动作的需求以及性能考虑决定。
+Exercise
+137
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 127 =====
+已知文法 G：S’→ S
+• S → (L) | a
+• L → L,S | S
+其语法制导翻译定义如下：
+若输入为(a,(a))，且采用自底向上的分
+析方法，则输出为 。
+Exercise
+138
+产生式 语义动作
+S’→ S print(S.num)
+S → (L) S.num = L.num +1
+S → a S.num = 0
+L → L1, S L.num = L1.num + S.num
+L → S L.num = S.num
+S.num=2
+L.num=1( )
+,L.num=0 S.num=1
+S.num=0
+a
+L.num=0( )
+S.num=0
+a
+2
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 128 =====
+假设我们有一个产生式A→BCD。A、B、C、D这四个非终结符号都有两个属性：
+s是一个综合属性，而i是一个继承属性。对于下面的每组规则，请回答：这些
+规则是否满足S属性定义的要求？这些规则是否满足L属性定义的要求？并给出
+理由。
+• A.s = B.s + D.s
+• 该规则满足S属性定义的要求（每个属性都是综合属性），也满足L属性定义的要求
+（无继承属性）。
+• A.s = B.i + C.s
+• 该规则不满足S属性定义的要求（存在继承属性i），满足L属性定义的要求（存在
+满足限制条件的继承属性i ）。
+• A.s = D.i，B.i = A.s + C.s，C.i = B.s，D.i = B.i + C.i
+• 该规则不满足S属性定义的要求（存在继承属性i），也不满足L属性定义的要求
+（存在不满足限制条件的继承属性B.i, 其依赖右兄弟的综合属性）。
+Exercise
+139
+
+===== 6.Semantic_Analysis_Intro_SDD_SDT.pdf | page 129 =====
+考虑一个非标准的二进制数值系统 ，其中的每个二进制数 b的值（value）被定义为从右至左
+的非零二进制数字表示的十进制数的交替和。例如，value（ε）= 0，value（10）= 21 = 2，
+value（100100）= 22 –25 =–28，value（11110）=21–22 + 23–24 = –10。已知表示非标准二进
+制数字b的文法G如下：
+• S → T | ε
+• T → 0T | 1T
+• T → 0 | 1
+请在表中添加相应的语义动作以计算value（b），
+你只能使用val和tmp两个属性。
+Exercise
+140
+产生式 语义动作
+S → T S.val = T.val；
+S → ε S.val = 0；
+T1 → 0T2
+T1.tmp = T2.tmp * 2；
+T1.val = T2.val；
+T1 → 1T2
+T → 0
+T → 1 T.tmp = 1；
+T.val = 1；
+T1.tmp = T2.tmp * (-2)；
+T1.val = T2.val+T1.tmp；
+T.tmp = -1；
+T.val = 0；

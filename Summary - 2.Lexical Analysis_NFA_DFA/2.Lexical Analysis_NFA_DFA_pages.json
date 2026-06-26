@@ -1,0 +1,322 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture2\nLexical Analysis: NFA&DFA\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "Content\n3\nNFA\nDFA\nTable-Driven \nImplementation\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nTranslation\nTranslation\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\nFrom Specification to Implementation\nAutomatic\n"
+  },
+  {
+    "page": 3,
+    "text": "• REs is only a language specification[只是定义了语言]\n◆to construct a token recognizer for languages given by regular expressions\n• How do we go from specification to implementation?\n◆Regular expressions can be implemented using finite automata\n◆There are two types of automata\nNFAs (nondeterministic finite automata) [非确定的有穷自动机]\nDFAs (deterministic finite automata) [确定的有穷自动机]\nFinite Automata[有穷自动机] \n4\nFinite Automata(FA) [有穷自动机] \nRegular\nexpressions\nNFA\nDFA\nTable-driven \nImplementation\nLexical\nSpecification\n"
+  },
+  {
+    "page": 4,
+    "text": "• Regular Expression = specification[正则表达是定义]\n• Finite Automata = implementation[自动机是实现]\n• Automaton (pl. automata): a machine or program\n• Finite automaton (FA): a program with a finite number of states\n• Finite Automata are similar to transition diagrams\n◆They have states and labelled edges\n◆There are one unique start state and one or more than one final states\nFinite Automata[有穷自动机] \n5\n"
+  },
+  {
+    "page": 5,
+    "text": "• Node[节点]: state\n◆Each state represents a condition that may occur in the process\n◆Initial state (Start): only one, circle marked with ‘start’ \n◆Final state (Accepting): may have multiple, double circle\n• Edge[边]: transition.  directed, labeled with the symbol(s)\n◆From one state to another on the input\nTransition Diagram[转换图]\n6\n1\nstart\n"
+  },
+  {
+    "page": 6,
+    "text": "• An FA is a program for classifying strings (return: accept, reject)\n◆In other words, a program for recognizing a language\n◆For a given string ‘x’, if there is a transition sequence for ‘x’ to move from \nthe start state to a certain accepting state, then we say ‘x’ is accepted by \nthe FA. Otherwise, rejected\n• Language of FA = set of strings accepted by that FA\n• L(FA) ≡ L(RE)\nFA: Language\n7\n"
+  },
+  {
+    "page": 7,
+    "text": "• Are the following strings acceptable?\n◆0   √\n◆1    ×\n◆11110    √\n◆11101    ×\n◆11100    ×\n◆1111110    √\n• What language does the state graph recognize? ∑ = {0, 1}\n• Any number of ‘1’s followed by a single 0 \nExample\n8\n1\nstart\n0\n"
+  },
+  {
+    "page": 8,
+    "text": "• Deterministic Finite Automata (DFA): the machine can exist in only \none state at any given time[确定的有限状态机]\n◆One transition per input per state\n◆No ε-moves\n◆Takes only one path through the state graph\n• Nondeterministic Finite Automata (NFA): the machine can exist in \nmultiple states at the same time[非确定的有限状态机]\n◆Can have multiple transitions for one input in a given state\n◆Can have ε-moves\n◆Can choose which path to take\nAn NFA accepts if some of these paths lead to accepting state at the end \nof input\nDFA and NFA\n9\n"
+  },
+  {
+    "page": 9,
+    "text": "• 5 components  ( ∑, S, n, F, δ )\n◆An input alphabet Σ \n◆A set of states S\n◆A start state n ∈ S \n◆A set of accepting states F ⊆ S\n◆A set of transitions δ: 𝐒𝐚\n𝐈𝐧𝐩𝐮𝐭𝐒𝐛\nState Graph\n10\n0\nstart\n"
+  },
+  {
+    "page": 10,
+    "text": "• NFA: There are many possible moves: to accept a string, we only \nneed one sequence of moves that lead to a final state\n \n− Input string: aabb\n \n− Successful sequence:\n \n− Unsuccessful sequence:\nComparison of NFA and DFA\n11\nAn NFA accepts (alb)*abb\n0 ՜\n𝑎0 ՜\n𝑎1 ՜\n𝑏 2 ՜\n𝑏 3\n0 ՜\n𝑎0 ՜\n𝑎0 ՜\n𝑏 0 ՜\n𝑏 0\nStart state\nAccepting state\n"
+  },
+  {
+    "page": 11,
+    "text": "• DFA: There is only one possible sequence of moves, either lead to \na final state and accept or the input string is rejected\n \n \n− Input string: aabb\n \n− Successful sequence:\nComparison of NFA and DFA\n12\nA DFA accepts (alb)*abb\n0 ՜\n𝑎1 ՜\n𝑎1 ՜\n𝑏 2 ՜\n𝑏 3\n"
+  },
+  {
+    "page": 12,
+    "text": "• FA can also be represented using transition table\n• Advantage\n◆We can easily find the transitions on a given state and input. \n• Disadvantage \n◆It takes a lot of space, when the input alphabet is large, yet most states do \nnot have any moves on most of the input symbols.\nNeed finite memory O(|S| * |∑|)\nTransition Table\n13\n"
+  },
+  {
+    "page": 13,
+    "text": "Content\n14\nRegular \nExpression\nNFA\nLexical\nAnalyzer\nToken\nThompson\nAlgorithm\nImpl.\n（Class, Lexeme）\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs\n③\nPerform DFA minimization\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 14,
+    "text": "Basic: processing atomic REs\n• NFA for \n• NFA for single character a\nConstruct NFA for RE\n16\n\nstart\na\nstart\n（Thompson算法）\n"
+  },
+  {
+    "page": 15,
+    "text": "Inductive: processing compound Res\n                R=A|B\n                   R=AB\n                   R=A*\nConstruct NFA for RE\n17\nA\nB\n\n\n\n\nA\nB\n\nA\n\n\n\n\n"
+  },
+  {
+    "page": 16,
+    "text": "• Convert “(a|b)*abb” to NFA\nExample\n18\na\nb\n\n\n\n\nA\n\n\n\n\n(a|b)\n(a|b)*\nR=A*\na\nb\n\n\n\n\n\n\n\n\n"
+  },
+  {
+    "page": 17,
+    "text": "• Convert “(a|b)*abb” to NFA\nExample\n19\n(a|b)*abb\na\nb\n\n\n\n\n\n\n\n\na\nb\n\n\n\n\n\n\na\nb\n\n\nb\n(a|b)*\n"
+  },
+  {
+    "page": 18,
+    "text": "Revisit\n20\nFrom Specification to Implementation\nLanguage \nSpecification\nToken\nRegular \nExpression\nPattern\nLexical\nAnalyzer\nToken\nExpress\nMatch\n（Class, Lexeme）\nSource code\nConsist\nLexeme\nAbstract\nInstance\nSpecify\nImpl.\n"
+  },
+  {
+    "page": 19,
+    "text": "Revisit\n21\nRegular \nExpression\nNFA\nDFA\nLexical\nAnalyzer\nToken\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nImpl.\n（Class, Lexeme）\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs – Subset-Construction Algorithm\n③\nPerform DFA minimization\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 20,
+    "text": "⚫Specification: Regular Expression\n⚫Compound Regular Expression\n⚫E.g., (ab)*, (a|b)*, (a*b*)* \n⚫Removing Ambiguity: keyword first, maximal match, the one listed first\n⚫Implementation: Finite Automata\n⚫Non-Deterministic Finite Automata (NFA)\n⚫Deterministic Finite Automata (DFA)\n⚫Transition Table\n⚫Thompson Algorithm\n⚫From REs to NFAs (systemic way)\n⚫Use to connect small NFAs\nRevisit\n22\n"
+  },
+  {
+    "page": 21,
+    "text": "Content\n23\nRegular \nExpression\nNFA\nDFA\nLexical\nAnalyzer\nToken\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nImpl.\n（Class, Lexeme）\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs – Subset-Construction Algorithm\n③\nPerform DFA minimization\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 22,
+    "text": "• NFA and DFA are equivalent\nFrom NFA to DFA\nTo show this we must prove every DFA can be converted into an \nNFA which accepts the same language, and vice-versa \n25\n"
+  },
+  {
+    "page": 23,
+    "text": "• Theorem: L(NFA) ≡ L(DFA)\n◆Both recognize regular languages L(RE)\n◆对于每个NFA M存在一个DFA M'，使得L(M)=L(M’)\nNFA与NFA描述能力相同!\n• Resulting DFA consumes more memory than NFA\n◆Potentially larger transition table as shown later\n• But DFAs are faster to execute\n◆For DFAs, number of transitions == length of input\n◆For NFAs, number of potential transitions can be larger\n◆NFA→ DFA conversion is needed because the speed of DFA far \noutweighs its extra memory consumption\nFrom NFA to DFA\n26\n"
+  },
+  {
+    "page": 24,
+    "text": "• Recall DFA\n◆Every state must have exactly one transition defined for every letter\n◆ε-moves are not allowed\nNFAs have multiple transition, while DFAs can only have one transition \nin one time\n• Subset construction[子集构造法]\n◆Each state of the constructed DFA corresponds to a set of NFA states\nAfter reading input 𝑎1𝑎2 … 𝑎𝑛, the DFA is in that state which \ncorresponds to the set of states that the NFA can reach, from its start \nstate, following paths labeled 𝑎1𝑎2 … 𝑎𝑛\nFrom NFA to DFA\n27\n"
+  },
+  {
+    "page": 25,
+    "text": "• Two problem need to solve\n◆Eliminate ε-transition\n◆Eliminate multiple transitions from a state on a single character\n• The ε-closure of a set of states\n◆The set of all states reachable by a series of zero or more ε-transitions from \nthe set of states\n◆That is, about a set I\nFrom NFA to DFA\n28\nε-closure(I) = I∪{s1, s2} \ns2\ns1\nε\nε\nI\n"
+  },
+  {
+    "page": 26,
+    "text": "Notion in the algorithm\n• ε-closure(s)\nThe set of all states reachable by a series of \nzero or more ε-transitions from state s\n• ε-closure(T)\nThe set of all states reachable by a series \nof zero or more ε-transitions from the set \nof states T\n• 𝑚𝑜𝑣𝑒𝑇, 𝑎= 𝑡𝑠 ∈𝑇 𝑎𝑛𝑑 𝑠՜\n𝑎𝑡}\nSet of NFA states to which there is a \ntransition on input symbol a from some \nstate s in T\nFrom NFA to DFA: Algorithm\n29\nThen, we will give a simple explanation \nby using the following symbols:\n•\nI is a set of states,\n•\na is a character in the alphabet\n•\n𝑚𝑜𝑣𝑒𝐼, 𝑎= 𝑡𝑠 ∈𝐼 𝑎𝑛𝑑 𝑠՜\n𝑎𝑡}\n•\n𝐼𝑎= ε-closure(𝑚𝑜𝑣𝑒𝐼, 𝑎)\n"
+  },
+  {
+    "page": 27,
+    "text": "• Step1: Start by constructing ε-closure of the start state\n◆𝐼 = ε-closure(state 0) = {0, 1, 3}\n◆{0, 1, 3} is a new state for DFA, marked T0\nExample\n30\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3}   mark T0\n0\n1\n2\n3\n4\nε\nε\na\nb\na\nb\nstart\n"
+  },
+  {
+    "page": 28,
+    "text": "• Step1: Start by constructing ε-closure of the start state\n◆𝐼 = ε-closure(state 0) = {0, 1, 3}\n• Step2: Keep getting ε-closure(move(𝐼, x)) for each character x in Σ\n◆Computing for the new state until there are no more new states\n◆𝐼 ={0, 1, 3}, move(𝐼, a) = {2, 4}, ε-closure({2, 4}) = {2, 4}\n◆𝐼𝑎 = ε-closure(move(𝐼, a)) = {2, 4}\n◆𝐼𝑏 = ε-closure(move(𝐼, b)) = {4}\n◆{2, 4} and {4} are sets of state that have never been obtained.\nExample Cont.\n31\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3}   mark T0\n{2, 4}    mark T1\n{4}  mark T2\n{2, 4}   T1\n{4}    T2\n0\n1\n2\n3\n4\nε\nε\na\nb\na\nb\nstart\n"
+  },
+  {
+    "page": 29,
+    "text": "• Step1: Start by constructing ε-closure of the start state\n◆𝐼 = ε-closure(state 0) = {0, 1, 3}\n• Step2: Keep getting ε-closure(move(𝐼, x)) for each character x in Σ\n◆For T1 = {2, 4}\n◆ 𝐼𝑎 = ε-closure(move({2, 4} , a)) = {}  dead state [text book 3.8.3]\n◆ 𝐼𝑏 = ε-closure(move({2, 4} , b)) = {1, 3}   new state\n◆For T2 = {4}, ….\n◆Stop, when there are no more new states\nExample Cont.\n32\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3}   mark T0\n{2, 4}    mark T1\n{4}  mark T2\n{2, 4}   T1\n{1, 3}   mark T3\n{4}    T2\n{1,3}   T3\n{2,4}   T1\n{4}   T2\n0\n1\n2\n3\n4\nε\nε\na\nb\na\nb\nstart\n"
+  },
+  {
+    "page": 30,
+    "text": "• Step1: Start by constructing ε-closure of the start state\n◆𝐼 = ε-closure(state 0) = {0, 1, 3}\n• Step2: Keep getting ε-closure(move(𝐼, x)) for each character x in Σ\n◆Stop, when there are no more new states\n• Step3: Mark as accepting for those states that contain an \naccepting state\nExample Cont.\n33\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3}   mark T0\n{2, 4}    mark T1\n{4}  mark T2\nT0 No\n{2, 4}   T1\n{1, 3}   mark T3\nT1 Yes\n{4}    T2\nT2 Yes\n{1,3}   T3\n{2,4}   T1\n{4}   T2\nT3 No \n0\n1\n2\n3\n4\nε\nε\na\nb\na\nb\nstart\n"
+  },
+  {
+    "page": 31,
+    "text": "• Construct DFA\nExample Cont.\n34\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3} T0\n{2, 4}    mark T1\n{4}  mark T2\nT0 No\n{2, 4}   T1\n{1, 3}   mark T3\nT1 Yes\n{4}    T2\nT2 Yes\n{1,3}   T3\n{2,4}   T1\n{4}   T2\nT3 No \n3\n1\n2\n0\nstart\na\na\nb\nb\nb\n"
+  },
+  {
+    "page": 32,
+    "text": "Content\n35\nRegular \nExpression\nNFA\nDFA\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs – Subset-Construction Algorithm\n③\nPerform DFA minimization – Partition Algorithm\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 33,
+    "text": "• Theory: Given any DFA, there is an equivalent DFA containing a minimum \nnumber of states, and this minimum-state DFA is unique\n• Equivalent States\n If s and t are two states, they are equivalent if and only if:\n①s and t are both accepting states or both non-accepting states. \n②For each character x∈Σ, s and t have transitions on x to the equivalent states\nMinimizing DFA \n36\nStates BC and AC do not \nneed differentiation\n"
+  },
+  {
+    "page": 34,
+    "text": "• The algorithm\nPartitioning the states of a DFA into groups of states that cannot be \ndistinguished (i.e., equivalent)\n①First, split the set of states into two sets, one consists of all accepting states \nand the other consists of all non-accepting states.\n②Consider the transitions on each character ‘x’ of the alphabet for each \nsubset, and determine whether all the states in the subset are equivalent, \nor the subset should be split.\n③Continue this process until no further splitting of sets occurs\nMinimization Algorithm\n37\n"
+  },
+  {
+    "page": 35,
+    "text": "• Step 1：Divide the states into two sets\nInitial sets: {non-accepting states}, {accepting states}\nInitial: {A} , {BC, AC}\n• Step 2:   check if the states are equivalent\nFor {BC, AC}\nBC on ‘0’ →AC, AC on ‘0’ →AC\nBC on ‘1’ →BC, AC on ‘1’ →BC\nNo way to distinguish BC from AC on any string starting with ‘0’ or ‘1’\nFinal: {A}, {BCAC}\nSimple Example for Minimizing DFA \n38\n"
+  },
+  {
+    "page": 36,
+    "text": "①Initial\n{S, A, B} and {C, D, E, F},      {non-accepting states} and {accepting states}\n②Consider all states in each subset, check the transitions for each x∈Σ\nNow we have two subsets {C,D,E,F} and {S,A,B}\nFor 𝑰𝟏 = {C, D, E, F}\nExample: Minimization\n39\na\nC\nD\nB\nA\nE\nF\nS\nb\na\na\na\na\na\nb\nb\nb\nb\nb\na\nb\n𝐶, 𝐷, 𝐸, 𝐹՜\n𝑎{𝐶, 𝐹} ⇒{𝐶, 𝐷, 𝐸, 𝐹} ՜\n𝑎{𝐶, 𝐷, 𝐸, 𝐹}\n𝐶, 𝐷, 𝐸, 𝐹՜\n𝑏{𝐷, 𝐸} ⇒{𝐶, 𝐷, 𝐸, 𝐹} ՜\n𝑏{𝐶, 𝐷, 𝐸, 𝐹}\n⇒\nFor each character x ∈{a, b}, \nall the states in {C, D, E, F} \nhave the same transition on x.\nAll the states in {C, D, E, F} are equivalent\nNow we still have {C,D,E,F} and {S,A,B}.\n"
+  },
+  {
+    "page": 37,
+    "text": "①Initial\n{S, A, B} and {C, D, E, F}\n②Consider all states in each subset, check the transitions for all x∈Σ\nFor 𝐼1 = {C, D, E, F},  all states in 𝐼1 are equivalent. \nFor 𝑰𝟐 = {S, A, B}, for each states, check x ∈{a, b}\nCheck character a\n𝑆՜\n𝑎𝐴, 𝐴՜\n𝑎𝐶, 𝐵՜\n𝑎𝐴 ⇒𝑆, 𝐵՜\n𝑎𝐴, 𝐴՜\n𝑎𝐶, 𝐷, 𝐸, 𝐹⇒ {S, B} and A have \ndifferent transition on 𝑎  ⇒  {S, B} and A are not equivalent.\nSo split {S, A, B} to {S, B} and {A}. \nNow we have {C, D, E, F}, {S, B}, {A}.\nExample: Minimization Cont.\n40\na\nC\nD\nB\nA\nE\nF\nS\nb\na\na\na\na\na\nb\nb\nb\nb\nb\na\nb\n"
+  },
+  {
+    "page": 38,
+    "text": "①Initial\n{S, A, B} and {C, D, E, F}\n②Consider all states in each subset, check the transitions for all x∈Σ\nFor 𝐼1 = {C, D, E, F},  all states in 𝐼1 are equivalent. Now we still have {C,D,E,F} and {S,A,B}.\nFor 𝑰𝟐 = {S, A, B}, for each states, check x ∈{a, b}\n𝑆՜\n𝑏𝐵, 𝐵՜\n𝑏{𝐶, 𝐷, 𝐸, 𝐹}\nExample: Minimization Cont.\n41\na\nC\nD\nB\nA\nE\nF\nS\nb\na\na\na\na\na\nb\nb\nb\nb\nb\na\nb\nNow we have {C, D, E, F}, {S, B}, {A}.\nKeep checking the subset {S, B}.\n𝑆, 𝐵՜\n𝑎𝐴\nSo split {S, B} to {S} and {B}.\nNow we have {C,D,E,F}, {S}, {B}, {A}.\nSince all states in {C,D,E,F} are equivalent and {S},{B},{A} each contain only one state, no further \nsplitting of sets will occur. Stop this process.\n⇒ S and B are not equivalent.\n"
+  },
+  {
+    "page": 39,
+    "text": "③Finally, get the subsets and draw min DFA\n{C, D, E, F}, {S}, {A}, {B}\n{C, D, E, F} is denoted as {C}\nExample: Minimization Cont.\n42\na\nC\nD\nB\nA\nE\nF\nS\nb\na\na\na\na\na\nb\nb\nb\nb\nb\na\nb\nC\nB\nA\nS\na\na\na\nb\nb\nb\na, b\nMinimization DFA\n{𝐶, 𝐷, 𝐸, 𝐹} ՜\n𝑎{𝐶, 𝐷, 𝐸, 𝐹}\n{𝐶, 𝐷, 𝐸, 𝐹} ՜\n𝑏{𝐶, 𝐷, 𝐸, 𝐹}\n{𝑆} ՜\n𝑏{𝐵}\n{𝑆} ՜\n𝑎{𝐴}\n{𝐴} ՜\n𝑎{𝐶, 𝐷, 𝐸, 𝐹}\n{𝐴} ՜\n𝑏{𝐵}\n{𝐵} ՜\n𝑏{𝐶, 𝐷, 𝐸, 𝐹}\n{𝐵} ՜\n𝑎{𝐴}\n"
+  },
+  {
+    "page": 40,
+    "text": "• Is the DFA minimal?\nExample\n44\n3\n1\n2\n0\nstart\na\na\nb\nb\nb\n0,3\n1\n2\nstart\na\nb\nb\n1. Initial: {0,3} and {1,2} \n2. Check all states in {1,2}\n state 2 have no transition, \n  state 1 have transition on b. \n {1} and {2} are not equivalent.\n Now we have {0,3} {1} {2}.\n3. Check all states in {0,3}\n Move({0,3}, a) = {1} \n Move({0,3}, b) = {2}.\n 0 and 3 are equivalent states.\nResult:  {0,3} {1} {2}.\n"
+  },
+  {
+    "page": 41,
+    "text": "• NFA may be in many states at any time\n• How many different possible states in DFA?\n◆If there are N states in NFA, the DFA must be in some subset of those N \nstates\n◆How many non-empty subsets are there?\n2𝑁−1\n• The resulting DFA has O(2N) space complexity, where N is \nnumber of original states in NFA\n◆For real languages, the NFA and DFA have about same number of states\nNFA → DFA: Space Complexity[复杂度]\n45\n"
+  },
+  {
+    "page": 42,
+    "text": "• DFA execution\n◆Requires O(|X|) steps, where |X| is the input length\n◆Each step takes constant time\nIf current state is S and input is c, then read T[S, c]\nUpdate current state to state T[S, c]\n◆Time complexity = O(|X|)\n• NFA execution\n◆Requires O(|X|) steps, where |X| is the input length\n◆Each step takes O(𝑁2) time, where N is the number of states\nCurrent state is a set of potential states, up to N\nOn input c, must union all T[Spotential, c], up to N times\n- Each union operation takes O(N) time\n◆Time complexity = O(|X|* 𝑁2)\nNFA → DFA: Time Complexity[复杂度]\n46\nDeterministic: \nFor input c, \nunique transition\nNon-deterministic: \nFor input c,\nform current state, \nyour can transit to any \nstates (including itself)\n"
+  },
+  {
+    "page": 43,
+    "text": "Revisit\n47\nRegular \nExpression\nNFA\nDFA\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs – Subset-Construction Algorithm\n③\nPerform DFA minimization – Partition Algorithm\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 44,
+    "text": "Basic: processing atomic REs\n• NFA for \n• NFA for single character a\nConstruct NFA for RE (Revisit)\n48\n\nstart\na\nstart\n（Thompson算法）\n"
+  },
+  {
+    "page": 45,
+    "text": "Inductive: processing compound Res\n                R=A|B\n                   R=AB\n                   R=A*\nConstruct NFA for RE (Revisit)\n49\nA\nB\n\n\n\n\nA\nB\n\nA\n\n\n\n\n"
+  },
+  {
+    "page": 46,
+    "text": "Notion in the algorithm\n• ε-closure(s)\nThe set of all states reachable by a series of \nzero or more ε-transitions from state s\n• ε-closure(T)\nThe set of all states reachable by a series \nof zero or more ε-transitions from the set \nof states T\n• 𝑚𝑜𝑣𝑒𝑇, 𝑎= 𝑡𝑠 ∈𝑇 𝑎𝑛𝑑 𝑠՜\n𝑎𝑡}\nSet of NFA states to which there is a \ntransition on input symbol a from some \nstate s in T\nFrom NFA to DFA (Revisit)\n50\nThen, we will give a simple explanation \nby using the following symbols:\n•\nI is a set of states,\n•\na is a character in the alphabet\n•\n𝑚𝑜𝑣𝑒𝐼, 𝑎= 𝑡𝑠 ∈𝐼 𝑎𝑛𝑑 𝑠՜\n𝑎𝑡}\n•\n𝐼𝑎= ε-closure(𝑚𝑜𝑣𝑒𝐼, 𝑎)\n"
+  },
+  {
+    "page": 47,
+    "text": "• Step1: Start by constructing ε-closure of the start state\n◆𝐼 = ε-closure(state 0) = {0, 1, 3}\n• Step2: Keep getting ε-closure(move(𝐼, x)) for each character x in Σ\n◆Stop, when there are no more new states\n• Step3: Mark as accepting for those states that contain an \naccepting state\nFrom NFA to DFA (Revisit)\n51\n𝐼\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0, 1, 3}   mark T0\n{2, 4}    mark T1\n{4}  mark T2\nT0 No\n{2, 4}   T1\n{1, 3}   mark T3\nT1 Yes\n{4}    T2\nT2 Yes\n{1,3}   T3\n{2,4}   T1\n{4}   T2\nT3 No \n0\n1\n2\n3\n4\nε\nε\na\nb\na\nb\nstart\n"
+  },
+  {
+    "page": 48,
+    "text": "• Step 1：Divide the states into two sets\nInitial sets: {non-accepting states}, {accepting states}\nInitial: {A} , {BC, AC}\n• Step 2:   check if the states are equivalent\nFor {BC, AC}\nBC on ‘0’ →AC, AC on ‘0’ →AC\nBC on ‘1’ →BC, AC on ‘1’ →BC\nNo way to distinguish BC from AC on any string starting with ‘0’ or ‘1’\nFinal: {A}, {BCAC}\nMinimizing DFA (Revisit)\n52\n"
+  },
+  {
+    "page": 49,
+    "text": "Content\n53\nRegular \nExpression\nNFA\nDFA\nTable-Driven \nImplementation\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nTranslation\nTranslation\nImpl.\n（Class, Lexeme）\nMinimizing\nSource code\nConsist\n①\nConverting REs to NFAs – Thompson Algorithm\n②\nConverting NFAs to DFAs – Subset-Construction Algorithm\n③\nPerform DFA minimization – Partition Algorithm\n④\nConverting DFAs to table-driven implementations\n"
+  },
+  {
+    "page": 50,
+    "text": "• Lex[词法分析器]: RE → NFA → DFA → Table\n◆Converts regular expressions to NFA\n◆Converts NFA to DFA \n◆Performs DFA state minimization to reduce space\n◆Generate the transition table from DFA \n◆Performs table compression to further reduce space\n• Most other automated lexers also choose DFA over NFA\n◆Trade off space for speed\nImplementation in Practice[实际实现]\n54\nRegular\nexpressions\nNFA\nDFA\nMinimal DFA\nLex\n"
+  },
+  {
+    "page": 51,
+    "text": "• A Lex program is turned into a transition table and actions, which are used by a \nFA simulator\n• Automaton need to recognize lexemes matching any of the patterns in a program\nLexical Analyzer Generated by Lex\n55\n"
+  },
+  {
+    "page": 52,
+    "text": "• Three patterns, three NFAs\n• Combine three NFAs into a single NFA\nAdd start state 0 and ε-transitions\nLex: Example\n56\na \n \n {action1}\nabb  \n {action2}\na*b+ \n {action3}\nstart\na\n1\n2\n3\n4\n5\n6\n7\n8\nstart\nstart\na\nb\nb\nb\nb\na\nε\na\n1\n2\n3\n4\n5\n6\n7\n8\nε\nε\na\nb\nb\nb\nb\na\n0\nstart\nAny one is possible, \nif you haven’t read \nany input symbol\n"
+  },
+  {
+    "page": 53,
+    "text": "• Input: aaba\n◆ε-closure(0) = {0, 1, 3, 7}\n◆Empty states after reading the fourth input symbol \nThere are no transitions out of state 8 \nBack up, looking for a set of states that include an accepting state\n◆State 8: a*b+ has been matched\n◆Select aab as the lexeme, execute action3  \nReturn to parser indicating that token with pattern a*b+ has been found\nLex: Example\n57\nε\na\n1\n2\n3\n4\n5\n6\n7\n8\nε\nε\na\nb\nb\nb\nb\na\n0\nstart\n0\n1\n3\n7\n2\n4\n7\na\n7\na\n8\nb\na\nnone\na*b+\n(a*b+, aab), (a, a)\naaba\na \n{action1}\nabb \n{action2}\na*b+  {action3}\n"
+  },
+  {
+    "page": 54,
+    "text": "• DFA’s for lexical analyzer \n• Input: abba\n◆Sequence of states entered: 0137 →247 →58 →68\n◆At the final a, there is no transition out of state 68\n68 itself is an accepting state that reports pattern abb\nLex: Example\n58\n0137\n247\n58\n68\n8\n7\na\na\na\nb\nb\nb\nb\nb\na\na*b+\nabb\na*b+\nb\nstart\n"
+  },
+  {
+    "page": 55,
+    "text": "• In general, find the longest match possible\n◆We have seen examples\n◆One more example: input string aabbb …\nHave many prefixes that match the third pattern \nContinue reading b’s until another a is met \nReport the lexeme to be the initial a’s followed by as many b’s as there are\n• If same length, appearing first takes precedence[先出现的优先]\n◆String abb matches both the second and third pattern\n◆We consider it as a lexeme for pattern2, since that pattern listed first\nHow Much Should We Match?[匹配多少]\n59\n1          a  \n          {action1}\n2          abb \n \n {action2}\n3          a*b+ \n          {action3}\n"
+  },
+  {
+    "page": 56,
+    "text": "• Example: to recognize the following tokens\n◆ Identifiers: letter( letter | digit )*\n◆ Keywords: if, then, else\n• Approach 1: make REs for keywords and place them before REs \nfor identifiers so that they will take precedence\n◆Will result in a more bloated[臃肿] finite state machine\n• Approach 2: recognize keywords and identifiers using the same \nRE but differentiate using special keyword table \n◆Will result in more streamlined finite state machine \n◆But extra table lookup is required\n• Usually approach 2 is more efficient than 1\nHow to Match Keywords?[匹配关键字]\n60\n"
+  },
+  {
+    "page": 57,
+    "text": "• Three patterns, three NFAs\n• Combine three NFAs into a single NFA\nAdd start state 0 and ε-transitions\nLex: Example\n61\na \n \n {action1}\nabb  \n {action2}\na*b+ \n {action3}\nε\na\n1\n2\n3\n4\n5\n6\n7\n8\nε\nε\na\nb\nb\nb\nb\na\n0\nstart\nstart\na\n1\n2\n3\n4\n5\n6\n7\n8\nstart\nstart\na\nb\nb\nb\nb\na\n"
+  },
+  {
+    "page": 58,
+    "text": "• Input: abbb\n◆ε-closure(0) = {0, 1, 3, 7}\n◆Select aab as the lexeme, execute {action3}\nReturn to parser indicating that token with pattern a*b+ has been found\nLex: Example\n62\nε\na\n1\n2\n3\n4\n5\n6\n7\n8\nε\nε\na\nb\nb\nb\nb\na\n0\nstart\n0\n1\n3\n7\n2\n4\n7\na\n7\na\n8\nb\na\nnone\na*b+\na\nabb\na*b+\nWhy not a?\nWhy not a*b+?[二义性问题]\nQ: 这个例子中，有几处二义性问题？\n"
+  },
+  {
+    "page": 59,
+    "text": "• The accepting states are labeled by the pattern that is identified \nby that state. \n◆{6,8} can accept abb and a*b+. \n◆Since the abb is listed first, it is the pattern of {6,8}. \nLex: Example\n64\nI\n𝑰𝒂\n𝑰𝒃 \n{0, 1, 3, 7}\n{2, 4, 7}\n{8}\n{2, 4, 7}   \n{7}\n{5, 8}\n{8}    \n{8}\n{7}\n{7}   \n{8}   \n{5, 8}\n{6, 8}\n{6, 8}\n{8}\n0137\n247\n58\n68\n8\n7\na\na\na\nb\nb\nb\nb\nb\na\na*b+\nabb \na*b+\nb\na\na*b+ \nabb, a*b+ \na*b+ \nDragon book Fig. 3.54\n"
+  },
+  {
+    "page": 60,
+    "text": "• Question\n◆Is this DFA minimal?\n◆are 8, 68, 58 really equivalent? \nLex: Example\n65\n0137\n247\n58\n68\n8\n7\na\na\na\nb\nb\nb\nb\nb\na\na*b+\nabb\na*b+\nb\n"
+  },
+  {
+    "page": 61,
+    "text": "• Depends on the language and the implementation approach\n◆if abb is a keyword\nApproach 1: identify abb explicitly by FA with precedence.\nApproach 2: identify abb by an extra table\n• Initial partition:\n◆Non-accepting, accepting \n◆{0137, 7},  {247},  {8, 58}, {68}\n• Split {0137, 7} \n◆move to different partitions on ‘a’ \n• Split {8, 58}\n◆move to different partitions on ‘b’\nLex: Example\n66\n"
+  },
+  {
+    "page": 62,
+    "text": "• Depends on the language and the implementation approach\n◆if abb is a keyword\nApproach 1: identify abb explicitly by FA\nApproach 2: identify abb by an extra table\n◆Or it is just an identifier\n• Initial partition:\n◆non-accepting: {0137, 7},\n◆accepting a: {247}, \n◆accepting a*b+: {58, 68, 8}, \n• Cannot split {58, 68, 8} \n◆No move on ‘a’ \n◆Move to {68, 8} on ‘b’\nLex: Example\n67\n"
+  },
+  {
+    "page": 63,
+    "text": "• For ∑={a, b}\n• The set of strings S over this alphabet consisting of a single b \nsurrounded by the same number of a.  \n  S = {b, aba, aabaa, aaabaaa, …} \n  L = {𝑎𝑛𝑏𝑎𝑛| n ≥ 0}\n   the regular expression is?\nThe Limits of Regular Languages\n68\na*ba* X\nThis set cannot be described by a regular expression\n"
+  },
+  {
+    "page": 64,
+    "text": "• L = {𝑎𝑛𝑏a𝑛| n ≥ 0} is not a Regular Language\n◆FA does not have any memory (FA cannot count)\nThe above L requires to keep count of a’s before seeing b’s\n• Matching parenthesis is not a RL[括号匹配不是正则语言]\n• Any language with nested structure is not a RL\nif … if … else … else\n• Regular Languages\n◆Weakest formal languages that are widely used [最弱的形式语言]\n• We need a more powerful formalism\nThe Limits of Regular Languages\n69\n"
+  },
+  {
+    "page": 65,
+    "text": "• Regular languages are expressive enough for tokens\n◆Can express identifiers, strings, comments, etc.\n• However, it is the weakest (least expressive) language\n◆Many languages are not regular\n◆C programming language is not\nThe language matching braces “{{{...}}}” is also not\n◆FA does not have any memory (FA cannot count)\nL = {𝑎𝑛𝑏𝑛| n ≥ 1}\nCrucial for analyzing languages with nested structures[嵌套结构] (e.g. \nnested for loop in C language)\n• We need a more powerful language for parsing\n◆Later, we will discuss context-free languages (CFGs)\nBeyond Regular Language\n70\n"
+  },
+  {
+    "page": 66,
+    "text": "Summary\n71\nRegular\nexpressions\nNFA\nDFA\nTable-driven \nImplementation\nLexical\nSpecification\nTransition Flow\n1. Converting REs to NFA\n• Thompson Algorithm(Inductive method)\n2. Converting NFA to DFA\n• Subset-Construction Algorithm[子集构造法]\n3. Minimizing DFA \n• Partition Algorithm[分割法]\n"
+  },
+  {
+    "page": 67,
+    "text": "Summary\n72\nLanguage \nSpecification\nToken\nRegular \nExpression\nNFA\nDFA\nTable-Driven \nImplementation\nPattern\nLexical\nAnalyzer\nToken\nPartition\nAlgorithm\nExpress\nMatch\nThompson\nAlgorithm\nSubset-\nConstruction\nAlgorithm\nTranslation\nTranslation\nImpl.\nMinimizing\nSource code\nLexeme\nAbstract\nInstance\nSpecify\nFrom Specification to Implementation\nSyntax \nAnalyzer\n"
+  },
+  {
+    "page": 68,
+    "text": "•Dragon Book\n◆Comprehensive Reading: \nSection Section 3.6–3.7, 3.9.6 for finite automata \nand related transformation.\n◆Skip Reading:\nSection 3.9.1–3.9.5 for regular expressions \ndirectly to DFAs.\nFurther Reading\n73\n"
+  },
+  {
+    "page": 69,
+    "text": "• The graph describes NFA or DFA? Why?\nNFA. \nA: ε-transition, \nB: multiple transitions for input ‘1’\n• What is the RE?\n0*1+2*\n• Then, what is the NFA of 0+1+2+?\nExercise\n74\n"
+  },
+  {
+    "page": 70,
+    "text": "Exercise\n75\nQue.\nThe behavior of a NFA can be simulated by a DFA\na.\nalways\nb.\nsometime\nc.\nNever\nd.\nDepend on NFA\nAnswer: always\n"
+  },
+  {
+    "page": 71,
+    "text": "Exercise\n76\nQue.\nWhat is the complement[补集] of the language accepted by the NFA \nshown below? Assume ∑ = {a} and ε is the empty string\na.\n \nb.\nε\nc.\na\nd.\n{ε, a}\nAnswer: ε\n"
+  },
+  {
+    "page": 72,
+    "text": "• Convert (a|b)*abb(a|b)* into NFA \n• Thompson construction: RE→NFA\n(a|b)→(a|b)*\nabb\n(a|b)*abb(a|b)*\nExercise\n77\n"
+  },
+  {
+    "page": 73,
+    "text": "• Convert (a|b)*abb(a|b)* into NFA \n• Thompson construction: RE→NFA\n(a|b)→(a|b)*\nabb\n(a|b)*abb(a|b)*\nExercise\n78\n"
+  },
+  {
+    "page": 74,
+    "text": "• Convert (a|b)*abb(a|b)* into NFA \n• Thompson construction: RE→NFA\n(a|b)→(a|b)*\nabb\n(a|b)*abb(a|b)*\nExercise\n79\n"
+  },
+  {
+    "page": 75,
+    "text": "• Construct a DFA for a minion language with ∑= {𝑎, 𝑏} that does \nnot contain “abb”:\n1. Build the regular expression for the minion’s language\n2. Convert the regular expression into NFA first\n3. Convert the NFA into DFA by subset construction.\n4. Minimize the state of DFA\n• Build the RE for this language\nb*(a | ab)*\nExercise: from RE to minimized FA\n80\nhttps://www.sensacine.com/peliculas/pelicula-\n210493/fotos/detalle/?cmediafile=21209746\n"
+  },
+  {
+    "page": 76,
+    "text": "• Convert b*(a | ab)* into NFA \nExercise\n81\nb\n\n\n\n\na\n\n\n\n\na\nb\n\nb*\n(a|ab)\nA\nB\n\nA\n\n\n\n\nA\nB\n\n\n\n\nR=A*\nR=AB\nR=A | B\n"
+  },
+  {
+    "page": 77,
+    "text": "• Convert the NFA into DFA by subset construction\nExercise\n82\n12\n5\na\n6\n7\n\n\n\n\na\nb\n8\n9\n10\n11\n\n4\n13\n\n\n\nb\n1\n2\n3\n\n0\n\n\n\n\n\n"
+  },
+  {
+    "page": 78,
+    "text": "Exercise\n83\nI\n𝑰𝒂\n𝑰𝒃 \nAccept\n{0,1,3,4,5,6,8,13}  0\n{7,9,12,13,5,6,8,10} 1 \n{2,1,3,4,5,6,8,13} 2\nYes\n{5,6,7,8,9,10,12,13} 1\n{5,6,7,8,9,10,12,13} 1\n{11,12,13,5,6,8} 3\nYes\n{1,2,3,4,5,6,8,13} 2\n{5,6,7,8,9,10,12,13} 1\n{1,2,3,4,5,6,8,13} 2\nYes\n{5,6,8,11,12,13} 3\n{5,6,7,8,9,10,12,13} 1\n{}\nYes\n12\n5\na\n6\n7\n\n\n\n\na\nb\n8\n9\n10\n11\n\n4\n13\n\n\n\nb\n1\n2\n3\n\n0\n\n\n\n\n\n"
+  },
+  {
+    "page": 79,
+    "text": "• Draw DFA according to the transition table\nExercise\n84\na\n3\nb\n1\n0\n2\na\nb\na\nb\na\nI\n𝑰𝒂\n𝑰𝒃 \n{0,1,3,4,5,6,8,13}  0\n{7,9,12,13,5,6,8,10} 1 \n{2,1,3,4,5,6,8,13} 2\n{5,6,7,8,9,10,12,13} 1\n{5,6,7,8,9,10,12,13} 1\n{11,12,13,5,6,8} 3\n{1,2,3,4,5,6,8,13} 2\n{5,6,7,8,9,10,12,13} 1\n{1,2,3,4,5,6,8,13} 2\n{5,6,8,11,12,13} 3\n{5,6,7,8,9,10,12,13} 1\n{}\n"
+  },
+  {
+    "page": 80,
+    "text": "• Minimization DFA\nExercise\n85\na\n3\nb\n1\n0\n2\na\nb\na\nb\na\na\n3\n1\n0\nb\na\nb\na\n•\nInitial: {0,1,2,3}\n \n{3} have no ‘b’ transition，split\n•\n{0,1,2}  {3}\n \n{1} on ‘b’ ->3，{0,2} on ‘b’ ->{2}，split\n•\n{0,2} {1} {3}\n \n{0,2} on ‘a’ -> {1}\n \n{0,2} on ‘b’ -> {2}\n \nNo way to distinguish {0,2} on any transition \nwith ‘a’ or ‘b’\n•\nFinal: {0,2} {1} {3}\n"
+  }
+]

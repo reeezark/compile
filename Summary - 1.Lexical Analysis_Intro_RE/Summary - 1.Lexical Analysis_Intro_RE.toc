@@ -1,0 +1,31 @@
+\contentsline {section}{\numberline {1}词法分析是什么（第 2--5 页）}{2}{section.1}%
+\contentsline {subsection}{\numberline {1.1}它在编译流程中的位置 {\small \color {gray}\,[p2,3]}}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}词法分析的定义与步骤 {\small \color {gray}\,[p4,5]}}{2}{subsection.1.2}%
+\contentsline {section}{\numberline {2}从规范到实现：全局蓝图（第 6--7 页）}{3}{section.2}%
+\contentsline {section}{\numberline {3}Token 与 Lexeme（第 8--11 页）}{3}{section.3}%
+\contentsline {subsection}{\numberline {3.1}常见的 Token 类别 {\small \color {gray}\,[p9]}}{4}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}词法分析的角色 {\small \color {gray}\,[p11]}}{4}{subsection.3.2}%
+\contentsline {section}{\numberline {4}设计、实现与扫描难点（第 12--15 页）}{5}{section.4}%
+\contentsline {subsection}{\numberline {4.1}设计要点 {\small \color {gray}\,[p12]}}{5}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}实现要点 {\small \color {gray}\,[p13]}}{5}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}扫描的挑战：C++ 的 \texttt {>>} 歧义 {\small \color {gray}\,[p14]}}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}展望（Look Ahead）{\small \color {gray}\,[p15]}}{6}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Token 规范：用正则表达式描述（第 16 页）}{6}{section.5}%
+\contentsline {section}{\numberline {6}语言的形式化基础：字母表、串、语言（第 17--21 页）}{6}{section.6}%
+\contentsline {subsection}{\numberline {6.1}语言上的运算 {\small \color {gray}\,[p19,20,21]}}{7}{subsection.6.1}%
+\contentsline {section}{\numberline {7}正则表达式与正则语言（第 22--27 页）}{8}{section.7}%
+\contentsline {subsection}{\numberline {7.1}原子正则表达式（递归定义的基础）{\small \color {gray}\,[p23]}}{8}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}复合正则表达式（递归构建）{\small \color {gray}\,[p24]}}{8}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}运算符优先级 {\small \color {gray}\,[p25]}}{9}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}常用扩展记号 {\small \color {gray}\,[p26,27]}}{9}{subsection.7.4}%
+\contentsline {section}{\numberline {8}正则表达式实例与等价（第 28--34 页）}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}RE 例子表 {\small \color {gray}\,[p31]}}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}同一语言可有不同 RE {\small \color {gray}\,[p31,32]}}{10}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}典型 token 的 RE {\small \color {gray}\,[p33]}}{11}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}编程语言中的 RE 简写 {\small \color {gray}\,[p34]}}{11}{subsection.8.4}%
+\contentsline {section}{\numberline {9}语言的词法规范算法与二义性（第 35--36 页）}{11}{section.9}%
+\contentsline {subsection}{\numberline {9.1}把 RE 用于分词的算法 S0--S4 {\small \color {gray}\,[p35]}}{11}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}二义性与消解规则 {\small \color {gray}\,[p36]}}{12}{subsection.9.2}%
+\contentsline {section}{\numberline {10}总结与练习（第 37--43 页）}{12}{section.10}%
+\contentsline {subsection}{\numberline {10.1}本讲总结 {\small \color {gray}\,[p37,38]}}{12}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}重点习题 {\small \color {gray}\,[p39--42]}}{12}{subsection.10.2}%
