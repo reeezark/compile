@@ -1,0 +1,34 @@
+\contentsline {section}{阅读导引}{3}{section*.2}%
+\contentsline {section}{\numberline {1}编译阶段与目标代码生成任务 {\small \color {graytext}\,[p1--6]}}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}目标代码生成的位置 {\small \color {graytext}\,[p1--3]}}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}三个主要任务 {\small \color {graytext}\,[p4--6]}}{3}{subsection.1.2}%
+\contentsline {section}{\numberline {2}栈式计算机、累加器与 MIPS 基础 {\small \color {graytext}\,[p7--13]}}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}栈式计算机 {\small \color {graytext}\,[p7]}}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}用累加器优化栈式机器 {\small \color {graytext}\,[p8--9]}}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}从栈式机器到 MIPS {\small \color {graytext}\,[p10--13]}}{5}{subsection.2.3}%
+\contentsline {section}{\numberline {3}寄存器保存恢复、栈操作和表达式代码生成 {\small \color {graytext}\,[p14--20]}}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}为什么要保存/恢复寄存器 {\small \color {graytext}\,[p14--15]}}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}栈操作 {\small \color {graytext}\,[p16--18]}}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}MIPS 翻译例子：\(7+5\) {\small \color {graytext}\,[p17]}}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}表达式代码生成策略 {\small \color {graytext}\,[p19]}}{7}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}条件语句代码生成 {\small \color {graytext}\,[p20]}}{8}{subsection.3.5}%
+\contentsline {section}{\numberline {4}运行时内存布局、活动记录和调用约定 {\small \color {graytext}\,[p21--30]}}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}运行时内存区域 {\small \color {graytext}\,[p21]}}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Activation 和 Activation Record {\small \color {graytext}\,[p22--24]}}{9}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Caller/Callee Conventions {\small \color {graytext}\,[p25--27]}}{10}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}详细调用步骤 {\small \color {graytext}\,[p28--30]}}{10}{subsection.4.4}%
+\contentsline {section}{\numberline {5}变量访问与帧指针偏移 {\small \color {graytext}\,[p31--33]}}{11}{section.5}%
+\contentsline {section}{\numberline {6}面向对象代码生成：对象布局与分派 {\small \color {graytext}\,[p34--39]}}{11}{section.6}%
+\contentsline {subsection}{\numberline {6.1}对象布局 {\small \color {graytext}\,[p34]}}{11}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}非虚方法、虚方法与分派 {\small \color {graytext}\,[p35--36]}}{12}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}典型对象布局与继承不变式 {\small \color {graytext}\,[p37--39]}}{12}{subsection.6.3}%
+\contentsline {section}{\numberline {7}机器相关优化 {\small \color {graytext}\,[p40--49]}}{13}{section.7}%
+\contentsline {subsection}{\numberline {7.1}机器相关优化总览 {\small \color {graytext}\,[p40]}}{13}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}指令选择与指令成本 {\small \color {graytext}\,[p41--43]}}{14}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}指令调度 {\small \color {graytext}\,[p44]}}{14}{subsection.7.3}%
+\contentsline {subsection}{\numberline {7.4}寄存器分配 {\small \color {graytext}\,[p45--46]}}{15}{subsection.7.4}%
+\contentsline {subsection}{\numberline {7.5}图着色与寄存器溢出 {\small \color {graytext}\,[p47--48]}}{16}{subsection.7.5}%
+\contentsline {subsection}{\numberline {7.6}窥孔优化 {\small \color {graytext}\,[p49]}}{16}{subsection.7.6}%
+\contentsline {section}{\numberline {8}总结 {\small \color {graytext}\,[p50]}}{17}{section.8}%
+\contentsline {section}{\numberline {9}练习题与解答}{18}{section.9}%
+\contentsline {section}{复习建议}{20}{section*.16}%

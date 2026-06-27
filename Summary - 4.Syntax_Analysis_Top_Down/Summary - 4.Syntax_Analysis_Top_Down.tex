@@ -86,17 +86,17 @@
 本讲研究\term{自顶向下语法分析}{Top-down parsing}。课件的思维导图可以压缩为三条线：
 
 \begin{center}
-\begin{tikzpicture}[font=\small,
+\begin{tikzpicture}[font=\footnotesize,
   n/.style={draw,rounded corners=2pt,fill=softbg,minimum height=0.7cm,align=center,inner sep=4pt},
   hi/.style={draw,rounded corners=2pt,fill=white,minimum height=0.7cm,align=center,inner sep=4pt},
   arr/.style={-{Latex[length=2mm]},thick}]
 \node[n] (type) {Parser 类型};
-\node[n,right=0.95cm of type] (td) {Top-down};
-\node[n,right=0.95cm of td] (rdp) {递归下降\\RDP};
+\node[n,right=0.65cm of type] (td) {Top-down};
+\node[n,right=0.65cm of td] (rdp) {递归下降\\RDP};
 \node[hi,below=0.8cm of rdp] (problem) {左递归 / 回溯};
-\node[hi,right=0.95cm of rdp] (pred) {预测分析\\Predictive};
-\node[n,right=0.95cm of pred] (ff) {FIRST / FOLLOW};
-\node[n,right=0.95cm of ff] (ll) {LL(1) 表};
+\node[hi,right=0.65cm of rdp] (pred) {预测分析\\Predictive};
+\node[n,right=0.65cm of pred] (ff) {FIRST / FOLLOW};
+\node[n,right=0.65cm of ff] (ll) {LL(1) 表};
 \draw[arr] (type) -- (td);
 \draw[arr] (td) -- (rdp);
 \draw[arr] (rdp) -- (problem);

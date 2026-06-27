@@ -1,0 +1,202 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture 9\nIntermediate Code Optimization\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "Compilation Phases[编译阶段]\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generation\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nCharacter Stream\n(Source Code)\nsyntax  tree\nCode Optimizer\ntarget-machine  code\n（executable）\nFront End\nBack End\n1\n"
+  },
+  {
+    "page": 3,
+    "text": "Compilation Phases[编译阶段]\n2\ngoto L1\nL2:\nt1 := a + b\nx := t1 \nt2 := y + x \ny := t2\nL1:\nif y < z goto L2\nwhile (y<z){\nint x = a + b;\ny += x;\n}\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generator\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nsyntax  tree\nCode Optimizer\nTarget Machine Code\n(keyword, while)\n(id, y)\n(sym, <)\n(id, z)\n(id, x)\n(id, a)\n(sym, +)\n(id, b)\n(sym, ;)\n(id, y)\n(sym, +=)\n(id, x)\n(sym, ;)\nint\nbool\nint\nint\nint\nint\nint\nint\nint\nint\nint\nint\nvoid\nvoid\nint\nwhile\n<\nbody\n=\nx\n+\na\nz\n=\ny\n+\ny\nx\ny\nb\nAnnotated AST/Decorated AST\n[带标注的抽象语法树]\nt1 = a + b\ngoto L1\nL2:\nt2 := y + t1 \ny := t2\nL1:\nif y < z goto L2\nQuiz: 这里做\n了什么优化？\n"
+  },
+  {
+    "page": 4,
+    "text": "Optimization[代码优化]\nFront End\nOptimization\nBack End\nControl-Flow \nAnalysis\nData-Flow \nAnalysis\nCode \nTransformation\n• What we have now?\nIR of the source program (+ symbol table)\n• Goal of the optimization?\nImprove the efficiency and performance of the code\nreducing execution time, memory usage, computational complexity. \nThis helps to make the code faster, more scalable, and able to handle increasing \nworkloads.\n3\n"
+  },
+  {
+    "page": 5,
+    "text": "To Optimize: Who When Where?\n• Manual: source code[人工, 源码]\nSelect appropriate algorithms and data structures\nWrite code that the compiler can effectively optimize\n\nNeed to understand the capabilities and limitations of compiler opts\n• Compiler: intermediate representation[编译器, IR]\nTo generate more efficient TAC instructions\n• Compiler: final code generation[编译器, 目标代码]\nSelecting effective instructions to emit, allocating registers in a better way\n• Assembler/Linker: after final code generation[汇编/链接, 目标代码]\nAttempting to re-work the assembly code itself into something more \nefficient (e.g., link-time optimization)\nFocus!\n4\n"
+  },
+  {
+    "page": 6,
+    "text": "Overview of Optimizations\n• Better one or more of the following (in the average case)\nExecution time.\nMemory usage.\nEnergy consumption.\nBinary executable size...\n• Some Principles\nEquivalence: after optimization, the result should not be changed.\nEfficient: make the optimized target code run in less time and less storage \nspace is occupied.\nCost-effectiveness: should be as low as possible to obtain optimized results.\n5\n"
+  },
+  {
+    "page": 7,
+    "text": "Code Optimization[代码优化]\n6\nLayout-related \ntransformations\nCode \noptimization\nCode-related \ntransformations\nCode\nData\nControl-Flow \nAnalysis\nDead code \nelimination\nCommon \nsubexpression \nelimination\nLocal \noptimizations\nGlobal \noptimizations\nConstant \nPropagation\nGlobal Constant \nPropagation\nDataflow \nanalysis\nIn Basic Block\nAcross Basic Block\nInclude\nBuild Basic Blocks\nHelp\nInclude\nBase on\nConstruct CFG\nConstant \nFolding\nDirected Acyclic \nGraph (DAG)\nProvide info\n"
+  },
+  {
+    "page": 8,
+    "text": "Code Optimization[代码优化]\n7\nLayout-related \ntransformations\nCode \noptimization\nCode-related \ntransformations\nCode\nData\nControl-Flow \nAnalysis\nDead code \nelimination\nCommon \nsubexpression \nelimination\nLocal \noptimizations\nGlobal \noptimizations\nConstant \nPropagation\nGlobal Constant \nPropagation\nDataflow \nanalysis\nIn Basic Block\nAcross Basic Block\nInclude\nBuild Basic Blocks\nHelp\nInclude\nBase on\nConstruct CFG\nConstant \nFolding\nDirected Acyclic \nGraph (DAG)\nProvide info\n"
+  },
+  {
+    "page": 9,
+    "text": "Types of Optimizations\n• Compiler optimization is essentially a transformation[转换], \nincluding deleting/adding/moving/modifying.\n• Layout-related transformations[布局相关]\nOptimizes where in memory code and data is placed.\nGoal: maximize the spatial locality [空间局部性], i.e., maximize the possibility \nthat nearby locations will also be accessed soon during an access.\n• Code-related transformations[代码相关]\nOptimizes what code is generated.\nGoal: execute least number of most costly instructions.\nFocus!\n8\n"
+  },
+  {
+    "page": 10,
+    "text": "Layout-Related: Code\n• For example, given two ways to layout code:\nWhich code layout is better?, assuming:\n\ndata cache has one N-word line\n\nthe size of each function is N/2-word long\n\naccess sequence is “g, f, h, f, h, f, h” \nf() {\n…\nh();\n…\n}\ng() {\n...\n}\nh() {\n…\n} \ncode of f()\ncode of g()\ncode of h()\ncode of f()\ncode of h()\ncode of g()\ncache\ncode of f()\ncode of g()\ncode of h()\ncode of f()\ncode of h()\ncode of g()\ng, f, h, f, h, f, h\n6 cache misses\n2 cache misses\n9\n"
+  },
+  {
+    "page": 11,
+    "text": "Layout-Related : Data\n• Example 1: Change the variable declaration order\nstruct S {\nint a;\nint b[10];\nint c;\n} obj[100];\nfor(...) {\n... = obj[i].a + obj[i].c;\n} \nstruct S {\nint a;\nint c;\nint b[10];\n} obj[100];\nfor(...) {\n... = obj[i].a + obj[i].c;\n} \n• After improving, a and c are likely resided in the same cache line.\n• Futhermore, access to c will always hit in the cache.\n10\n"
+  },
+  {
+    "page": 12,
+    "text": "Layout-Related : Data\n• Example 2: Change AOS (array of structs) to SOA (struct of arrays)\nstruct S {\nint a;\nint b;\n} objs[100];\nfor(...) {\n... = objs[i].a + 1;\n} \nfor(...) {\n... = objs[i].b + 1;\n} \nstruct S {\nint a[100];\nint b[100];\n} objs;\nfor(...) {\n... = objs.a[i] + 1;\n} \nfor(...) {\n... = objs.b[i] + 1;\n} \n• Improved spatial locality for accesses to ‘a’s and ‘b’s\n11\n"
+  },
+  {
+    "page": 13,
+    "text": "IR Optimization Revisit\n• Goal of Optimization:\nExecution time / Memory usage / Energy consumption / Binary executable size... \nEquivalence / Efficient / Cost-effectiveness\n• Layout-related transformations[布局相关]\nOptimizes where in memory code and data is placed.\nGoal: maximize the spatial locality [空间局部性].\ncode layout, declaration ordering, data structuring\n• Code-related transformations[代码相关]\nOptimizes what code is generated.\nGoal: execute least number of most costly instructions.\n12\n"
+  },
+  {
+    "page": 14,
+    "text": "Code Optimization[代码优化]\n13\nLayout-related \ntransformations\nCode \noptimization\nCode-related \ntransformations\nCode\nData\nControl-Flow \nAnalysis\nDead code \nelimination\nCommon \nsubexpression \nelimination\nLocal \noptimizations\nGlobal \noptimizations\nConstant \nPropagation\nGlobal Constant \nPropagation\nDataflow \nanalysis\nIn Basic Block\nAcross Basic Block\nInclude\nBuild Basic Blocks\nHelp\nInclude\nBase on\nConstruct CFG\nConstant \nFolding\nDirected Acyclic \nGraph (DAG)\nProvide info\n"
+  },
+  {
+    "page": 15,
+    "text": "Code-Related Optimizations\n• Modifying (e.g., strength reduction)\nA = 2 * a;\n→\nA = a << 1;\n• Deleting (e.g. dead code elimination)\nA = 2; A = y;\n→\nA = y; \n• Moving (e.g. code scheduling)\nA = x / y; B = A + 1; C = y;\n→\nA = x / y; C = y; B = A + 1;\n• Inserting (e.g., data prefetching[数据预取])\nwhile(p != NULL) {process(p); p = p -> next;}\nwhile(p != NULL) {prefetch(p -> next); process(p); p = p -> next;}\n14\nA and C can be parallel\nNow access to ‘p->next’ \nis likely to hit in cach\n"
+  },
+  {
+    "page": 16,
+    "text": "Control-Flow Analysis\n• For many imperative programming languages[命令式编程], the \ncontrol flow of a program is explicit in a program's source code. \n• As a result, control-flow analysis (CFA) [控制流分析] usually refers to a static \nanalysis for determining the receiver(s) of function calls in programs written \nin a higher-order programming language.\n• CFA is a static code analysis for determining the control flow of a \nprogram. The control flow is expressed as control-flow graph (CFG).\n• To build CFG, we first divide the code into basic blocks.\n15\n"
+  },
+  {
+    "page": 17,
+    "text": "Basic Block\n• A basic block[基本块] is a straight-line code sequence that \n• Except the first instruction, there are no other labels[只有第一条进入]\n• Except the last instruction, there are no jumps[只有最后一条跳出]\n• The code in a basic block has:\n\nOne entry point, Can only jump into the beginning of a block\n\nOne exit point, Can only jump out at the end of a block\n• Basic blocks forms the nodes in CFG.\n• cannot be divided further\n• All instructions in basic block execute or none at all [all or nothing]\n• decomposes programs to basic blocks as a first step in CFA. \n• Local optimizations are limited to scope of one basic block.\n• Global optimizations are across basic blocks.\n16\n"
+  },
+  {
+    "page": 18,
+    "text": "Control Flow Graph[控制流图]\n• A control flow graph is a directed graph in which:\nEach node represents a basic block, i.e., a straight-line piece of code \nwithout any jumps or jump targets\nDirected edges represent flow of execution between basic blocks\n\nFlow from the end of one basic block to the begin of another\n\nFlow can be result of a control flow divergence\n\nFlow can be result of a control flow merge\nControl statements introduce control flow edges\n\ni.e., if-then-else, for-loop, while-loop, ...\n• CFG is widely used\n• to represent a function\n• for program analysis, especially for global analysis and optimization\n17\n"
+  },
+  {
+    "page": 19,
+    "text": "Example\nL1:\na := c * 2;\nw := a + b;\nif(w > 0) goto L3\nL2:\n...\nL3:\nw := -w;\nL1:\na := c * 2;\nw := a + b;\nif(w > 0) goto L3\nL2:\n...\nL3:\nw := -w;\nYES\nNO\n18\n"
+  },
+  {
+    "page": 20,
+    "text": "Construct CFG\n• Step 1: partition code into basic blocks[分解为基本块]\nIdentify the leaders instructions. An instruction is a leader if any of the \nfollowing 3 conditions are met:\n\nIt is the first instruction.[首条指令] \n\nThe target of a conditional or an unconditional goto / jump. [跳转目标] \n\nimmediately follows a conditional or an unconditional goto / jump. [紧跟目标] \nStarting from a leader, the set of all following instructions until and not \nincluding the next leader is the basic block corresponding to the starting \nleader. \nEvery basic block has a leader.\n19\n"
+  },
+  {
+    "page": 21,
+    "text": "Construct CFG\n• Step 2 : add an edge between basic blocks B1 and \nB2 if[连接基本块]\nB2 follows B1, and B1 may “fall through” to B2[相邻]:\n1.\nB1 ends with a conditional jump to another basic block             \n[若条件假，到达B2]\n2.\nB1 ends with a non-jump instruction (B2 is a target of a jump) \n[无跳转，B1顺序执行到达B2]\n\nNote: if B1 ends in an unconditional jump, cannot fall through \n[B1无条件跳转，会绕开B2]\nB2 doesn’t follow B1, but B1 ends with a jump to B2   \n[不相邻，但B2是B1的跳转目标]\nB1\nB2\nB1\nB2\n...\nfalse\ntrue\nB1\n...\nB2\n20\n"
+  },
+  {
+    "page": 22,
+    "text": "Example\n0:  \nt0 = read_num\n1:  \nif t0 mod 2 == 0\n2:             print t0 + \" is even.\"\n3:             goto L1\n4:  \nprint t0 + \" is odd.\"\n5:  L1:  end program\n0:  t0 = read_num\n1:  if t0 mod 2 == 0\n2:  print t0 + \" is even.\"\n3:  goto 5\n4:  print t0 + \" is odd.\"\n5:  end program\n• Partition code into basic blocks.\n• the first instruction of a program:\n• target instructions of jump: \n• instructions immediately following jump:\n• Add edges between basic blocks.\n0\n5\n2 ,4\n21\n"
+  },
+  {
+    "page": 23,
+    "text": "Local and Global Optimizations\n• Local optimizations[局部]\nOptimizations performed exclusively within a basic block.\nTypically the easiest, never consider any control flow info.\n\nAll instructions in scope executed exactly once\nExample:\n\nconstant folding[常量折叠, 在编译时直接计算常量表达式, 而不在运行时每次都计算]\n\nconst int a = 2 + 3; x=y+a;\n→\nx=y+5\n\ncommon subexpression elimination[消除公共子表达式]\n• Global optimizations[全局]\nOptimizations performed across basic blocks.\n\nScope can contain if / while / for statements.\n\nSome instants may not execute, or execute multiple times.\nNote: global here doesn’t mean across the entire program.\n\nWe usually optimize one function at a time.\n22\n"
+  },
+  {
+    "page": 24,
+    "text": "Code Optimization[代码优化]\n23\nLayout-related \ntransformations\nCode \noptimization\nCode-related \ntransformations\nCode\nData\nControl-Flow \nAnalysis\nDead code \nelimination\nCommon \nsubexpression \nelimination\nLocal \noptimizations\nGlobal \noptimizations\nConstant \nPropagation\nGlobal Constant \nPropagation\nDataflow \nanalysis\nIn Basic Block\nAcross Basic Block\nInclude\nBuild Basic Blocks\nHelp\nInclude\nBase on\nConstruct CFG\nConstant \nFolding\nDirected Acyclic \nGraph (DAG)\nProvide info\n"
+  },
+  {
+    "page": 25,
+    "text": "Example: Local Optimizations\n• Common subexpression elimination (CSE)[删除公共子表达式]\nTwo operations are common if they produce the same.\n\nIt is likely more efficient to compute the result once and reference it the second time \nrather than re-evaluate it[避免重复计算]\n• Dead code elimination[删除无用代码]\nIf an instruction’s result is never used, the instruction is considered \n“dead” and can be removed from the instruction stream[结果从不使用]\ny = x + z;\ny = x * x + (x / 3);\nz = x * x + y;\ny = x + z;\nt1 = x * x;\nt2 = x / 3;\ny = t1 + t2;\nt3 = x * x;\nz = t3 + y;\ny = x + z;\nt1 = x * x;\nt2 = x / 3;\ny = t1 + t2;\nt3 = x * x;\nz = t1 + y;\n24\n"
+  },
+  {
+    "page": 26,
+    "text": "DAG of Basic Blocks\n• The Directed Acyclic Graph (DAG) is used to represent the \nstructure of a basic block\n• visualize the flow of values between basic blocks\n• provide optimization techniques in the basic block. \n• A DAG is a three-address code.\nis a type of data structure \nfacilitates the transformation of basic blocks.\nis an efficient method for identifying common sub-expressions.\n25\n"
+  },
+  {
+    "page": 27,
+    "text": "Algorithm: Construction of DAG\n• Create a node for each initial value of the variables appearing in \nthe basic block[为变量初始值创建节点--- 叶子节点]\n• Create a node N associated with each statement S within the \nblock[为声明语句创建节点--- 中间节点]\nThe children of N are those nodes corresponding to statements that are \nthe last definitions, prior to s, of the operands used by s[节点N的子节点为\nstatement中操作符相关的节点]\nLabel N by the operator applied at S[用运算符标注节点N]\n• Certain nodes are designated output nodes[某些节点为输出节点]\n26\n"
+  },
+  {
+    "page": 28,
+    "text": "Example\n(1) a = b + c\n(2) b = a – d\n(3) c = b + c\n(4) d = a – d\n27\n"
+  },
+  {
+    "page": 29,
+    "text": "Local Opt.: Elimination\n• If b is not live on exit from the block\nNo need to keep b = a – d\n• If both b and d are live\nRemove either (2) or (4) : Common Subexpression Elimination\nAdd a 4th statement to copy one to the other\n• If only a is live on exit\nRemove nodes from the DAG correspond to dead code\n\nc -> (b,d) -> d0\nThis is actually dead code elimination\n(1) a = b + c\n(2) b = a – d\n(3) c = b + c\n(4) d = a – d\n28\n"
+  },
+  {
+    "page": 30,
+    "text": "Local Opt.: Elimination\n• When finding common subexpressions, we \nreally are finding expressions that are \nguaranteed to compute the same value, no \nmatter how that value is computed[过于严苛]\nThus miss the fact that (1) and (4) are the same\n\nb + c = (b – d) + (c + d) = b0 + c0\n• Solution: algebraic identities[代数恒等式]\n(1) a = b + c\n(2) b = b – d\n(3) c = c + d\n(4) e = b + c\n29\n"
+  },
+  {
+    "page": 31,
+    "text": "Using Algebraic Identities\n• Eliminate computations by applying mathematical rules[使用数学规则]\nIdentities: a * 1 ≡ a, a * 0 ≡ 0, b & true ≡ b\nReassociation and commutativity[重组合与交换]\n\n(a + b) + c ≡ a + (b + c), a + b ≡ b + a\n• Strength Reduction[强度削减]\nReplacing expensive operations (multiplication, division) by less expensive \noperations (add, sub, shift)\nSome ops can be replaced with cheaper ops\nx = y / 8 x = y >> 3\ny = y * 8 x = y << 3\nx^2 x * x\n2 * x x + x\n30\n"
+  },
+  {
+    "page": 32,
+    "text": "Local Opt.: Constant Folding\n• Constant Folding[常量折叠]\nComputing operations on constants at compile time\nExample:\nAfter constant folding\nDead code elimination can further remove the above if statement \nInherently local since scope limited to statement\n#define LEN 100 \nx = 2 * LEN;\nif (LEN < 0) print(”error”);\nx = 200;\nif (false) print(”error”); \n31\n"
+  },
+  {
+    "page": 33,
+    "text": "Local Opt.: Constant Propagation\n• Constant Propagation[常量传播]\nSubstituting values of known constants at compile time\nLocal Constant Propagation (LCP)\n• Some optimizations have both local and global versions\nGlobal Constant Propagation (GCP), more powerful but complicated\nx = 4\ny = x * 3\na = 1;\nx = 3;\nif (…)\nx = a + 2;\ny = x;\nx = 4\ny = 4 * 3\nx = 4\ny = 12\na = 1;\nx = 3;\nif (…)\nx = 1 + 2;\ny = x;\na = 1;\nx = 3;\nif (…)\nx = 3;\ny = 3;\n32\n"
+  },
+  {
+    "page": 34,
+    "text": "Code Optimization[代码优化]\n33\nLayout-related \ntransformations\nCode \noptimization\nCode-related \ntransformations\nCode\nData\nControl-Flow \nAnalysis\nDead code \nelimination\nCommon \nsubexpression \nelimination\nLocal \noptimizations\nGlobal \noptimizations\nConstant \nPropagation\nGlobal Constant \nPropagation\nDataflow \nanalysis\nIn Basic Block\nAcross Basic Block\nInclude\nBuild Basic Blocks\nHelp\nInclude\nBase on\nConstruct CFG\nConstant \nFolding\nDirected Acyclic \nGraph (DAG)\nProvide info\n"
+  },
+  {
+    "page": 35,
+    "text": "Global Optimizations\n• Extend optimizations to flow of control, i.e., CFG\nAlong all paths.\nOptimization must be stopped if incorrect in even one path\nX = 3;\nif(B>0)\nY = Z + W;\nY = 0;\nA = 2 * X;\nX = 3;\nif(B>0)\nY = Z + W;\nY = 0;\nA = 2 * 3;\n34\n"
+  },
+  {
+    "page": 36,
+    "text": "Global Optimizations\nX = 3;\nif(B>0)\nY = Z + W;\nX = Y;\nY = 0;\nA = 2 * X;\n35\n√\n×\n"
+  },
+  {
+    "page": 37,
+    "text": "Global Opt.: Conservative\n• Compiler must prove some property X at a particular point\nNeed to prove at that point property X holds along all paths.\nNeed to be conservative[保守性]to ensure correctness.\n\nAn optimization is enabled only when X is definitely true\n\nIf not sure if it is true or not, it is safe to say don’t know\n\nIf analysis result is don’t know, no optimization done\n\nMay lose optimization opportunities but guarantees correctness\n• Property X often involves data flow of program\ne.g., Global Constant Propagation (GCP)\nNeeds knowledge of data flow, as well as control flow\n\nWhether data flow is interrupted between points A and B\n36\n"
+  },
+  {
+    "page": 38,
+    "text": "Global Opt.: Data Flow\n• Most optimizations rely on a property at given point, called values\n\nFor Global Constant Propagation (GCP):\nA = B + C; // Property: {A=?, B=10, C=?}\n\nAfter optimization:\nA = 10 + C;\n• Dataflow analysis[数据流分析]: compiler analysis that calculates values \nfor each point in a program\n\nValues get propagated from one statement to the next\n\nStatements can modify values (for GCP, assigning to vars)\n\nRequires CFG since values flow through control flow edges\n• Dataflow analysis framework: a framework for dataflow analysis that \nguarantees correctness for all paths\n\nTo be feasible, makes conservative approximations\n37\n"
+  },
+  {
+    "page": 39,
+    "text": "Global Constant Propagation\n• Let’s apply dataflow analysis to compute values for:\nEmulates what human does when tracing through code\n• Let’s use following notation to express the state of a variable:\nx=*: not assigned (default)\nx=1, x=2, ...: assigned to a constant value\nx=#: assigned to multiple values\n• All values start as x=* and are iteratively refined\nUntil they stabilize and reach a fixed point\n• Once fixed point is reached, can replace with constants:\nx=*: replace with any constant (typically 0)\nx=1, x=2, ...: replace with given constant value\nx=#: cannot do anything\n38\n"
+  },
+  {
+    "page": 40,
+    "text": "Example\n• In this example, constants can be propagated to X+1, 2*X\n• Statements visited in reverse post-order (predecessor first)\nX = 2\nif(B > 0)\nY = T + K\nX = 3\nY = M + N\nX = X + 1\nA = 2 * X\nX = *\nX = 2\nX = 3\nX = 2\nx=*: not assigned (default)\nx=1, x=2, ...: assigned to a \nconstant value \nx=#: assigned to multiple \nvalues\n39\nX = 2\nX = 2\nX = 2\n3\nX = 3\nX = 3\n"
+  },
+  {
+    "page": 41,
+    "text": "Example\n• Once constants have been globally propagated, we would like to \neliminate the dead code\nX = 2\nif(B > 0)\nY = T + K\nX = 3\nY = M + N\nX = X + 1\nA = 2 * X\nX = 3\nX = 2\nif(B > 0)\nY = T + K\nY = M + N\nA = 2 * X\nX = 3\n40\n"
+  },
+  {
+    "page": 42,
+    "text": "IR Optimization of LLVM\nSource url: https://www.slideserve.com/quinlan-dominguez/llvm-pass-and-code-instrumentation\n41\n"
+  },
+  {
+    "page": 43,
+    "text": "LLVM Passes\n• Optimizations are implemented as Passes that traverse some portion of \na program to either collect information or transform the program\n• A Pass receives an LLVM IR and performs analyses and/or \ntransformations\n\nUsing opt, it is possible to run each Pass\n• A Pass can be executed in a middle of compiling process from source \ncode to binary code\n\nThe pipeline of Passes is arranged by Pass Manager\nSource url: https://www.slideserve.com/quinlan-dominguez/llvm-pass-and-code-instrumentation\n42\n"
+  },
+  {
+    "page": 44,
+    "text": "General Optimization Flags\n• O0: no optimization\n\nCompiles the fastest and generates the most debuggable code\n• O1: somewhere between O0 and O2\n• O2: moderate level of optimization enabling most optimizations\n• O3: like O2,\n\nexcept that it enables opts that take longer to perform or that may generate \nlarger code (in an attempt to make the program run faster)\n• Os: like O2 with extra opts to reduce code size\n• Oz: like Os, but reduce code size further\n• O4: enables link-time opt Clang has support for O4, but not opt\n43\n"
+  },
+  {
+    "page": 45,
+    "text": "Performance at Varying Flags\n• Compare the performance of the benchmark when compiled \nwith either GCC or LLVM\nCompile benchmark at six optimization levels\nEach workload was run 3 times with each executable on the Intel Core \ni7-2600 machines\nSource url: https://webdocs.cs.ualberta.ca/~amaral/AlbertaWorkloadsForSPECCPU2017/reports/exchange2_report.html\n44\n"
+  },
+  {
+    "page": 46,
+    "text": "Summary\n• Layout-related transformations[布局相关]\nGoal: maximize the spatial locality [空间局部性].\ncode layout, declaration ordering, data structuring\n• Code-related transformations[代码相关]\nGoal: execute least number of most costly instructions.\nBasic blocks\nControl flow graphs\nDAG construction of basic blocks\nLocal optimization\nCSE/ DCE / Algebraic identities / Constant folding and propagation\nGlobal Optimization \nConstant propagation\n45\n"
+  },
+  {
+    "page": 47,
+    "text": "Further Reading\n46\n•Dragon Book, 2nd Edition\nComprehensive Reading:\nSection 8.4 8.5 on DAG based block optimization.\nSection 9.1 on an example of loop optimization.\nSection 9.6.1, 9.6.6 on basic concepts of loop optimization.\nSection 9.2.1 9.2.4 on data flow equations and reaching \ndefinition analysis.\nSkip Reading:\nSection 9.2.5-9.2.6 on liveness and available expression \nanalysis. \nSection 9.6.4 on properties of reducible flow graphs. \n"
+  },
+  {
+    "page": 48,
+    "text": "DAG Construction Revisit\n• Three possible scenarios\n1.\nx = y op z\n2.\nx = op y\n3.\nx = y\n• Step 1:\n• If the y operand is not defined, then create a node (y).\n• For case 1 - If the z operand is not defined, create a node(z).\n• Step 2:\n• For case 1 - Create node(OP), with node(y) as its left child and node(z) as its right.\n• For case 2 - See if there is a node operator (OP) with one child node (y).\n• For case 3 - Node node(x) will be node(y).\n• Step 3:\n• Remove x from the list of node identifiers\n• Add x to the list of attached identifiers for node n.\n47\nhttps://www.geeksforgeeks.org/directed-acyclic-graph-in-compiler-design-with-examples/\n"
+  },
+  {
+    "page": 49,
+    "text": "Example\n• x = A + B\n• y = x + 3\n• z = x * y\n• w = x * y\n• u = w\n• a = 4 / 2\n• b = - a\n48\nA\nB\n+\nA\nB\n+\n+\nx\nx\n3\ny\nA\nB\n+\n+\nx\n3\ny\n*\nz,w,u\nA\nB\n+\n+\nx\n3\ny\n*\nz,w,u\na\nb\n-\n2\n"
+  },
+  {
+    "page": 50,
+    "text": "DAG-based Optimization\n• If z and b are alive\n49\nA\nB\n+\n+\nx\n3\ny\n*\nz,w,u\nx = A + B\ny = x + 3\nz = x * y\nw = x * y\nu = w\na = 4 / 2\nb = - 2\na\n-\n2\nb\n"
+  }
+]

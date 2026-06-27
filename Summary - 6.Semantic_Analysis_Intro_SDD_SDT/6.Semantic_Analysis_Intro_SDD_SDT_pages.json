@@ -1,0 +1,518 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture 6\nSemantic Analysis: Intro & SDD & SDT\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "Compilation Phases[编译阶段]\n2\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generation\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nCharacter Stream\n(Source Code)\nsyntax  tree\nCode Optimizer\nTarget Machine Code\n（executable）\nFront End\nBack End\n"
+  },
+  {
+    "page": 3,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\n"
+  },
+  {
+    "page": 4,
+    "text": "Compilation Phases[编译阶段]\n4\nAbstract Syntax Tree(AST)\nint\nbool\nint\nint\nint\nint\nint\nint\nint\nint\nint\nint\nvoid\nvoid\nint\nwhile\n<\nbody\n=\nx\n+\na\nz\n=\ny\n+\ny\nx\ny\nb\nAnnotated AST/Decorated AST\n[带标注的抽象语法树]\n"
+  },
+  {
+    "page": 5,
+    "text": "• Because programs use symbols (a.k.a. identifiers)\nIdentifiers require context to figure out the meaning\n• Consider the English sentence: “He ate it”\nThis sentence is syntactically correct\nBut it makes sense only in the context of a previous sentence: “Sam bought \na pizza.” (what if “Sam bought a car.”?)\n• Semantic analysis\nAssociates identifiers with objects they refer to[关联]\n”He” --> “Sam”\n“it” --> “pizza”\nChecks whether identifiers are used correctly[检查]\n“He” and “it” refer to some object: def-use check\n“it” is a type of object that can be eaten: type check\nWhy Semantic Analysis? [语义分析]\n5\n"
+  },
+  {
+    "page": 6,
+    "text": "• Semantic of a language is more difficult to describe than syntax\n[语义比语法更难描述]\nSyntax: describes the proper form of the programs [仅形式]\nSemantics: defines the meaning of programs (i.e., what each program does \nwhen it executes) [到意义]\n• Context cannot be analyzed using a CFG parser[CFG不能分析上下文信息]\nAssociating IDs with objects require expressing the pattern:\n{wcw | w ∊(a|b)*}\nThe first w represents the definition of an ID\nThe c represents arbitrary intervening code\nThe second w represents the use of the ID\nWhy Semantic Analysis?\n6\n"
+  },
+  {
+    "page": 7,
+    "text": "• Deeper check into the source program[对程序进一步分析]\nLast stage of the front end[前端最后阶段]\nCompiler’s last chance to reject incorrect programs[最后拒绝机会]\nVerify properties that aren’t caught in earlier phases\nVariables declaration before use [先声明后使用]\nType consistency when using IDs [变量类型一致]\nCorrect expressions types [表达式类型]\n• Gather useful info about program for later phases[收集后续信息]\nDetermine what variables are meant by each identifier\nBuild an internal representation of inheritance hierarchies\nCount how many variables are in scope at each point\nSemantic Analysis\n7\n"
+  },
+  {
+    "page": 8,
+    "text": "• Attribute grammars[属性文法]\nOne-pass compilation\nSemantic analysis is done along with parsing\nAugment rules to do checking during parsing\nThe approach suggested in the Compilers book\n• AST walk[语法树遍历]\nTwo-pass compilation\nFirst pass digests the syntax and builds a parse tree\nThe second pass traverses the tree to verify that the program respects \nall semantic rules\nStrict phase separation of Syntax Analysis and Semantic Analysis\nSemantic Analysis: Implementation\n8\n"
+  },
+  {
+    "page": 9,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable\ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nDefinitions (SDD)\nSyntax Directed \nTranslation (SDT)\nsemantic rules\nsemantic actions\n"
+  },
+  {
+    "page": 10,
+    "text": "• Syntax Directed Translation[语法制导翻译]\nSyntax Directed Translation\n10\nSemantic Analysis\n[语义分析]\nSyntax Directed \nTranslation\n[语法制导翻译]\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generation\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nsyntax  tree\nCode Optimizer\nTarget code\n"
+  },
+  {
+    "page": 11,
+    "text": "• Translate based on the program’s grammar structure[语法结构]\nSyntactic structure: structure of a program given by grammar[文法]\nThe parsing process and parse trees are used to direct semantic analysis and \nthe translation of the program, i.e., CFG-driven translation[CFG驱动的翻译]\n• How? Augment the grammar used in parser[对语法的进一步加强]:\nAttach semantic attributes[语义属性] to each grammar symbol\nThe attributes describe the symbol properties [符号特征] \nAn attribute has a name and an associated value: a string, a number, a \ntype, a memory location, an assigned register…\nFor each grammar production, give semantic rules or actions[语义规则或动作]\nThe actions describe how to compute the attribute values associated \nwith each symbol in a production\nSyntax Directed Translation[语法制导翻译]\n11\n"
+  },
+  {
+    "page": 12,
+    "text": "• Attributes can represent anything depending on the task[属性可\n以表示任意含义]\nIf computing expression: a number (value of expression)\nIf building AST: a pointer (pointer to AST for expression)\nIf generating code: a string (assembly code for expression)\nIf type checking: a type (type for expression)\n• Attributes are associated directly with the grammar symbols\n• Format: X.a (X is a symbol, a is one of its attributes)\nAttributes[语义属性]\n12\n"
+  },
+  {
+    "page": 13,
+    "text": "Associating semantic rules with grammar rules (productions) \ninvolves two concepts:\n• Syntax Directed Definitions (SDD)   [语法制导定义]\n• Syntax Directed Translation scheme (SDT)   [语法制导翻译方案]\nSDD & SDT\n13\n"
+  },
+  {
+    "page": 14,
+    "text": "• Syntax Directed Definitions (SDD) [语法制导定义]\nA syntax-directed definition (SDD) is a context-free grammar(CFG) together \nwith attributes and rules\nAdd Attributes + semantic rules[语义规则] in CFG\nA generalization of CFG\nAttributes for grammar symbols [文法符号和语义属性关联]\nSemantic rules for productions [产生式和语义规则关联]\nSyntax Directed Definitions (SDD)\n14\nProductions \nAttributes\nSemantic rules\nE -> E1 + E2\nE -> id \nE.val; E1.val; E2.val\nE.val; id.lexval\nE.val = E1.val + E2.val\nE.val = id.lexval\n"
+  },
+  {
+    "page": 15,
+    "text": "• Syntax Directed Translation scheme (SDT) [语法制导翻译方案]\nSDT is a CFG with program fragments embedded in the right part of the \nproduction, and these program fragments are called semantic actions.\nAttributes + semantic actions[语义动作]\nExample actions for computing the value of an expression\nSyntax Directed Translation (SDT)\n15\nE -> E1 + E2 {E.val = E1.val + E2.val}\nE -> id {E.val = id.lexval}\n…\nThe position of a semantic action in a production determines \nthe execution point of the action\n"
+  },
+  {
+    "page": 16,
+    "text": "• SDD[语法制导定义]: 是CFG的推广，翻译的高层次规则说明\nA CFG grammar together with attributes and semantic rules\nA subset of them are also called attribute grammars[属性文法]\nSemantic rules imply no order to attribute evaluation\n• SDT[语法制导翻译方案]:  SDD的补充，具体翻译实施方案\nAn executable specification of the SDD\nProgram fragments are attached to different points in production rules\nThe execution order is important\nSDD v.s. SDT\n16\nD -> TL\nT -> int\nT -> float\nL -> L1, id\nL.inh = T.type\nT.type = int\nT.type = float\nL1.inh = L.inh\nD ->T {L.inh = T.type} L\nT -> int {T.type = int}\nT -> float {T.type = float}\nL -> {L1.inh = L.inh} L1, id\nSDD\nGrammar\nSDT\n"
+  },
+  {
+    "page": 17,
+    "text": "• Syntax: A -> ⍺{action1} β {action2} γ …\n• Actions are executed “at that point” in the RHS\naction1 executes after ⍺has been produced but before β\naction2 executes after ⍺, action1, β but before γ\n• Semantic rule v.s. Action[语义规则vs. 语义动作]\nSemantic rules are not associated with locations in RHS\nSDD doesn’t impose any order other than dependences\nLocation of action in RHS specifies when it should occur\nSDT specifies the execution order and time of each action\nSDD v.s. SDT\n17\n"
+  },
+  {
+    "page": 18,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\ndepended by \n"
+  },
+  {
+    "page": 19,
+    "text": "• SDD是CFG的增广\nGrammar symbols together with semantic attributes \nProductions associated with a set of semantic rules to compute the value \nof an expression\n• SDD has two types of attributes [文法符号的两种属性]\nSynthesized attribute [综合属性]\nInherited attribute [继承属性]\nSyntax Directed Definitions (SDD)\n19\n"
+  },
+  {
+    "page": 20,
+    "text": "• Synthesized attribute[综合属性]\nDefined by a semantic rule associated with the production at N\nThe production must have A as its head (i.e., A -> …)\nA synthesized attribute of node N is defined only by attributes of N’s children\nand N itself[子节点或自身]\n• Inherited attribute[继承属性]\nDefined by a semantic rule associated with the production at the parent of N\nThe production must have A as a symbol in its body (i.e., … -> …A…)\nAn inherited attributed of node N is defined only by attribute values at N’s \nparent, N itself, and N’s siblings[父节点、自身或兄弟节点]\nSyntax Directed Definitions (SDD)\n20\n"
+  },
+  {
+    "page": 21,
+    "text": "• Synthesized attribute for non-terminal A of parse-tree node N[非终结符\n的综合属性]\nOnly defined by N’s children and N itself\nPassed up the tree\nP.syn_attr = f(P.attrs, C1.attrs, C2.attrs, C3.attrs)\nExample\n• Terminals CAN have synthesized attributes[终结符可以具有综合属性]\nLexical values supplied by the lexical analysis\nThus, no semantic rules in SDD for terminals\nSynthesized Attribute[综合属性]\n21\nProductions \nSemantic rules\nE -> E1 + T\nE.val = E1.val + T.val\nE.val\nE1.val\nT.val\n+\nP\nC1\nC2\nC3\n"
+  },
+  {
+    "page": 22,
+    "text": "• Inherited attribute for non-terminal A of parse-tree node N[非终结符继\n承属性]\nOnly defined by N’s parent, N’s siblings and N itself\nPassed down a parse tree\nC2.inh_attr = f(P.attrs, C1.attrs, C2.attrs, C3.attrs)\nExample\n• Terminals CANNOT have inherited attributes[终结符无继承属性]\nOnly synthesized attributes from lexical analysis\nInherited Attribute[继承属性]\n22\nProductions \nSemantic rules\nD -> T L\nL.inh = T.type\nD\nT.type\nL.inh\nP\nC1\nC2\nC3\n"
+  },
+  {
+    "page": 23,
+    "text": "• Attribute dependencies in a production rule[产生式中的属性依赖]\n• SDD has rule of the form for each grammar production\nb = f(A.attrs, ⍺.attrs, β.attrs, γ.attrs)\n• b is either an attribute in LHS (an attribute of A)\nIn which case b is a synthesized attribute\nWhy? From A’s perspective ⍺, β, γ are children\n• Or, b is an attribute in RHS (e.g., of β)\nIn which case b is an inherited attribute\nWhy? From β’s perspective A, ⍺, γ are parent or siblings\nSDD[语法制导定义]\n23\nA      ->      α           β            γ\nInherited\nSynthesized\n"
+  },
+  {
+    "page": 24,
+    "text": "Example: Synthesized attribute \n24\nAttribute grammar for simple integer arithmetic expression\nGrammar rule\nSemantic Rules\nE→E1+T\nE→T\nT→T1*F\nT→F\nF→(E)\nF→dight\nE.val ＝E1.val +T.val\nE.val ＝T.val\nT.val ＝T1.val * F.val\nT.val ＝F.val\nF.val ＝E.val\nF.val ＝dight.val\nThe val attribute is synthesized\n"
+  },
+  {
+    "page": 25,
+    "text": "Attribute grammar for variable\nExample: Inherited Attribute \n25\nGrammar rule\nSemantic Rules\ndecl -> type varlist\ntype -> int\ntype -> float\nvarlist1 -> id, varlist2\nvarlist -> id\nvarlist.dtype = type.dtype\ntype.dtype = integer\ntype.dtype = real\nid.dtype = varlist1.dtype\nvarlist2.dtype = varlist1.dtype\nid.dtype = varlist.dtype\nThe dtype attribute is inherited\n"
+  },
+  {
+    "page": 26,
+    "text": "The Concepts\n26\n• Side effect[副作用]\n一般属性值计算（基于属性值或常量进行的）之外的功能\n例如：code generation, print results, modify symbol table …\n• Attribute grammar[属性文法]\n一个没有副作用的SDD\nThe rules define the value of an attribute purely in terms of the value of other \nattributes and constants[属性文法的规则仅仅通过其他属性值和常量来定义一个属性值]\n• Annotated parse-tree[标注分析树]\n每个节点都带有属性值的分析树\nA parse tree showing the value(s) of its attribute(s)\na.k.a., attribute parse tree[属性分析树]\n"
+  },
+  {
+    "page": 27,
+    "text": "Compilation Phases[编译阶段]\n27\nAbstract Syntax Tree(AST)\nint\nbool\nint\nint\nint\nint\nint\nint\nint\nint\nint\nint\nvoid\nvoid\nint\nwhile\n<\nbody\n=\nx\n+\na\nz\n=\ny\n+\ny\nx\ny\nb\nAnnotated AST/Decorated AST\n[带标注的抽象语法树]\nA very simple illustrative case!\n"
+  },
+  {
+    "page": 28,
+    "text": "• SDD (Syntax-directed definition)\n• CFG + attributes for each symbol + semantic rules for each production\n• SDT (Syntax-directed definition)\n• CFG + attributes for each symbol + {semantic actions} in each production\n• Synthesized attribute\n• Terminals CAN have synthesized attributes\n• Inherited Attribute\n• Terminals CANNOT have inherited attributes\nSemantic Analysis Revisit\n28\nP\nC1\nC2\nC3\nP\nC1\nC2\nC3\nD -> TL\nT -> int\nT -> float\nL -> L1, id\nL.inh = T.type\nT.type = int\nT.type = float\nL1.inh = L.inh\nD ->T {L.inh = T.type} L\nT -> int {T.type = int}\nT -> float {T.type = float}\nL -> {L1.inh = L.inh} L1, id\nSDD (rules)\nGrammar\nSDT (actions)\n"
+  },
+  {
+    "page": 29,
+    "text": "• Dependence relationship[依赖关系]\nBefore evaluating an attribute at a node of a parse tree, we must evaluate all \nattributes it depends on\n• Dependency graph[依赖图]\nWhile the annotated parse tree shows the values of attributes, a dependency \ngraph helps determine how those values can be computed[决定属性值计算]\nDepicts the flow of information among the attribute instances in a particular \nparse tree[描绘了分析树的属性信息流]\nEdges are dependence relationships between attributes\nFor each parse-tree node X, there’s a graph node for each attr of X\nIf X.a depends on Y.b, then there’s one directed edge from X.a to Y.b\nDependence Graph[依赖图]\n29\nA      ->      α           β            γ\nInherited\nSynthesized\n"
+  },
+  {
+    "page": 30,
+    "text": "SDD：\nExample: Dependency Graph\n30\nProductions \nSemantic rules\nD -> T L\nT -> int\nT -> float\nL -> L1, id\nL-> id\nL.inh = T.type\nT.Type = int\nT.Type = float\nL1.inh = L.inh\naddtype(id.entry,L.inh)\naddtype(id.entry,L.inh)\nInput:\nfloat a, b, c\nD\ntype\nL\nfloat\ninh\nentry\nL\n,\nid\nL\n,\nid\ninh\nentry\nlexeme\nlexeme\nlexeme\ninh\nentry\nid\n‘entry’ is dummy attribute for the addtype()\nT\n"
+  },
+  {
+    "page": 31,
+    "text": "• Ordering the evaluation of attributes[计算顺序]\nDependency graph characterizes possible orders in which we can evaluate the \nattributes at the various nodes of a parse-tree[依赖图描述了属性计算顺序]\n• If the graph has an edge from node M to node N, then the attribute associated \nwith M must be evaluated before N[用图的边来确定计算顺序]\nThus, the only allowable orders of evaluation are those sequences of nodes N1, \nN2, …, Nk such that if there is an edge from Ni to Nj and i < j\nThis order embeds a directed graph into a linear order, called a topological \nsort[拓扑排序] of the graph\nIf there’s any cycle in the graph, then there are no topological sorts, i.e., no \nway to evaluate the SDD on this parse tree\nIf there are no cycles, then there is always at least one topological sort\nEvaluation Order[属性值计算顺序]\n31\n"
+  },
+  {
+    "page": 32,
+    "text": "Example: Evaluation Order\n32\nSDD：\n32\nProductions \nSemantic rules\nD -> T L\nT -> int\nT -> float\nL -> L1, id\nL-> id\nL.inh = T.type\nT.type= int\nT.type= float\nL1.inh=L.inh\naddtype(id.entry,L.inh)\naddtype(id.entry,L.inh)\nInput:\nfloat a,b,c\nfloat\n5 inh\nentry 6\nL\n,\nid\nL\n,\nid\n7 inh\nentry 8\nlexeme\n2\nlexeme\n1\n9 inh\nentry 10\nid\nD\nT type\n4\nL\nlexeme\n3\nTopological sort:\n1, 2, 3, 4, 5, 6, 7, 8, 9, 10\n"
+  },
+  {
+    "page": 33,
+    "text": "• Before evaluating an attribute at a node of a parse tree, we must \nevaluate all attributes it depends on [依赖关系]\nSynthesized: evaluate children first, then the node itself\nInherited: evaluate parent and dependent siblings first, then the node itself\nFor SDD’s with both inherited and synthesized attributes, there’s no guarantee \nthat there is even one evaluation order\n• Difficult to check circularities in a dependency graph\nBut, there are subclasses of SDD’s that guarantee an evaluation order\nSuch classes do not permit graphs with cycles\nEvaluation Order (cont.)\n33\nProduction\nA-> B\nSemantic Rules\nA.s=B.i;\nB.i= A.s + 1;\nA.s\nB.i\n"
+  },
+  {
+    "page": 34,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nDefinitions (SDD)\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nclass\nonly synthesized\nattr.\n"
+  },
+  {
+    "page": 35,
+    "text": "• An SDD is S-attributed if every attribute is synthesized[只具有综合属性]\nS-Attributed Definitions[S-属性定义]\n35\nProductions \nSemantic rules\n(1)L-> E\n(2)E-> E1+ T\n(3)E-> T\n(4)T-> T1* F\n(5)T-> F\n(6)F-> (E)\n(7)F-> digit\nprint(E.val)\nE.val = E1.val+T.val\nE.val =T.val\nT.val= T1.valxF.val \nT.val=F.val\nF.val=E.val\nF.val=digit.lexval\n• If an SDD is S-attributed (S-SDD)\nCan evaluate its attributes in any bottom-\nup order of the nodes of the parse-tree[自底\n向上的顺序计算属性值]\nCan be implemented during bottom-up \nparsing[与自底向上的语法分析同时进行]\n"
+  },
+  {
+    "page": 36,
+    "text": "• An SDD is L-attributed (L-SDD) if\nBetween the attributes associated with a production body, dependency graph \nedges can only go from left to right [依赖图的边只能从左到右]\nEach attribute can be either synthesized, or inherited with the rules that \nsuppose A -> X1X2…Xi-1Xi, the inherited attribute Xi.a only depends on:\n1. Inherited attributes associated with A [A的继承属性, Why?]\n2. Either syn or inh attributes of X1, X2, …, Xi-1 located to the left of Xi [Xi的之前符\n号的综合/继承属性]\n3. Either syn or inh attributes of Xi itself, but no cycles formed by the \nattributes of this Xi [Xi的综合/继承属性(不能出现环形依赖)]\nL-SDD是对S-SDD的拓展, Can be implemented during top-down/bottom-up \nparsing [L属性的语义分析可在LL/LR分析中完成]\nL-Attributed Definitions[L-属性定义]\n36\n"
+  },
+  {
+    "page": 37,
+    "text": "L-Attributed Definitions (cont.)\n37\nProductions \nSemantic rules\nA -> BC\nA.s = B.b\nB.i = f(C.c,A.s)\nS-SDD or L-SDD?\nNot S-SDD: B.i is inh\n[S属性文法中不会出现\n继承属性]\nNot L-SDD: A.s is syn arrt, C is right to B \n[L属性文法中, 继承属性(B.I)不会依赖综合属性(A.s)]\n[L属性文法中, RHS不会出现从右到左的依赖关系]\nP\nC1\nC2\nC3\nP\nC1\nC2\nC3\n综合属性\n继承属性\n"
+  },
+  {
+    "page": 38,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nconvert S-SDD\nadd actions at \nproduction end\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nextend \nstack\nLL\nmarker\nLR\n"
+  },
+  {
+    "page": 39,
+    "text": "•SDT (executable SDD) can be implemented in two ways\nUsing a parse tree or AST[基于预先构建的分析树]\nFirst build a parse tree, and then apply rules or actions at each node while \ntraversing the tree\nAll SDDs (without cycles) and SDTs can be implemented since the tree can be \ntraversed freely, implements any ordering\nDuring parsing, without building a parse tree[语法分析过程中]\nApply rules or actions at each production while parsing\nOnly a subset of SDDs and SDTs can be implemented \nEvaluation ordering restricted to parser derivation order\nImplementation[实现]\n39\n"
+  },
+  {
+    "page": 40,
+    "text": "• Two important classes of SDD’s[两个关键子类]\nSDD is S-attributed, the underlying grammar is LR-parsable\nSDD is L-attributed, the underlying grammar is LL-parsable\n• For both classes, semantic rules in an SDD can be converted into an \nSDT with actions that are executed at the right time[允许SDD到SDT的转换]\nDuring parsing, an action in a production body is executed as soon as all the \ngrammar symbols to the left of the action have been matched\nImplementation[实现]\n40\n"
+  },
+  {
+    "page": 41,
+    "text": "• Convert S-attributed SDD to SDT[SDD到SDT的转换]\nPlace each action at the end of the production[将每个语义动作都放在产生式的最后]\nSDTs with all actions at the right ends of the production bodies are called Postfix \nSDT [后缀/尾部SDT]\nImplement S-SDD\n41\nProductions \nSemantic rules\n(1)L-> E\n(2)E-> E1+ T\n(3)E-> T\n(4)T-> T1* F\n(5)T-> F\n(6)F-> (E)\n(7)F-> digit\nprint(E.val)\nE.val= E1.val+T.val\nE.val=T.val\nT.val= T1.valxF.val \nT.val=F.val\nF.val=E.val\nF.val=digit.lexval\nS-SDD\nCFG with actions\n(1)L-> E {print(E.val)}\n(2)E-> E1+ T {E.val= E1.val+T.val}\n(3)E-> T {E.val=T.val}\n(4)T-> T1* F {T.val= T1.valxF.val }\n(5)T-> F {T.val=F.val}\n(6)F-> (E) {F.val=E.val}\n(7)F-> digit {F.val=digit.lexval}\nSDT\n"
+  },
+  {
+    "page": 42,
+    "text": "• If the underlying grammar of S-SDD is LR parsable\nThen the SDT can be implemented during LR parsing\n• Implement the converted SDT by reduction[借助归约实现]\nExecuting the action along with the reduction of LHS <- RHS\nImplement S-SDD (cont.)\n42\nCFG with actions\n(1)L-> E {print(E.val)}\n(2)E-> E1+ T {E.val = E1.val+T.val}\n(3)E-> T {E.val = T.val}\n(4)T-> T1* F {T.val = T1.valxF.val }\n(5)T-> F {T.val = F.val}\n(6)F-> (E) {F.val = E.val}\n(7)F-> digit {F.val = digit.lexval}\nSDT\nI0:\nE’ → ·E\nE  → · E + T\nE  → · T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI1:\nE’ → E ·\nE  → E · + T\nI2:\nE  → T · \nT  → T · *F\nI3:\nT  → F · \nI4:\nE’ → (·E)\nE  → · E + T\nE  → · T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI6:\nE  → E + ·  T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI7:\nT  → T* · F\nF → · (E)\nF → · d\nI9:\nE  → E + T ·\nT  → T · *F\nI10:\nT  → T*F · \nI8:\nF → (E ·)\nE → E · +T\nI11:\nF → (E) ·\nI5:\nF → d ·\nd\nd\nd\nE\nE\nT\nT\nT\nF\nF\nF\nF\nd\n(\n(\n(\n)\n+\n*\n(\n*\n+\nSLR Automaton\n"
+  },
+  {
+    "page": 43,
+    "text": "• Save synthesized attributes into the stack[栈中额外存放综合属性值]\nPlace the attributes along with the grammar symbols (or LR states that \nassociated with these symbols) in records on stack\nIf there are multiple attributes\nMake the records large enough or by putting pointers to records on the \nstack [栈记录足够大，或栈记录中存放指针]\n• Example: A -> XYZ\nx, y, z are attributes of X, Y, Z respectively\nAfter the action, A and its attributes are at the top (i.e., m-2)\nExtend LR Parse Stack[扩展分析栈]\n43\nState:\nSymbol:\nAttribute:\nS0 …  Sm-2 Sm-1 Sm\n$   …  X       Y       Z\n-\n…  X.x\nY.y\nZ.z\nstate ->\nSymbol ->\nAttribute ->\nS0 …  Sm-2\n$   …  A\n-\n…  A.a\ntop\ntop\nA.a\nX.x\nY.y\nZ.z\n"
+  },
+  {
+    "page": 44,
+    "text": "• Rewrite the actions to manipulate the parser stack\nThe manipulation can be done automatically by the parser\nStack Manipulation[栈操作]\n44\nstack[top-2].symbol= A\nstack[top-2].val = f(stack[top-2].val, stack[top-1].val, stack[top].val)top = top-2\nA -> XYZ {A.a= f(X.x,Y.y,Z.z)}\nA.a\nX.x\nY.y\nZ.z\nState:\nSymbol:\nAttribute:\nS0 …  Sm-2 Sm-1 Sm\n$   …  X       Y       Z\n-\n…  X.x\nY.y\nZ.z\nstate ->\nSymbol ->\nAttribute ->\nS0 …  Sm-2\n$   …  A\n-\n…  A.a\ntop\ntop\n"
+  },
+  {
+    "page": 45,
+    "text": "• Rewrite the actions to manipulate the parser stack\nThe manipulation can be done automatically by the parser\nExample\n45\nProductions \nSemantic rules\nSemantic Actions\n(1)L-> E\nprint(E.val)\n{print(stack[top].val);}\n(2)E-> E1+ T\nE.val= E1.val+T.val\n{ stack[top-2].val= stack[top-2].val + stack[top].val;\ntop = top-2;}\n(3)E-> T\nE.val=T.val\n(4)T-> T1* F\nT.val= T1.val*F.val\n{stack[top-2].val= stack[top-2].val * stack[top].val;\ntop = top-2;}\n(5)T-> F\nT.val=F.val\n(6)F-> (E)\nF.val=E.val\n{stack[top-2].val= (stack[top-1].val);\ntop = top-2;}\n(7)F-> digit\nF.val=digit.lexval\n"
+  },
+  {
+    "page": 46,
+    "text": "Example\n46\nProductions \nSemantic Actions\n(1)L-> E\n(2)E-> E1+ T\n(3)E-> T\n(4)T-> T1* F\n(5)T-> F\n(6)F-> (E)\n(7)F-> digit\n{ print(stack[top].val);}\n{ stack[top-2].val=stack[top-2].val\n+ stack[top].val;    top = top-2;}\n{ stack[top-2].val=stack[top-2].val\n* stack[top].val;    top = top-2;}\n{ stack[top-2].val= stack[top-1].val; \ntop = top-2;}\nInput: 3*5+4\nstate ->\nSymbol ->\nAttribute ->\nS0 S2 S7 S10\n$   T    *   F\n-\n3 -\n5 (top)\nstate ->\nSymbol ->\nAttribute ->\nS0 Sn\n$     T\n-\n15 (top)\nI0:\nE’ → ·E\nE  → · E + T\nE  → · T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI1:\nE’ → E ·\nE  → E · + T\nI2:\nE  → T · \nT  → T · *F\nI3:\nT  → F · \nI4:\nE’ → (·E)\nE  → · E + T\nE  → · T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI6:\nE  → E + ·  T\nT  → · T*F\nT  → · F\nF → · (E)\nF → · d\nI7:\nT  → T* · F\nF → · (E)\nF → · d\nI9:\nE  → E + T ·\nT  → T · *F\nI10:\nT  → T*F · \nI8:\nF → (E ·)\nE → E · +T\nI11:\nF → (E) ·\nI5:\nF → d ·\nd\nd\nd\nE\nE\nT\nT\nT\nF\nF\nF\nF\nd\n(\n(\n(\n)\n+\n*\n(\n*\n+\n"
+  },
+  {
+    "page": 47,
+    "text": "Example\n47\nInput: 3*5+4\nProductions \n(1)L-> E n\n(2)E-> E1+ T\n(3)E-> T\n(4)T-> T1* F\n(5)T-> F\n(6)F-> (E)\n(7)F-> digit\n"
+  },
+  {
+    "page": 48,
+    "text": "• We have examined S-SDD -> SDT -> implementation\nS-SDD can be converted to SDT with actions at production ends\nThe SDT can be parsed and translated by bottom-up, as long as the \nunderlying grammar is LR-parsable\n• What about the more-general L-attributed SDD?\nRule for turning L-SDD into an SDT\n1. Embed the action that computes the inherited attributes for a nonterminal A\nimmediately before the occurrence of A in the production body\n2. Place the actions that compute a synthesized attribute for the LHS at the end of \nthe production body\nImplement L-SDD\n49\n"
+  },
+  {
+    "page": 49,
+    "text": "• A -> B {C.inh} C {A.syn}\nC的继承属性: 在C之前\nA的综合属性: 在RHS末尾\nExample\n50\nProductions \nSemantic rules\n(1)T-> FT’\n(2)T’-> *FT1’\n(3)T’-> Ɛ\n(4)F-> digit\nT’.inh = F.val\nT.val = T’.syn\nT1’.inh = T’.int * F.val\nT’.syn = T1’.syn\nT’.syn = T’.inh\nF.val = digit.lexval\nSDT\n(1) T->  F  {T’.inh = F.val}  T’  {T.val = T’.syn}\n(2) T’->  *F  {T1’.inh = T’.int * F.val}  T1’  {T’.syn = T1’.syn}\n(3) T’->   Ɛ  {T’.syn = T’.inh}\n(4) F-> digit  {F.val = digit.lexval}\nA\nB\nC\nC.inh\nA.syn\n"
+  },
+  {
+    "page": 50,
+    "text": "Implement L-SDD\n51\n• If the underlying grammar is LL-parsable, then the SDT of L-SDD can \nbe implemented during LL or LR parsing [若文法是LL可解析的，则可在LL或\nLR语法分析过程中实现]\n• Semantic translation during parsing\nAn LL recursive-descent parser[递归下降的LL分析]\nAugment non-terminal functions to both parsing and attributes handling\nAn LL predictive parser[非递归的LL预测分析]\nExtend the parse stack to hold actions and certain data items needed for attribute evaluation\nAn LR parser[LR分析]\nRewrite grammars to involve marker\n• For the top-down ones, we need to eliminate left recursion first!\n"
+  },
+  {
+    "page": 51,
+    "text": "• A motivating example: a simple case\n• Trick: treating actions as terminals if they do not calculate any attributes. \nEliminating left recursion\n52\nE\n\nE + T  { print('+') }\nE\n\nT\nE\n\nT R\nR\n\n+ T { print('+') }  R\nR\n\n\nE\n\nE + T\nE\n\nT\nE\n\nT R\nR\n\n+ T R | \nE => E+T+T+T...\n*\nA →A⍺| β \nA →βA’; A’ →⍺A’ | ε\na single terminal\n"
+  },
+  {
+    "page": 52,
+    "text": "• Implementing L-SDD: top-down/bottom-up\n• L-SDD -> SDT: \n1. Embed the action that computes the inherited attributes for a nonterminal A\nimmediately before the occurrence of A in the production body\n2. Place the actions that compute a synthesized attribute for the LHS at the end of \nthe production body\n• Eliminating left recursion！\nSemantic Analysis Revisit\n53\nA -> B {C.inh} C {A.syn}\nC的继承属性: 在C之前\nA的综合属性: 在RHS末尾\n"
+  },
+  {
+    "page": 53,
+    "text": "• A more complex case\nEliminating left recursion\n54\nE E1 + T\n{ E.val = E1.val + T.val; }\nE E1 – T\n{ E.val = E1.val – T.val; }\nE T\n{ E.val = T.val; }\nT ( E )\n{ T.val = E.val; }\nT num\n{ T.val = num.val; }\nE\n\nT { R.i = T.val; } R { E.val = R.s; }\nR\n\n+ T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }\nR\n\n– T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }\nR\n\n{ R.s = R.i; }\nT\n\n( E ) { T.val = E.val; }\nT\n\nnum { T.val = num.val; }\nE\n\nT R\nR\n\n+ T R1\nR\n\n– T R1\nR\n\n\nT\n\n( E )\nT\n\nnum\nA →A⍺| β \nA →βA’; \nA’ →⍺A’ | ε\n解决左递归斩断了产生式(及actions)\nEE1 + T    =>    ETR   R+TR  R\n用新引入的R，传递属性值，实现计算\nR.i (属性传递) R.s (属性返回)\n通过R-> ，将计算结果传回\n"
+  },
+  {
+    "page": 54,
+    "text": "Eliminating left recursion\n55\nE\nR.i = 9\nT.val = 9\nnum.val = 9\nT.val = 5\nR.i = 4\n–\nT.val = 2\nR.i = 6\n+\nnum.val = 2\nnum.val = 5\nE T { R.i = T.val; } R { E.val = R.s; }\nR + T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }\nR – T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }\nR { R.s = R.i; }\nT ( E ) { T.val = E.val; }\nT num { T.val = num.val; }\nInput: 9 – 5 + 2\nR.s = 6\nR.s = 6\nR.s = 6\nE.val = 6\n\n"
+  },
+  {
+    "page": 55,
+    "text": "• General rules\n• Only available for S-SDD (postfix translation schemes), a subset of L-SDD \nEliminating left recursion\n56\nA\n\nA1 Y { A.a = g(A1.a, Y.y) }\nA\n\nX { A.a = f(X.x) }\nA\n\nX { R.i = f(X.x) } R { A.a = R.s }\nR\n\nY { R1.i = g(R.i, Y.y) } R1 { R.s = R1.s }\nR\n\n{ R.s = R.i }\nA => XYYY...\n*\nA.a = g(g(f(X.x), Y1.y), Y2.y)\nA.a = g(f(X.x), Y1.y)\nY2\nA.a = f(X.x)\nY1\nX\nR.i = g(g(f(X.x), Y1.y), Y2.y)\nA\nR.i = f(X.x)\nX\nR.i = g(f(X.x), Y1.y)\nY1\n\nY2\n{ R.s = R.i }\n{ R.s = R1.s }\n{ R.s = R1.s }\n{ A.a = R.s }\n"
+  },
+  {
+    "page": 56,
+    "text": "• Evaluation order -> DAG -> topological sort -> circle is NOT allowed\n• SDD Subsets without circle: S-SDD and L-SDD\n• S-SDD: Synthesized attributes only\n• L-SDD: Synthesized and Inherited attributes (A -> X1X2…Xi-1Xi)\n• Xi.inh can depend on: (i) A.inh, (ii) Xj.attr, j<i, (iii) Xi.attr with no circles\n• Implementation:\n• Based on parser tree or AST\n• Any computation order without dependency circles\n• Along with Parser\n• Strictly follows the parsing order: Top-down or Bottom-up\nSemantic Analysis Revisit\n57\nL-SDD\nS/L-SDD\n"
+  },
+  {
+    "page": 57,
+    "text": "• Implementing S-SDD: bottom-up\n• S-SDD -> SDT: Place each action at the end of the production\n• Slack manuscription: enable automation\n• Example: A -> XYZ\nx, y, z are attributes of X, Y, Z respectively\nAfter the action, A and its attributes are at the top (i.e., m-2)\nSemantic Analysis Revisit\n58\nState:\nSymbol:\nAttribute:\nS0 …  Sm-2 Sm-1 Sm\n$   …  X       Y       Z\n-\n…  X.x\nY.y\nZ.z\nstate ->\nSymbol ->\nAttribute ->\nS0 …  Sm-2\n$   …  A\n-\n…  A.a\ntop\ntop\n"
+  },
+  {
+    "page": 58,
+    "text": "• Implementing L-SDD: top-down/bottom-up\n• L-SDD -> SDT: \n1. Embed the action that computes the inherited attributes for a nonterminal A\nimmediately before the occurrence of A in the production body\n2. Place the actions that compute a synthesized attribute for the LHS at the end of \nthe production body\n• Eliminating left recursion！\nSemantic Analysis Revisit\n59\nA -> B {C.inh} C {A.syn}\nC的继承属性: 在C之前\nA的综合属性: 在RHS末尾\n"
+  },
+  {
+    "page": 59,
+    "text": "• A more complex case\nEliminating left recursion\n60\nE E1 + T\n{ E.val = E1.val + T.val; }\nE E1 – T\n{ E.val = E1.val – T.val; }\nE T\n{ E.val = T.val; }\nT ( E )\n{ T.val = E.val; }\nT num\n{ T.val = num.val; }\nE\n\nT { R.i = T.val; } R { E.val = R.s; }\nR\n\n+ T { R1.i = R.i + T.val; } R1 { R.s = R1.s; }\nR\n\n– T { R1.i = R.i – T.val; } R1 { R.s = R1.s; }\nR\n\n{ R.s = R.i; }\nT\n\n( E ) { T.val = E.val; }\nT\n\nnum { T.val = num.val; }\nE\n\nT R\nR\n\n+ T R1\nR\n\n– T R1\nR\n\n\nT\n\n( E )\nT\n\nnum\nA →A⍺| β \nA →βA’; \nA’ →⍺A’ | ε\n解决左递归斩断了产生式(及actions)\nEE1 + T    =>    ETR   R+TR  R\n用新引入的R，传递属性值，实现计算\nR.i (属性传递) R.s (属性返回)\n通过R-> ，将计算结果传回\n"
+  },
+  {
+    "page": 60,
+    "text": "• General rules\n• Only available for S-SDD (postfix translation schemes), a subset of L-SDD \nEliminating left recursion\n61\nA\n\nA1 Y { A.a = g(A1.a, Y.y) }\nA\n\nX { A.a = f(X.x) }\nA\n\nX { R.i = f(X.x) } R { A.a = R.s }\nR\n\nY { R1.i = g(R.i, Y.y) } R1 { R.s = R1.s }\nR\n\n{ R.s = R.i }\nA => XYYY...\n*\nA.a = g(g(f(X.x), Y1.y), Y2.y)\nA.a = g(f(X.x), Y1.y)\nY2\nA.a = f(X.x)\nY1\nX\nR.i = g(g(f(X.x), Y1.y), Y2.y)\nA\nR.i = f(X.x)\nX\nR.i = g(f(X.x), Y1.y)\nY1\n\nY2\n{ R.s = R.i }\n{ R.s = R1.s }\n{ R.s = R1.s }\n{ A.a = R.s }\n"
+  },
+  {
+    "page": 61,
+    "text": "• A recursive-descent parser has a function A for each nonterminal A \n[递归预测分析方法]\nNon-terminal expansion implemented by a function call\n(Recursive) calls to functions for non-terminals in RHS\n• Synthesized attributes: evaluate at end of function[综合属性: 最后计算]\nAll calls for RHS would have done by then\n• Inherited attributes: pass as argument to function[继承属性：参数传递]\nValues may come from parent or siblings\nL-attributed guarantees they have been computed                                              \n(can only come from already computed portion of RHS)\nL-SDD in Recursive Decent Parsing\n62\nIt becomes clearer here that the \ninherited attributes of symbols at \nRHS cannot depend on the \nsynthesized attribute of the LHS\n"
+  },
+  {
+    "page": 62,
+    "text": "• Function arguments and return[参数和返回值]\nInherited: arguments\nSynthesized: return\nAugmentation:\n• Use local variables[增加局部变量]\n• Embed semantic actions[嵌入语义动作]\nExample\n63\nSDT\n(1) T-> F  {T’.inh = F.val}  T’  {T.val = T’.syn}\n(2) T’-> *F  {T1’.inh = T’.inh * F.val}  T1’  {T’.syn = T1’.syn}\n(3) T’-> Ɛ  {T’.syn = T’.inh}\n(4) F-> digit  {F.val = digit.lexval}\nT’.syn T’(token, T’.inh) {\nif token = “*”, then{\ngetnext(token);\nF.val = F(token);\nT1’.inh = T’.inh * F.val\ngetnext(token);\nT1’.syn = T1’(token, T1’.inh);\nT’.syn = T1’.syn\nreturn T’.syn\n} else if token = “$”, then {\nT’.syn = T’.inh;\nreturn T’.syn;\n} else\nError;\n}\nD: F.val -> T1’.inh -> T1’.syn \n"
+  },
+  {
+    "page": 63,
+    "text": "• Extend the stack to hold actions and certain data items needed \nfor attribute evaluation[扩展语法分析栈]\nAction-record[动作记录]: represent the actions to be executed\nSynthesize-record[综合记录]: hold synthesized attributes for non-terminals\nTypically, the data items are copies of attributes[属性备份]\n• Manage attributes on the stack[管理属性信息]\nThe inherited attributes of a nonterminal A are placed in the stack that \nrepresents that terminal[A的继承属性直接放在符号位]\nAction-record to evaluate these attributes are immediately above A\nThe synthesized attributes of a nonterminal A are placed in a separate \nsynthesize-record that is immediately below A[A的综合属性另存放在A后]\nL-SDD in LL Parsing[非递归预测]\n64\nAction\nCode\nA\nInh Attr.\nA.syn\nSyn Attr.\n"
+  },
+  {
+    "page": 64,
+    "text": "• Table-driven LL-parser\nMimics a leftmost derivation -> stack expansion\n• A-> BC, suppose nonterminal C has an inherited attr C.i\nC.i may depend not only on the inherited attr A.i, but on all attrs of B\nAs an L-SDD, it ensures A.i are available when A is on the stack top\nThus, available to be copied into C\nA’s synthesized attrs A.s remain on the stack, \nbelow B and C when expansion happens\nL-SDD in LL Parsing (cont.)\n65\nAction\nCode\nA\nInh Attr.\nA.syn\nSyn Attr.\nAction\nCode\nB\nInh Attr.\nB.syn\nSyn Attr.\nC\nInh Attr.\nC.syn\nSyn Attr.\nA.syn\nSyn Attr.\n"
+  },
+  {
+    "page": 65,
+    "text": "• A-> BC: C.i may depend not only on the inherited attr A.I, but \non all the attrs of B\nThus, need to process B completely before C.i can be evaluated\nSave temporary copies of all attrs needed by C.i in the action-record that \nevaluates C.i; \nOtherwise, when the parser replaces A on top of the stack by BC, the A.i\nwill be gone, along with its stack record\n1.\n左部展开时（i.e., 左部符号本身的记录出栈时），若其含有\n继承属性，则要将继承属性复制给后面的动作记录\n2.\n综合属性出栈时，要将综合属性值复制给后面的动作记录\nL-SDD in LL Parsing (cont.)\n66\nAction\nCode\nB\nInh Attr.\nB.syn\nSyn Attr.\nC\nInh Attr.\nC.syn\nSyn Attr.\nA.syn\nSyn Attr.\n"
+  },
+  {
+    "page": 66,
+    "text": "Example\n67\n(1) T -> F  {T’.inh = F.val}  T’  {T.val = T’.syn}\n(2) T’-> *F  {T1’.inh = T’.int x F.val}  T1’  {T’.syn = T1’.syn}\n(3) T’-> Ɛ  {T’.syn = T’.inh }\n(4) F -> digit  {F.val = digit.lexval }\nThree kinds of symbols:\n(1)  Terminal\n(2)  Non-terminal\n(3)  Action symbol\n(1)T-> F  {a1}  T’  {a2} \n(2)T’-> * F  {a3}  T1’  {a4} \n(3)T’-> Ɛ  {a5} \n(4)F-> digit  {a6} \na1: T’.inh = F.val\na2: T.val = T’.syn\na3: T1’inh = T’.inh x F.val\na4: T’.syn = T1’ .syn\na5: T’.syn = T’.inh\na6: F.val = digit.lexval\n"
+  },
+  {
+    "page": 67,
+    "text": "Example (cont.)\n68\nInput: 3*5\nStack top ‘digit’ matches the input ‘3’\n•\npop ‘digit’, but value copy is needed\na6: stack[top-1].val= stack[top].d_lexval\ndigit\n{a6}\nF’syn\n{a1}\nT’\nT’syn\n{a2}\nTsyn\n$\nlexv=3\nd_lexv=3\nval=3\nval=3\ninh\nval\nval\n(1)T-> F  {a1}  T’  {a2} \n(2)T’-> * F  {a3}  T1’  {a4} \n(3)T’-> Ɛ  {a5} \n(4)F-> digit  {a6} \na1:T’.inh = F.val\na2:T.val = T’.syn\na3:T1’inh = T’.inh x F.val\na4:T’.syn = T1’ .syn\na5:T’.syn = T’.inh\na6:F.val = digit.lexval\nT -> F {a1} T’ {a2}\nF -> digit {a6}\n"
+  },
+  {
+    "page": 68,
+    "text": "• What we already learnt\nLR > LL, w.r.t parsing power\nWe can do bottom-up if we can do top-down\nS-attributed SDD can be implemented in bottom-up way\nAll semantic actions are at the end of productions, i.e., triggered in reduce\n• For L-SDD on an LL grammar, can it be implemented during \nbottom-up parsing?\nProblem: semantic actions can be in anywhere of the production body\nL-SDD in LR Parsing\n69\n(1) T -> F  {T’.inh = F.val}  T’  {T.val = T’.syn}\n(2) T’-> *F  {T1’.inh = T’.int x F.val}  T1’  {T’.syn = T1’.syn}\n(3) T’-> Ɛ  {T’.syn = T’.inh }\n(4) F -> digit  {F.val = digit.lexval }\nAction\nCode\nB\nInh Attr.\nB.syn\nSyn Attr.\nC\nInh Attr.\nC.syn\nSyn Attr.\nA.syn\nSyn Attr.\n"
+  },
+  {
+    "page": 69,
+    "text": "• It is not natural to evaluate inherited attributes\nExample: how to get T’.inh\n• Claims: inherited attributes are on the stack\nL-SDD guarantee they’ve already been computed\nBut computed by previous productions - deep in the stack\n• Solution\nHack the stack to dig out those values\nL-SDD in LR - The Problem\n70\nT\nT’\nT1’\nF\n*\nF\ndigit\ndigit ε\n(1) T -> F  {T’.inh = F.val}  T’  {T.val = T’.syn}\n(2) T’-> *F  {T1’.inh = T’.int x F.val}  T1’  {T’.syn = T1’.syn}\n(3) T’-> Ɛ  {T’.syn = T’.inh }\n(4) F -> digit  {F.val = digit.lexval }\nF.inh\n？\nT’.inh\n1\n2\n"
+  },
+  {
+    "page": 70,
+    "text": "• Given the following SDD, where |⍺| ≠ |β|\nA-> X⍺{Y.in= X.s} Y | Xβ {Y.in= X.s} Y\nY-> γ {Y.s= f(Y.in)}\n• Problem: cannot generate stack location for Y.in\nBecause X.s is at different relative locations from Y in the stack\n• Solution: insert markers M1, M2right before Y \nA-> X ⍺M1Y | X β M2 Y\nM1-> ε  {M1.s= stack[top-|⍺|].s}   // M1.s= X.s\nM2-> ε  {M2.s= stack[top-|β|].s}   // M2.s= X.s\nY -> γ\n{Y.s= f(stack[top-|γ|].s) }   // Y.s= M1.s or Y.s= M2.s \n• Marker: a non-terminal marking a location that is the same with the symbol that \nhas an inherited attribute \n• Always produces ε since it is only a placeholder for an action\nL-SDD in LR - Marker\n71\n"
+  },
+  {
+    "page": 71,
+    "text": "• Given an L-SDD on an LL grammar, we can adapt the grammar to \ncompute the same SDD during an LR parse\nPut a marker non-terminal[标记非终结符] in the place of each embedded action\nEach of such places gets a distinct marker, say M, where M -> ε [空产生式]\nModify the action {a} if marker M replaces it in some production A->⍺{a} β, \nand associate with M -> ε an action {a’} that\n1.\nCopies, as inherited attrs of M, any attrs of A or symbols of ⍺that action {a} needs (e.g., \nM.i=A.i)[M的继承属性为{a}的输入]\n2.\nCompute sattrs in the same way as {a}, but makes those attrs be synthesized attrs of M (e.g., \nM.s= f(M.i)) [M的综合属性为{a}中的输出]\nModify Grammar with Marker\n72\nA -> {B.i= f(A.i)} BC\nA-> M B C\nM-> ε  {M.i=A.i; M.s= f(M.i)}\n"
+  },
+  {
+    "page": 72,
+    "text": "Example\n73\n(1)T -> F {T’.inh = F.val} T’ {T.val = T’.syn}\n(2) T’ -> *F {T1’ .inh = T’.int * F.val} T1’ {T’.syn = T1’ .syn}\n(3) T’ -> Ɛ {T’.syn = T’.inh }\n(4) F -> digit {F.val = digit.lexval }\n(1)T-> F M T’ {T.val = T’.syn}\nM->ε  {M.i=F.val; M.s= M.i;}\n(2) T’-> *F N T1’ {T’.syn = T1’ .syn}\nN->ε  {N.i1=T.inh; N.i2= F.val; N.s = N.i1 * N.i2 }\n(3) T’-> Ɛ {T’.syn = T’.inh }\n(4) F-> digit {F.val = digit.lexval }\nA -> {B.i= f(A.i)} BC\nA-> M B C\nM-> ε {M.i=A.i; M.s= f(M.i)}\n"
+  },
+  {
+    "page": 73,
+    "text": "Stack Manipulation[栈操作]\n74\n(1)T -> F {T’.inh = F.val} T’ {T.val = T’.syn}\n(2) T’ -> *F {T1’ .inh = T’.int x F.val} T1’ {T’.syn = T1’ .syn}\n(3) T’ -> Ɛ {T’.syn = T’.inh }\n(4) F -> digit {F.val = digit.lexval }\n(1)T-> F M T’ {T.val = T’.syn}\nM->ε  {M.i=F.val; M.s= M.i;}\n(2) T’-> *F N T1’ {T’.syn = T1’ .syn}\nN->ε  {N.i1=T.inh; N.i2= F.val; N.s = N.i1 * N.i2 }\n(3) T’-> Ɛ {T’.syn = T’.inh }\n(4) F-> digit {F.val = digit.lexval }\n(1)T-> FMT’ {stack[top-2].val= stack[top].syn; top = top-2;}\nM->ε {stack[top+1].T’inh= stack[top].val; top = top + 1; }\n(2)T’-> * FNT1’ { stack[top-3].syn= stack[top].syn; top = top-3;}\nN->ε {stack[top+1].T’inh= stack[top-2].T’inh * stack[top].val; top = top + 1; }\n(3)T’->ε {stack[top+1].syn= stack[top].T’inh; top = top + 1;}\n(4)F-> digit {stack[top].val=stack[top].lexval;}\n"
+  },
+  {
+    "page": 74,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nclass\ndepended by \nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nextend \nstack\nLL\nmarker\nLR\n"
+  },
+  {
+    "page": 75,
+    "text": "Content\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\nSyntax Directed \nTranslation (SDT)\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\napplication\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\n"
+  },
+  {
+    "page": 76,
+    "text": "Binding [绑定]\n• Binding: matching identifier use with definition[使用-定义] \nDefinition: associating an id with a memory location \nBinding is an essential step before machine code generation\n• If there are multiple definitions, which one to use?\n86\nvoid foo() \n{ \nchar x; /* allocated at mem[0x100] */\n...\n{ \nint x; /* allocated at mem[0x200] */\n… \n} \nx = x + 1; /* add mem[0x100],1 ? add mem[0x200],1 ?\n}\n"
+  },
+  {
+    "page": 77,
+    "text": "Scope [作用域]\n• Scope: program region where a definition can be bound \nUses of identifier in the scope is bound to that definition \nFor Java: private, global, static, etc...\n• Some properties of scopes \nUse not in scope of any definition results in undefined error \nScopes for the same identifier can never overlap \nThere is at most one binding at any given time \n• Two types: static scoping and dynamic scoping [静态/动态作用域]\nDepending on how scopes are formed\n87\n"
+  },
+  {
+    "page": 78,
+    "text": "Static Scoping [静态作用域]\n• Scopes formed by where definitions are in program text[声明起作用\n的那段区域] \nAlso known as lexical scoping since related to program text C/C++, Java, \nPython, JavaScript[也叫词法作用域] \n• Rule: bind to the closest enclosing definition \n88\nvoid foo() \n{ \nchar x;\n...\n{ \nint x;\n… \n} \nx = x + 1;\n}\n"
+  },
+  {
+    "page": 79,
+    "text": "Dynamic Scoping[动态作用域]\n• Scopes formed by when definitions happen during runtime[运行时\n决定] \nPerl, Bash, LISP, Scheme \n• Rule: bind to most recent definition in current execution \n• Which x’s definition is the most recent? \nExecution (a): ...(1)...(2)...(5) \nExecution (b): ...(1)...(2)...(3)...(4)...(5)\n89\nvoid foo()\n{\n(1) char x;\n(2) if (...) {\n(3) \nint x;\n(4) \nx=x+1;\n}\n(5) x=‘a’;\n}\n"
+  },
+  {
+    "page": 80,
+    "text": "Static vs. Dynamic Scoping[对比]\n• Most languages that started with dynamic scoping (LISP, Scheme, \nPerl) added static scoping afterwards \n• Why? With dynamic scoping... \nAll bindings are done at execution time \nHard to figure out by eyeballing, for both compiler and human \n• Pros of static scoping[静态的好处]\nStatic scoping leads to fewer programmer errors \nBindings readily apparent from lexical structure of code \nStatic scoping leads to more efficient code \nCan determine bindings at compile time – allow code optimization\n90\n"
+  },
+  {
+    "page": 81,
+    "text": "What is Symbol Table[符号表]\n• Symbol: same thing as identifier (used interchangeably) \n• Symbol table: a data structure that tracks info about all symbols \nEach entry represents a definition of that identifier[标识符的定义] \nMaintains definitions that reach current program point[当前作用域中的定义] \nList updated whenever scopes are entered or exited [随作用域改变而更新]\nUsed to perform binding of identifier uses [用于绑定变量定义与使用]\nTraversing the parse tree in a separate pass after parsing [单独扫描语法树]\nUsing semantic actions as an integral part of parsing pass [或与语义分析同时]\nUsually discarded after generating executable binary\nMachine code instructions no longer contain symbols \nFor use in debuggers, symbol tables may be included  \nTo display symbol names instead of addresses in debuggers \nFor GCC, using ‘gcc -g” includes debug symbol tables\n91\n"
+  },
+  {
+    "page": 82,
+    "text": "Maintaining Symbol Table[维护]\n• Basic idea: \nint x=0; ... void foo() { int x=0; ... x=x+1; } ... x=x+1 ...\nStart processing foo: \nAdd definition of x, overriding old definition of x if any \nAfter processing foo: \nRemove definition of x, restoring old definition of x if any \n92\n• Operations: \nenter_scope() \nstart a new scope \nexit_scope() \nexit current scope\nfind_symbol(x) \nfind the information about x \nadd_symbol(x) \nadd a symbol x to the symbol table \ncheck_symbol(x) \ntrue if x is defined in current scope \n"
+  },
+  {
+    "page": 83,
+    "text": "Symbol Table Structure [结构]\n• Front-end time is affected by symbol table access time[符号表访问\n时间影响编译前端性能] \nFront-end: lexical, syntax, semantic analysis \nFrequent searches on any large data structure is expensive \nSymbol table design is important for compiler performance \n• What data structure to choose? [可选数据结构] \nList[线性表] \nBinary tree[二叉树] \nHash table[哈希表] \n• Tradeoffs: time vs. space[空间和时间的权衡] \nLet us first consider the organization without scope\n93\n"
+  },
+  {
+    "page": 84,
+    "text": "Symbol Table Structure (cont.)\n• Array: no space wasted, insert/delete: O(n) , search: O(n) \n• Linked list: extra pointer space, insert/delete: O(1), search: O(n)\nOptimization: move recently used identifier to the head\nFrequently used identifiers are found more quickly \n• Binary tree: use more space than array/list \nBut insert/delete/search is O(logn) on balanced tree\nIn the worst case, tree may reduce to linked list \nThen insert/delete/search becomes O(n) \n94\nid1\ninfo1\nid2\ninfo2\nid1\ninfo1\nid2\ninfo2\nv_city\nv_salary\nv_age\n"
+  },
+  {
+    "page": 85,
+    "text": "• S-SDD & LR: Slack manipulation\n• L-SDD: Remove Left Recursion\n• L-SDD & RDP: Extend RDP Function + Slack manipulation\nInherited: arguments; Synthesized: return\nUse local variables[增加局部变量]\nEmbed semantic actions[嵌入语义动作]\nInherited: along with the symbol; Synthesized: right below the symbol\n• L-SDD & LL(1): Slack manipulation\n• L-SDD & LR: Marker + Slack manipulation\nSDD Implementation Revisit\n95\n1.\n左部展开时（i.e., 左部符号本身的记录出栈时），\n若其含有继承属性，则要将继承属性复制给后面\n的动作记录\n2.\n综合属性出栈时，要将综合属性值复制给后面的\n动作记录\nA-> X⍺{Y.in= X.s} Y | Xβ {Y.in= X.s} Y\nY-> γ {Y.s= f(Y.in)}\nA-> X ⍺M1Y | X β M2 Y\nM1-> ε  {M1.s= stack[top-|⍺|].s}   // M1.s= X.s\nM2-> ε  {M2.s= stack[top-|β|].s}   // M2.s= X.s\nY -> γ\n{Y.s= f(stack[top-|γ|].s) }   // Y.s= M1.s or Y.s= M2.s \nA -> {B.i= f(A.i)} BC\nA-> M B C\nM-> ε {M.i=A.i; M.s= f(M.i)}\n"
+  },
+  {
+    "page": 86,
+    "text": "Symbol Table Revisit\n• Binding: matching identifier use with definition[使用-定义] \n• Scoping:\n• Static: Can be obtained by static code analysis\n• Dynamic: becomes clear only during execution\n• Symbol: same thing as identifier\n• Symbol table: a data structure that tracks info about all symbols \n• Constructing Symbol table: a tradeoff between time and space\n• Array, Linked list, Binary tree, Hash table\n96\nid1\ninfo1\nid2\ninfo2\nid1\ninfo1\nid2\ninfo2\nv_city\nv_salary\nv_age\n"
+  },
+  {
+    "page": 87,
+    "text": "Symbol Table Structure (cont.)\n• hash(id_name) → index[哈希表]\nA hash function decides mapping from identifier to index \nConflicts resolved by chaining multiple IDs to same index \n• Memory consumption from hash table (N << M)\nM: the size of hash table\nN: the number of stored identifiers \n• But insert/delete/search in O(1) time\nCan become O(n) with frequent conflicts and long chains \n• Most compilers choose hash table for its quick access time\n97\nid1\ninfo1\nid3\ninfo3\nid2\ninfo2\nnil\n"
+  },
+  {
+    "page": 88,
+    "text": "• To handle multiple scopes in a program [处理多个作用域] \nConceptually, need an individual table for each scope \nIn order to be able to enter and exit scopes \nSometimes symbols in scope can be discarded on exit:\nSometimes not:\n• How can scoping be enforced without discarding symbols? \nKeep a stack of active scopes at a given point \nKeep a list of all reachable scopes in the entire program\nAdding Scope to Symbol Table[作用域]\n98\nif (...) { int v; } /* block scope */ \n/* v is no longer valid */\nclass X { ... void foo() {...} ... } /* class scope */\n/* foo() is no longer valid */\nX v;\ncall v.foo(); /* v.foo() is still valid */\n"
+  },
+  {
+    "page": 89,
+    "text": "Handle Scopes with Stack\n• Organize all symbol tables into a scope stack[作用域栈] \nAn individual symbol table for each scope \nScope is defined by nested lexical structure, e.g., { C1  {C2 {C3}} {C4} } \nStack holds one entry for each open scope \nInner-most scope is stored at the top of the stack \n• Stack push/pop happen when entering/exiting a scope\n99\nParsing here\nSymbol tables\nScope stack\nC1\nC2\nC3\nC4\nC1’s Symbol Table\n"
+  },
+  {
+    "page": 90,
+    "text": "Handle Scopes with Stack (cont.)\n• Operations: \nWhen entering a scope \nCreate a new symbol table to hold all variables declared in that scope \nPush a pointer to the symbol table on the stack \nPop the pointer to the symbol table when exiting scope \nSearch from the top of the stack\n100\nParsing here\nSymbol tables\nScope stack\nC2\nC3\nC4\nC1 ‘s Symbol Table\nC2 ‘s Symbol Table\nC3 ‘s Symbol Table\nC1\n"
+  },
+  {
+    "page": 91,
+    "text": "Info Stored in Symbol Table\n• Entry in symbol table \nString: the name of identifier \nKind: variable, function, struct type, class type\n• Attributes vary with the kind of symbols \nvariable: type, address of variable \nfunction: prototype, address of function body \nstruct type: field names, field types \nclass type: symbol table for class\n102\nstring\nkind\nattributes\n"
+  },
+  {
+    "page": 92,
+    "text": "Attribute List in Symbol Table\n• Type info can be arbitrarily complicated \nType can be an array with multiple dimensions \nchar arr[20][20]; \nType can be a struct with multiple fields \n• Store all type info in an attribute list \nEntry for an array variable with 2 dimensions\nEntry for a struct variable\nEntry for a struct type with 2 fields\n103\nstruct Point {\nfloat x;\nfloat y;\n} point;\nid\narray variable\nbase type\n1st dimension size\n2nd dimension size\nid\nstruct variable\npoint to struct type entry\nid\nstruct type\ntotal size\nfield1 id\ntype\nsize\nfield2 id\ntype\nsize\n"
+  },
+  {
+    "page": 93,
+    "text": "Use Type Information[类型信息]\n• Each variable or function entry contains type info \n• Type info is used in later code generation stage[代码生成]\nTo calculate how much memory to alloc for a variable \nShould a variable assignment be a 4 byte or 8 byte copy? \nTo translate uses of variables to machine instructions \nShould a ’+’ on variable be an integer or a floating point add? \nTo translate calls to functions to machine instructions \nWhat are the types of arguments and return value of the function? \n• Also used in later code optimization stage[代码优化] \nTo help compiler understand semantics of program \n• Also used in semantic analysis stage for Type Checking\nUses types to check semantic correctness of program \n104\n"
+  },
+  {
+    "page": 94,
+    "text": "Type and Type Checking\n• Type: a set of values and a set of operations on these values \n• Type checking: verifying type consistency across program\nA program is type consistent if all operators are consistent with the \noperand value types \nMuch of what we do in semantic analysis is type checking \n• Some type checking examples: \nGiven char *str = “Hello”; \nstr[2] is consistent: char* type allows [] operator \nstr/2 is not: char* type does not allow / operator \nGiven int pi = 3; \npi/2 is consistent: int type allows / operator\npi=3.14 is not: = operator not allowed on different types \nCompiler must type convert implicitly to make it consistent\n105\n"
+  },
+  {
+    "page": 95,
+    "text": "Static Type Checking[静态类型检查]\n• Static type checking at compile time\nInfers[推断] whether the program is type consistent through code analysis \nCollect info via declarations that store in symbol table \nCheck the types involved in each operation \nE.g., int a, b, c; a = b + c; can be proven type consistent because the addition of two ints is \nstill an int\n• Difficult for a language to only do static type checking \nSome type errors usually cannot be detected at compile time \nE.g., a and b are of type int, a * b may not in the valid range of int \nTypecasting can be a pretty risky thing to do - Basically, typecast suspends type checking\nunsigned a; (int) a;\n106\n"
+  },
+  {
+    "page": 96,
+    "text": "Dynamic Type Checking[动态检查]\n• Dynamic type checking at execution time\nType consistency by checking types of runtime values \nInclude type info for each data location at runtime \nE.g., a variable of type double would contain both the actual double value and some kind \nof tag indicating “double type” \nThe execution of any operation begins by first checking these type tags\nThe operation is performed only if everything checks out\nOtherwise, a type error occurs and usually halts execution \nArray bounds check: \nIs int A[10], i; … A[i] = i; type consistent? \n• Static type checking is always more desirable. Why?\nAlways good to catch more errors before runtime \nDynamic type checking carries runtime overhead\n107\n"
+  },
+  {
+    "page": 97,
+    "text": "Static vs. Dynamic Typing[静态-动态]\n• Static typing: C/C++, Java, … \nVariables have static types → hold only one type of value \n\nE.g. int x; → x can only hold ints\n\nE.g. char *x; → x can only hold char pointers \nHow are types assigned to variables? \n\nC/C++, Java: types are explicitly defined \n\nint x; → explicit assignment of type int to x \n• Pros/cons of static typing \nMore programmer effort \nProgrammer must adhere to strict type rules \nDefining advanced types can be quite complex (e.g. classes) \nLess bugs and execution time \nThanks to static type checking\n108\n"
+  },
+  {
+    "page": 98,
+    "text": "Static vs. Dynamic Typing (cont.)\n• Dynamic Typing: Python, JavaScript, PHP, ... \nVariables have dynamic types → can hold multiple types \nvar x; /* var declaration without a static type */ \nx = 1; /* now x holds an integer value */ \nx = \"one\"; /* now x holds a string value */ \nHow are types assigned to variables? \nType is a runtime property → type tags stored with values \nDynamic type checking must be done during runtime \n• Pros/cons of dynamic typing \nLess programmer effort \nFlexible type rule means program is more malleable[可塑性强] \nAbsence of types declarations means shorter code \nSuitable for scripting or prototyping languages \nMore program bugs and execution time \nDue to dynamic type checking\n109\n"
+  },
+  {
+    "page": 99,
+    "text": "Type System[类型系统]\n• Static/dynamic typing are type systems\nType System: types and type rules of a language \n• Static/dynamic type checking are methods\nMethods to enforce the rules of the given type system \n• Static type checking is not used only for static typing \nAlso used for dynamic typing if types can be inferred at compile time \n• Dynamic type checking is not used only for dynamic typing \nSome features of statically typed languages require it \ne.g., downcasting[父类向子类的强制类型转换]\n110\n"
+  },
+  {
+    "page": 100,
+    "text": "Summary\nSyntax Directed \nDefinitions (SDD)\nattributes\nSynthesized \nattribute\nInherited \nattribute\ncalculation \norder\ntopological \norder \nDependence \nGraph\nS-SDD\nL-SDD\nLR-parsable \ngrammar\nLL-parsable\ngrammar\nSyntax Directed \nTranslation (SDT)\nadd actions at diff position \nfor synth. & inhe. attr\naugment \nnon-terminal \nfunctions\nhandle\nsymbol \ntable\ntype \nchecking\nscope\nmethod\nclass\ndepended by \napplication\nsemantic rules\nconvert S-SDD\nonly synthesized\nattr.\nadd actions at \nproduction end\nsemantic actions\nextend \nstack\nImpl. for LR parser\nconvert L-SDD\nLL RDP\nstatic\ndynamic\nstack\nchaining\nwith diff \nadvantage\nimprove\noffer info\nstatic\ndynamic\nat execution\nat compile\nextend \nstack\nLL\nmarker\nLR\n"
+  },
+  {
+    "page": 101,
+    "text": "• SDD & SDT\n• Synthesized & inherited attribute\n• Evaluation order – DAG & topological order\n• S-SDD & L-SDD\n• S-SDD -> SDT -> Implementation\n• (LR only) Postfix SDT -> stack extension -> stack manipulation\n• L-SDD -> SDT -> Implementation\n• LL: Eliminate left recursion\n• RDP: inherited attributes (arguments) and synthesized attributes (return values)\n• Predictive Parsing: stack extension (action and synthesized records)\n• LR: Marker -> postfix SDT -> stack extension -> stack manipulation\nSummary\n112\nP\nC1\nC2\nC3\nP\nC1\nC2\nC3\n"
+  },
+  {
+    "page": 102,
+    "text": "Summary\n• Static and Dynamic Scoping\nPros of static: fewer errors + more efficient\n• Symbol and Symbol Table\nStructuring: array, list, binary tree, hash table\nTrade-off between time and space\n• Scope handling\nStack: Inefficient searching and use of memory\nSo chaining is introduced\n• Static and dynamic typing and type checking\nStatic: less bugs and execution time, but more effort\nDynamic: less effort, but more bugs and execution time \nStatic ones are more desirable, but is often insufficient, e.g., downcasting\n113\n"
+  },
+  {
+    "page": 103,
+    "text": "•Dragon Book, 2nd Edition\nComprehensive Reading:\nSection 5.1-5.3 on introduction to syntax-directed \ntranslation.\nSection 5.4-5.5 on the implementation of \ntranslation schemes in top-down and bottom-up \nLR parsing.\nFurther Reading\n114\n"
+  },
+  {
+    "page": 104,
+    "text": "编译原理\nComplier Principles\nExercise\nSyntax and Semantic Analysis\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 105,
+    "text": "• 对于一个无二义性文法G，它的一个句子的最左与最右推导产生的分析树一\n定是一样的吗?\n• 对的，是这样的。语法树会隐去推导顺序\n• 怎么样判断一个文法是否为LL(1)型文法?\n• 对文法中的每个产生式A → α | β:\n• FIRST(α) ∩ FIRST(β) = ∅.\n• If β ⇒ε, then FIRST(α) ∩ FOLLOW(A) = ∅.\n• LL(1)语法分析表行数与列数分别由哪些因素确定?\n• 行数是该文法的非终结符个数，列数为终结符个数+1（结束符号$ ）\n• 设句型aaAb 的最右推导为S⇒aBb⇒aaAb ，句柄为aA ，该句型的活前缀是?\n• a, aa, aaA\nExercise\n116\n"
+  },
+  {
+    "page": 106,
+    "text": "• 找出以下文法中的句型的所有短语，直接短语，句柄\n• 文法: G(E): E → T | E+T;\nT → F | T*F;\nF → (E) | a | b | c\n• 句型: a * b + c\n• 第一步：画出语法树\n• 第二步：找出语法树的叶子节点\n• a, *, b, +, c\n• 第三步：由叶子节点找出短语\n• a,  a*b,  b,  c,  a*b+c (why not *b, b+c, *, +?)\n• 第四步：从短语中找出直接短语\n• a, b, c\n• 第五步：从直接短语中找出句柄\n• a\nExercise\n117\nE\n+\nE\nT\nF\nT\n*\nT\nF\nF\na\nb\nc\n"
+  },
+  {
+    "page": 107,
+    "text": "• 给定一下文法G(S), 请构建该文法的LL(1)分析表\n• S →A\n• A →\n• A →bbA\n• FIRST & Follow:\n• S →A: FIRST(α) = {b, }\n• A →: FIRST(α) = {}\n• A →bbA: FIRST(α) = {b}\n• FOLLOW(S) = {$}\n• FOLLOW(A) = {$}\n• Parse Table:\nExercise\n118\nb\n$\nS\nA\nb\n$\nS\nS  A\nA\nA  bbA\nb\n$\nS\nS  A\nS  A\nA\nA  bbA\nA →\nuse FIRST\nuse FOLLOW\n"
+  },
+  {
+    "page": 108,
+    "text": "• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表\n• S →A\n• A →A + A  |  B + +\n• B →y\nExercise\n119\nI0:\nS· A,  $\nA·A+A, +/$\nA·B++, +/$\nB·y, +\nI1:\nBy ·, +\ny\nI2:\nSA ·,  $\nAA ·+A, +/$\nA\nB\nI3:\nAB · ++,  +/$\n+\nI4:\nAA+ ·A, +/$\nA·A+A, +/$\nA·B++, +/$\nB·y, +\ny\nB\nA\nI5:\nAA+A ·, +/$\nAA ·+A, +/$\n+\n+\nI6:\nAB+ · +,  +/$\n+\nI7:\nAB++ · ,  +/$\n"
+  },
+  {
+    "page": 109,
+    "text": "• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表\n• (1) S →A\n• (2) A →A + A\n• (3) A →B + +\n• (4) B →y\nExercise\n120\nS\nACTOION\nGOTO\ny\n+\n$\nA\nB\n0\n1\n2\n3\n4\n5\n6\n7\ns1\n2\n3\nr4\ns4\ns6\ns1\n5\n3\nr2/s4 r2\ns7\nacc\nr3\nr3\n"
+  },
+  {
+    "page": 110,
+    "text": "• 该文法是LR(1)型文法吗? 若不是，应如何解决? (有多种选择)\nExercise\n121\nS\nACTOION\nGOTO\ny\n+\n$\nA\nB\n0\n1\n2\n3\n4\n5\n6\n7\ns1\n2\n3\nr4\ns4\ns6\ns1\n5\n3\ns4\nr2\ns7\nacc\nr3\nr3\n"
+  },
+  {
+    "page": 111,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n122\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\n"
+  },
+  {
+    "page": 112,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n123\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n"
+  },
+  {
+    "page": 113,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n124\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\n"
+  },
+  {
+    "page": 114,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n125\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n"
+  },
+  {
+    "page": 115,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n126\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n"
+  },
+  {
+    "page": 116,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n127\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n"
+  },
+  {
+    "page": 117,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n128\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n"
+  },
+  {
+    "page": 118,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n129\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n"
+  },
+  {
+    "page": 119,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n130\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n0\n$A\n$\n2\n"
+  },
+  {
+    "page": 120,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise\n131\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n0\n$A\n$\n2\n02\n$A\n$\nacc\n"
+  },
+  {
+    "page": 121,
+    "text": "给定文法G(S): \nS →Sb | bAa\nA →aSc | aSb | a \n(1) 拓广文法后，用LR(0)项目构造一个识别G(S)所有活前缀的DFA\n(2) 判断该文法是否为LR(0)文法，并阐明原因\n(3) 判断该文法是否为LR(1)文法，并阐明原因。\n(4) 试构造该文法的SLR(1)分析表。\nExercise\n132\n"
+  },
+  {
+    "page": 122,
+    "text": "给定文法G(S): \nS →Sb | bAa\nA →aSc | aSb | a \n(1) 拓广文法后，用LR(0)项目构造一个识别G(S)所有活前缀的DFA\nExercise\n133\n"
+  },
+  {
+    "page": 123,
+    "text": "给定文法G(S): \nS →Sb | bAa\nA →aSc | aSb | a \n(2) 判断该文法是否为LR(0)文法，并阐明原因\n• 移进—归约：I1，I5\n• 归约—归约：I9\nExercise\n134\n"
+  },
+  {
+    "page": 124,
+    "text": "给定文法G(S): \nS →Sb | bAa\nA →aSc | aSb | a \n(3) 判断该文法是否为LR(1)文法，并阐明原因\n• 该文法是SLR(1)的，所以自然就是LR(1)文法。\n• 理由: \n• I1: 由于b ∉FOLLOW(S’)，冲突可通过Lookahead解析\n• I5: 考虑b ∉FOLLOW(A)，同理可解析\n• I9: FOLLOW(A) ∩ FOLLOW(S) = ∅\nExercise\nLR(1)\nLALR(1) SLR(1)\nLR(0)\n"
+  },
+  {
+    "page": 125,
+    "text": "给定文法G(S): \nS →Sb | bAa\nA →aSc | aSb | a \n(4) 试构造该文法的SLR(1)分析表\nExercise\n(1) S → Sb \n(2) S →bAa\n(3) A → aSc\n(4) A → aSb\n(5) A → a \n推荐写增广后的文法\n也可以按照课件\n中的分析表写法\n"
+  },
+  {
+    "page": 126,
+    "text": "• 判断题\n• 在L-属性定义（L-Attributed Definition）中，每一个属性都是继承属性\n（Inherited Attribute）。\n• 错。在L-属性定义中，要么是综合属性，要么是受限的继承属性，并非都是继承属\n性。\n• 如果一个翻译模式（Translation Scheme）中存在嵌入在产生式右部的左\n边或中间的语义动作，则该翻译模式只适合使用递归下降预测翻译器\n（Recursive Descent Predictive Translator）来实现，无法使用LR分析技术\n来实现。\n• 错。翻译器分析技术的使用并不是由语义动作的实现决定，而是由文法的特点、语\n义动作的需求以及性能考虑决定。\nExercise\n137\n"
+  },
+  {
+    "page": 127,
+    "text": "已知文法G：S’→S\n•\nS →(L) | a\n•\nL →L,S | S\n其语法制导翻译定义如下：\n若输入为(a,(a))，且采用自底向上的分\n析方法，则输出为\n。\nExercise\n138\n产生式\n语义动作\nS’→ S\nprint(S.num)\nS → (L)\nS.num = L.num +1\nS → a\nS.num = 0\nL → L1, S\nL.num = L1.num + S.num\nL → S\nL.num = S.num\nS.num=2\nL.num=1\n(\n)\n,\nL.num=0\nS.num=1\nS.num=0\na\nL.num=0\n(\n)\nS.num=0\na\n2\n"
+  },
+  {
+    "page": 128,
+    "text": "假设我们有一个产生式A→BCD。A、B、C、D这四个非终结符号都有两个属性：\ns是一个综合属性，而i是一个继承属性。对于下面的每组规则，请回答：这些\n规则是否满足S属性定义的要求？这些规则是否满足L属性定义的要求？并给出\n理由。\n• A.s = B.s + D.s\n• 该规则满足S属性定义的要求（每个属性都是综合属性），也满足L属性定义的要求\n（无继承属性）。\n• A.s = B.i + C.s\n• 该规则不满足S属性定义的要求（存在继承属性i），满足L属性定义的要求（存在\n满足限制条件的继承属性i ）。\n• A.s = D.i，B.i = A.s + C.s，C.i = B.s，D.i = B.i + C.i\n• 该规则不满足S属性定义的要求（存在继承属性i），也不满足L属性定义的要求\n（存在不满足限制条件的继承属性B.i, 其依赖右兄弟的综合属性）。\nExercise\n139\n"
+  },
+  {
+    "page": 129,
+    "text": "考虑一个非标准的二进制数值系统，其中的每个二进制数b的值（value）被定义为从右至左\n的非零二进制数字表示的十进制数的交替和。例如，value（ε）= 0，value（10）= 21 = 2，\nvalue（100100）= 22 –25 =–28，value（11110）=21–22 + 23–24 = –10。已知表示非标准二进\n制数字b的文法G如下：\n• S → T | ε\n• T → 0T | 1T\n• T → 0 | 1\n请在表中添加相应的语义动作以计算value（b），\n你只能使用val和tmp两个属性。\nExercise\n140\n产生式\n语义动作\nS →T\nS.val = T.val；\nS →ε\nS.val = 0；\nT1 →0T2\nT1.tmp = T2.tmp * 2；\nT1.val = T2.val；\nT1 →1T2\nT →0\nT →1\nT.tmp = 1；\nT.val = 1；\nT1.tmp = T2.tmp * (-2)；\nT1.val = T2.val+T1.tmp；\nT.tmp = -1；\nT.val = 0；\n"
+  }
+]

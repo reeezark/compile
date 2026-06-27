@@ -1,0 +1,202 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture 9\nTarget Code Generation\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "Compilation Phases[编译阶段]\nLexical Analyzer\nSyntax Analyzer\nSemantic Analyzer\nIntermediate\nCode Generation\nCode Generator\ntoken  stream\nsyntax  tree\nintermediate  representation\nintermediate  representation\nCharacter Stream\n(Source Code)\nsyntax  tree\nCode Optimizer\ntarget-machine  code\n（executable）\nFront End\nBack End\n2\n"
+  },
+  {
+    "page": 3,
+    "text": "Target Code Generation[⽬标代码⽣成]\n• Target code generation\nu Transform the syntactically analyzed or optimized intermediate code into \ntarget code.\n• The main issues we need to consider:\nu How to make the target code shorter?\nu How to make full use of the registers and reduce the number of accesses \nto storage units in the target code ?\nu How to make full use of characteristics of the computer's instruction \nsystem ?\n3\n"
+  },
+  {
+    "page": 4,
+    "text": "Primary Tasks [主要任务]\n• What we have now ?\nu IR of the source program\nu Symbol table\n• Three primary tasks:\nu Instruction selection[指令选取]\np\nChoose appropriate target-machine instructions to implement the IR statements\nu Register allocation and assignment[寄存器分配]\np\ndecide what values to keep in which register\nu Instruction ordering[指令排序]\np\nDecide in what order to schedule the execution of instructions\n4\n"
+  },
+  {
+    "page": 5,
+    "text": "Instruction Selection[指令选取]\n• Instruction selection is the stage of a compiler backend that \ntransforms intermediate representation (IR) into a low-level IR.\n• contains both instruction scheduling and register allocation.\n• Its output IR may still be subject to peephole optimization[窥孔优化]. \nIR code (TAC):\na = b + c;\nd = a + e;\nTarget code:\nLD R0, b \n// R0 = b\nADD R0, R0, c \n// R0 = R0 + c\nST a, R0 \n// a = R0\nLD R0, a \n// R0 = a\nADD R0, R0, e \n// R0 = R0 + e\nST d, R0 \n// d = R0\n5\n"
+  },
+  {
+    "page": 6,
+    "text": "• Register allocation: the process of assigning local variables and \nexpression results to processor registers[寄存器分配].\nu Registers are the fastest storage unit but are of limited numbers\np\nValues not held in registers need to reside in memory\np\nInstructions involving register operands are much shorter and faster\nu Many allocations, including register allocation, are NP problems.\n• Instruction order: the order in which computations are \nperformed can affect the efficiency of the target code[执行顺序]\nu Some computation orders require fewer registers to hold intermediate \nresults than others\nu However, picking a best order in the general case is NP-hard\n6\nRegister Allocation & Inst. Order\n"
+  },
+  {
+    "page": 7,
+    "text": "Stack Machine [栈式计算机]\n• A simple evaluation model:\nu\nNo variables or registers\nu\nA stack of values for intermediate results\n• Each instruction:\nu\nPush operands to the stack[讲操作数压⼊栈中]\nu\nTakes its operands from the top of the stack[栈顶取操作数]\nu\nRemoves those operands from the stack[从栈中移除操作数]\nu\nComputes the required operation on them[计算]\nu\nPushes the result on the stack[将计算结果⼊栈]\n7\n"
+  },
+  {
+    "page": 8,
+    "text": "Optimize the Stack Machine\n• Note that the add instruction does 3 memory operations\n• two reads and one write. \n• The top of the stack is frequently accessed.\n• Idea: keep the top of the stack in a register (called accumulator) \n[使⽤寄存器]\n• The “add” instruction is now\nuacc ← acc + top_of_stack\nuOnly one memory operation\n8\n"
+  },
+  {
+    "page": 9,
+    "text": "Example\n3+7+5:\n9\n"
+  },
+  {
+    "page": 10,
+    "text": "From Stack Machine to MIPS\n• The compiler generates code for a stack machine with \naccumulator.\n• We want to run the resulting code on the MIPS processor\n• We simulate stack machine instructions using MIPS instructions \nand registers\n10\n"
+  },
+  {
+    "page": 11,
+    "text": "Simulating a Stack Machine\n• The ACC is kept in MIPS register $t0\n• The stack is kept in memory\n• The address of the next location on the stack is kept in MIPS \nregister $sp\nuThe top of the stack is at address $sp + 4\n• The stack grows towards lower addresses\nuStandard convention on the MIPS architecture\n11\ntop\n$sp + 12\n$sp\n$sp + 4\n$sp + 8\n"
+  },
+  {
+    "page": 12,
+    "text": "MIPS Architecture\n• Prototypical Reduced Instruction Set Computer (RISC) architecture\n• Arithmetic operations use registers for operands and results\n• Must use load and store instructions to use operands and results in \nmemory\nuAll other instructions access only registers\n• 32 general purpose registers (32 bits each)\nuWe will use $t0 (ACC), $sp (address of the next location on the stack ), and \n$t1 (a temporary register)\nu31 of these are general-purpose that can be used in any of the instructions\nuThe last one (zero), is to contain the number zero at all times\n12\n"
+  },
+  {
+    "page": 13,
+    "text": "A Sample of MIPS Instructions\n• lw reg1 offset(reg2)\nuLoad 32-bit word from address reg2 + offset into reg1\n• add reg1 reg2 reg3\nureg1 ← reg2 + reg3\n• sw reg1 offset(reg2)\nuStore 32-bit word in reg1 at address reg2 + offset\n• addiu reg1 reg2 imm\nureg1 ← reg2 + imm\nu“u” means overflow is not checked\n•  li reg imm\nureg ← imm\n13\n"
+  },
+  {
+    "page": 14,
+    "text": "Code Generation Consideration\n• We used to store values in unlimited temporary variables, but \nregisters are limited --> must reuse registers[重复使⽤寄存器]\n• Must save/restore registers when reusing them[保存-恢复]\nue.g., suppose that we need to store results of expressions in $t0\nuWhen generating E -> E1 + E2, \np E1 will first store result into $t0\np E2 will next store result into $t0, overwriting E1’s result\np Must save $t0 somewhere before generating E2\n14\n"
+  },
+  {
+    "page": 15,
+    "text": "Code Generation Consideration(cont.)\n• Registers are saved on and restored from the stack\n• Note: $sp - stack pointer register, pointing to the top of stack \nuSaving a register $t0 on the stack:\np sw $t0, 0($sp)  \n// store word in $t0 on the top of stack\np addiu $sp, $sp, -4 \n// allocate (push) a word on the stack\nuRestoring a value from stack to register $t0:\np lw $t0, 4($sp) \n \n// load word from top of stack to $t0\np addiu $sp, $sp, 4 \n// free (pop) word from stack\n15\n*MIPS instruction set: https://www.dsi.unive.it/~gasparetto/materials/MIPS_Instruction_Set.pdf\n"
+  },
+  {
+    "page": 16,
+    "text": "•  To push elements onto the stack\nuTo move stack pointer $sp down to make room for the new data\nuStore the elements into the stack\n• For example, to push registers $t1 and $t2 onto stack\n• add $sp, $sp, -8 \n• sw $t1, 4($sp) \n• sw $t2, 0($sp) \n \n \nStack Operations[栈操作]\n16\n"
+  },
+  {
+    "page": 17,
+    "text": "MIPS Assembly Example.\n• The stack-machine code for 7 + 5 in MIPS:\nacc ← 7\npush acc\nacc ← 5\nacc ← acc + stack_top\npop\n17\nli  $t0  7  \n \n \n// store 7 in $t0 \nsw  $t0  0($sp) \n \n// store $t0 in the stack\naddiu  $sp  $sp  -4 \n// decrement sp to make space for the value\nli  $t0  5  \n \n \n// store 5 in $t0 \nlw  $t1  4($sp) \n \n// load value from $sp+4 into $t1\nadd  $t0  $t0  $t1  \n// add $t0+$t1 = 5 + 7, store result in $t0 \naddiu  $sp  $sp  4  \n// pop constant 7 off stack \nQuestion: What is the value of $t0, $t1 and $sp-4 after the computation? \n*MIPS instruction set: https://www.dsi.unive.it/~gasparetto/materials/MIPS_Instruction_Set.pdf\n"
+  },
+  {
+    "page": 18,
+    "text": "• Pop elements simply by adjusting the $sp upwards\nuNote that the popped data is still present in memory, but data past the \nstack pointer is considered invalid\nStack Operations (cont.)\n18\nword 1\nword 2\n$sp\nword 1\nword 2\n$t1\n$t2\n$sp\nword 1\nword 2\n$t1\n$t2\n$sp\nHigher address\nHigher address\nHigher address\n"
+  },
+  {
+    "page": 19,
+    "text": "• For each expression e, we generate MIPS code that: \nu Computes the value of e into $t0\nu Preserves $sp and the contents of the stack\n• We define a code generation function cgen(e)\nu Its result is the code generated for e\nCode Generation Strategy\n19\ncgen(e1 + e2): \ncgen(e1) # stores result of e1 in $t0\nsw $t0 0($sp)\naddiu $sp $sp -4 # pushes $t0 on stack\ncgen(e2) # overwrites result in $t0\nlw $t1 4($sp) # pops value of e1 to $t1 \naddiu $sp $sp 4 \nadd $t0 $t1 $t0 # performs addition \ncgen(e1 + e2): \ncgen(e1) # stores result in $t0\nmove $t1 $t0 # copy result of $t0 to $t1 \ncgen(e2) # stores result in $t0 \nadd $t0 $t1 $t0 # performs addition \nPossible optimization: put the result of e1 \ndirectly in register $t1? What if 3 + (7 + 5)? \n"
+  },
+  {
+    "page": 20,
+    "text": "• We need flow control instructions                                                                \n• New instruction: beq reg1 reg2 label\nuBranch to label if reg1 ==reg2\n• New instruction: b label\nuUnconditional jump to label\nCode Generation for the Conditional\n20\ncgen(if e1 == e2 then e3 else e4):\ncgen(e1) \n# pushes $t0 on stack \nsw $t0 0($sp)\naddiu $sp $sp -4 \n# overwrites $t0 \ncgen(e2) \n# pops value of e1 to $t1 \nlw $t1 4($sp) \naddiu $sp $sp 4 \n# performs comparison \nbeq $t0 $t1 true_branch \nfalse_branch: \ncgen(e4) \nb end_if \ntrue_branch: \ncgen(e3) \nend_if:\n"
+  },
+  {
+    "page": 21,
+    "text": "• Code\nuthe size of the generated target code is fixed \nat compile time \n• Global/static \nuthe size of some program data objects, e.g., \nglobal constants, are known at compile time \n• Stack \nustore dynamic data structures \n• Heap \numanage long-lived data\nExample Memory Layout\n21\n…\ncode of g()\ncode of f()\ncode of main()\nglobal data segment\nheap\nfree memory\nstack\ncode\ndata\nexecutable \nimage\nlow\nhigh\n"
+  },
+  {
+    "page": 22,
+    "text": "• Compiler typically allocates memory in the unit of procedure.\n• Each execution of a procedure is called as its activation[活动].\nustarts at the beginning of the procedure body \nuWhen completed, returns the control to the point immediately after the place \nwhere that procedure is called\n• Activation record (AR[活动记录]) is used to manage the information \nneeded by a single execution of a procedure \n• Stack is to hold activation records that get generated during procedure \ncalls\nActivation[活动]\n22\n"
+  },
+  {
+    "page": 23,
+    "text": "• Manage ARs like a stack in memory[AR栈管理] \nuOn function entry: AR instance allocated at top of stack \nuOn function return: AR instance removed from top of stack\n•  Hardware support \nuStack pointer ($SP) register[栈指针] \np\n$SP stores address of top of the stack \np\nAllocation/de-allocation can be done by moving $SP\nu Frame pointer ($FP) register[帧指针] \np\n$FP stores base address of current frame \np\nFrame: another word for AR\np\nVariable addresses translated to an offset from \nu$FP and $SP together delineate the bounds of current AR\nARs in Stack Memory[在栈中管理]\n23\n"
+  },
+  {
+    "page": 24,
+    "text": "• Example layout of a function AR\n• Registers such as $FP and $IP overwritten by callee → Must be saved \nto/restored from AR on call/return\nuCaller’s $IP: where to execute next on function return (a.k.a. return address: \ninstruction following function call)\nuCaller’s $FP: where $FP should point to on function return \nContents of ARs\n24\nTemporaries\nLocal variables \nSaved Caller/Callee Register Values \nSaved Caller’s Instruction Pointer ($IP)\nSaved Caller’s AR Frame Pointer ($FP) \nParameters\nReturn Value \n临时变量\n局部变量\n保存的寄存器值\n保存的调⽤者指令指针\n保存的调⽤者AR指针\n参数\n返回值\n"
+  },
+  {
+    "page": 25,
+    "text": "• Important registers should be saved across function calls\nuOtherwise, values might be overwritten\n•  But, who should take the responsibility?\nuThe caller knows which registers are important to it and should be saved\nuThe callee knows exactly which registers it will use and potentially \noverwrite\nuHowever, the caller and the callee don’t know anything about each other’s \nimplementation\nCaller/Callee Conventions\n25\n"
+  },
+  {
+    "page": 26,
+    "text": "• Potential solutions\nuSolution 1: caller to save any important registers that it needs before \ncalling a func, and to restore them after (but not all will be overwritten)\nuSolution 2: callee saves and restores any registers it might overwrite (but \nnot all are important to caller)\n• Caller and callee should cooperate\nCaller/Callee Conventions (cont.)\n26\n"
+  },
+  {
+    "page": 27,
+    "text": "• Caller: save and restore any of the following caller-saved registers that it cares\nu $t0-$t9, $a0-$a3, $v0-$v1 \nu The callee can modify these registers, assuming that the caller already saved them\n• Callee: save and restore any of the following callee-saved registers that it uses          \nu$s0-$s7, $ra \nuThe caller assume these registers are not changed by the callee\nCaller/Callee Conventions (cont.)\n28\n"
+  },
+  {
+    "page": 28,
+    "text": "• The caller sets up for the call via these steps[调⽤者]\nu Make space on stack for and save any caller-saved registers\nu Pass arguments by pushing them on the stack, one by one, right to left\nu Jump to the function (saves the next inst in $ra)\n• The callee then takes over and does the following[被调⽤者]\nu Make space on stack for and save values of $fp and $ra[caller当前的FP地址和返回地址]\nu Configure frame pointer by setting $fp to base of frame[设置⾃⼰的FP]\nu Allocate space for stack frame (required for all local and temporary variables)\nu Execute function body, code can access params at positive offset from $fp, \nlocals/temps at negative offsets from $fp\nDetailed Calling Steps\n29\n"
+  },
+  {
+    "page": 29,
+    "text": "• When ready to exit, the callee does the following[调⽤退出]\nu Assign the return value (if any) to $v0\nu Pop stack frame off the stack (locals/temps/saved regs)\nu Restore the value of $fp and $ra\nu Jump to the address saved in $ra\n• When control returns to the caller, it cleans up from the call with \nthe steps[调⽤返回]\nu Pop the parameters from the stack\nu Restore value of any caller-saved registers\nDetailed Calling Steps (cont.)\n30\n"
+  },
+  {
+    "page": 30,
+    "text": "• The calling sequence is instructions \n(of both caller and callee) to set up a \nfunction invocation.\n• New instruction: jal label.\nu Jump to label, after saving address of next \ninstruction in $ra.\n• New instruction: jr reg\nu\nJump to address in register reg\nCode Generation for Function Call\n31\ncgen(f(e1, …, en)): \ncgen(en) \n \n # push arguments in reserve order \naddiu $sp $sp -4 \nsw $a0 0($sp)\n… \naddiu $sp $sp -4 \n# saves FP \nsw $fp 0($sp) \naddiu $sp, $sp, -4 \n# pushes return address \nsw $ra, 0($sp)\nmove $fp, $sp  \n# begins new AR in stack \njal f_entry \n \n# jump (update $ra)\ncgen(def f(x1,…,xn) = e): \nf_entry: \n \ncgen(e) \nmove $sp $fp  \n# removes AR from stack \nsw $ra 0($sp)  \n# pops return address\naddiu $sp $sp 4 \nlw $fp 0($sp)  \n# pops old fp \naddiu $sp $sp 4 \njr $ra  \n \n# jumps to return address \n"
+  },
+  {
+    "page": 31,
+    "text": "• The “variables” of a function are just its ‘parameters’\nuThey are all in the AR\nuPushed by the caller\n• Problem: the stack grows when intermediate results are saved, so the \nvariables are not at a fixed offset from $sp\nuThus, access to locations in the stack frame cannot use $sp-relative addressing\n• Solution: use the frame pointer $fp instead\nuAlways points to the return address on the stack\nuSince it does not move, it can be used to find the variables\nCode Generation for Variables\n32\n"
+  },
+  {
+    "page": 32,
+    "text": "• Local variables are referenced from an offset from $fp \nu $fp is pointing to old $ip (return address) \n• For a function def f(x,y) = e, the activation and frame pointer are \nset up as follows:\nu The parameters are pushed right to left by the caller\nu The locals are pushed left to right by the callee\nExample\n33\ny\nx\nOld FP\nOld IP\nLocal variables\nTemporaries\n…\n$sp\n$fp\nx: +8($fp) \ny: +12($fp) \nFirst local variable: -4($fp)\n"
+  },
+  {
+    "page": 33,
+    "text": "Example\n34\ndouble fun1(int p1, double p2, int p3) { \nint i, j;\nres = fun2(p1*p2, j); \nreturn res;\n }\ndouble fun2(double ar, int ib) {\n \nint i, r1; \n \ndouble res;\n \n… \n \nreturn res; \n}\np3\np2\np1\nOld FP\nOld IP\ni\nj\nib\nar\nOld FP\nOld IP\ni\nr1\nres\n$sp\n$fp\n$sp\n$fp\n"
+  },
+  {
+    "page": 34,
+    "text": "• Objects are like structures in C\nu Objects are laid out in contiguous memory\nu Each member variable is stored at a fixed offset in object\n• Unlike structures, objects have member methods\nCode Generation for OO\n35\n"
+  },
+  {
+    "page": 35,
+    "text": "• Two types of member methods:\nuNonvirtual member methods: cannot be overridden\np Parent obj = new Child();\np obj.nonvirtual(); // Parent::nonvirtual() called\np Method called depends on (static) reference type\np Compiler can decide call targets statically\nuVirtual member methods: can be overridden by child class \np Parent obj = new Child();\np obj.virtual(); // Child::virtual() called\np Method called depends on (runtime) type of object\np Need to call different targets depending on runtime type\nCode Generation for OO(cond.)\n36\n"
+  },
+  {
+    "page": 36,
+    "text": "• Dispatch: to send to a particular place for a purpose\nu i.e., to jump to a (particular) function \n• Static Dispatch: selects call target at compile time \nu Nonvirtual methods implemented using static dispatch \nu Implication for code generation -- Can hard code function address into binary \n• Dynamic Dispatch: selects call target at runtime \nu Virtual methods implemented using dynamic dispatch \nu Implication for code generation: \np\nMust generate code to select correct call target, but how?\nu At compile time, generate a dispatch table for each class, containing call targets for all virtual \nmethods of that class.\nu At runtime, each object has a pointer to its dispatch table, which is indexed into to find call \ntarget for its runtime type.\nStatic and Dynamic Dispatch\n37\n"
+  },
+  {
+    "page": 37,
+    "text": "• Class tag is used for dynamic type checking \n• Dispatch ptr is a pointer to the dispatch table \n• Compiler translates member accesses to offset accesses\n  if(...) obj = new Parent();\n  else  obj = new Child();\n  obj.x = 10;     // move 10, x_offset(obj)\n  obj.f2();        // call f2_offset(obj.dispatch_ptr) \n• Offsets must remain identical \nuHow to layout object and dispatch table to make it so?\nTypical Object Layout\n38\nClass tag (A)\nDispatch ptr\nx\ny\nz\nClass A`s Table\naddr of f1()\naddr of f2()\naddr of f3()\n"
+  },
+  {
+    "page": 38,
+    "text": "• Invariant: the offset of a member variable or member method is \nthe same in a class and all of its subclasses\nInheritance and Subclasses\n39\nclass A1 {\n  int x; \n  virtual void f1() { ... }\n  virtual void f2() { ... } \n} \nclass A2 inherits A1 { \n  int y;\n  virtual void f2() { ... } \n}\nclass A3 inherits A2 {\n  int z;\n  virtual void f3() { ... }\n }\nClass tag (A1)\nDispatch ptr\nx\nA1’s Table\nf1()\nf2()\nClass tag (A2)\nDispatch ptr\nx\ny\nA2’s Table\nf1()\nf2()\nClass tag (A3)\nDispatch ptr\nx\ny\nz\nA3’s Table\nf1()\nf2()\nf3()\nNote, f2() in A1’s\nand A2’s tables\nare different\n"
+  },
+  {
+    "page": 39,
+    "text": "• Member variable access\nuGenerate code using offset for reference type (class)\nuObject may be a child type, but will still have same offset \n• Member method call \nuGenerate code to load call target from dispatch table using offset for \nreference type \nuAgain, object may be of child type, but still same offset \nInheritance and Subclasses (cont.)\n40\n"
+  },
+  {
+    "page": 40,
+    "text": "Machine Optimizations[机器相关优化]\n• After performing IR optimizations\nu We need to convert the optimized IR into the target language (e.g., assembly, machine code)\n• Specific machine features are taken into account to produce code \noptimized for the particular architecture[考虑特定的架构特性]\nue.g., specialized instructions, hardware pipeline abilities, register details\n• Typical machine optimizations[典型的优化⽅案]\nuInstruction selection and scheduling[指令选择与调度] \np select which instructions to implement the operators in IR\np Decide in what order the instructions are executed.\nuRegister allocation[寄存器分配优化]: map values to registers and manage\nuPeephole optimization[窥管优化]: locally improve the target code\n41\n"
+  },
+  {
+    "page": 41,
+    "text": "Instruction Selection[指令选取]\n• To find an efficient mapping from the IR to a target-specific assembly \nlisting[IR到汇编的映射]\n• Instruction selection is particularly important when targeting \narchitectures with CISC (e.g., x86)\nuIn these architectures, there are typically several possible implementations of \nthe same IR operation, each with different properties\nue.g., on x86, an addition of one can be implemented by an add or inc\n42\nMOV y,R0\nADD z,R0\nMOV R0,x\nMOV a,R0\nADD #1,R0\nMOV R0,a\nMOV a,R0\nINC R0\nMOV R0,a\nx = y + z\na = a + 1\n"
+  },
+  {
+    "page": 42,
+    "text": "Instruction Cost[指令成本]\n• Instruction cost = 1 + cost (source-mode) + cost (destination-mode)\n• Examples\n43\n"
+  },
+  {
+    "page": 43,
+    "text": "Instruction Cost (cont.)\n• Suppose we translate TAC x:=y+z to\nMOV y, R0\nADD z, R0\nMOV R0, x\n• a := b + c\n• a := a + 1\n44\nMOV b, R0\nADD c, R0\nMOV R0, a\nMOV b, a\nADD c, a\nMOV *R1, *R0\nADD *R2, *R0\nMOV a, R0\nADD #1, R0\nMOV R0, a\nADD #1, a\nINC a\ncost = 6\ncost = 6\ncost = 2\ncost = 6\ncost = 3\ncost = 2\nAssuming R0, R1 and R2 \ncontain the addresses of \na, b, and c\n"
+  },
+  {
+    "page": 44,
+    "text": "Instruction Scheduling[指令调度]\n• Some facts\nu Instructions take clock cycles to execute (latency)\nu Modern machines issue several operations per cycle (Out-of-Order Execution)\nu Execution time is order-dependent\n• Goal: reorder the operations to minimize execution time\nu Minimize wasted cycles\nu Avoid spilling registers\nu Improve locality\n45\nA = x * y;\nB = A + 1;\nC = y;\nA = x * y;\nC = y;\nB = A + 1;\n(Now C=y can execute while waiting for A=x*y)\n"
+  },
+  {
+    "page": 45,
+    "text": "Register Allocation[寄存器分配]\n• In TAC, there are an unlimited number of variables\nu On a physical machine there are a small number of registers\n• Register allocation is the process of assigning variables to registers and managing \ndata transfer in and out of registers\nu How to assign variables to finitely many registers?\nu What to do when the number of variables outweighs the number registers?\nu How to do so efficiently?\n• Using registers intelligently is a critical step in any compiler\nu Accesses to memory are costly, even with caches \nu A good register allocator can generate code orders of magnitude better than a bad \nregister allocator\n46\n"
+  },
+  {
+    "page": 46,
+    "text": "Register Allocation (cont.)\n• Goals of register allocation\nu Keep frequently accessed variables in registers\nu Keep variables in registers only as long as they are live \n• Local register allocation[局部]\nu Allocate registers basic block by basic block\nu Makes decisions on a per-block basis (hence ‘local’) \n• Global register allocation[全局]\nu Makes global decisions about register allocation such that\np Var to reg mappings remain consistent across blocks\np Structure of CFG is taken into account on decisions\n• Three well-known register allocation algorithms \nu Graph coloring allocator[图着⾊]\nu Linear scan allocator[线性扫描]\nu LP (Integer Linear Programming) allocator[整数线性规划]\n47\n"
+  },
+  {
+    "page": 47,
+    "text": "Graph Coloring[图着⾊]\n• Register interference graph (RIG)[相交图]\nu Each node represents a variable\nu An edge between two nodes V1 and V2 represents an interference in live ranges[活跃\n期/⽣存期]\n• Based on RIG\nu Two variables can be allocated in the same register if there is no edge between \nthem[若⽆边相连, 可使⽤同⼀寄存器]\nu Otherwise, they cannot be allocated in the same register \n• Problem of register allocation maps to graph coloring\nu Once solved, k colors can be mapped back to k registers\nu If the graph is k-colorable, it’s k-register-allocatable\n48\na\nb\nc\nd\ne\nf\nR1\nR1\nR2\nR2\nR3\nR4\n"
+  },
+  {
+    "page": 48,
+    "text": "Register Spilling[寄存器溢出]\n• Determining whether a graph is k-colorable is NP-complete\nu Therefore, problem of k-register allocation is NP-complete\nu In practice: use heuristic polynomial algorithm that gives sub-optimal allocations \nin most of the time\nu Chaitin’s graph coloring is a popular heuristic algorithm \np e.g., most backends of GCC use Chaitin’s algorithm \n• What if k-register allocation does not exist?\nu Spill a variable to memory to reduce RIG and try again\nu Spilled variable stays in memory and is not allocated a register \n• Spilling is slow\nu\nPlaced into memory, loaded into register when needed, and written back to \nmemory when no longer used\n49\n"
+  },
+  {
+    "page": 49,
+    "text": "Peephole Optimization[窥孔优化]\n• Optimization ways\nu Usual: produce good code through careful instruction selection and register allocation\nu Alternative: generate naive target code and then improve\n• A simple but effective technique for locally improving the target code\nu Done by examining a sliding window of target instructions (called peephole) \nu Replace instruction sequences within the peephole by a shorter or faster sequence\nu Can also be applied directly after IR generation to improve IR\n• Example transformations\nu Redundant-instruction elimination\nu Flow-of-control optimizations\nu Algebraic simplifications\n50\nif a < b goto L2\n…\nL1: goto L2\nif a < b goto L1\n…\nL1: goto L2\nJump to jumps\n"
+  },
+  {
+    "page": 50,
+    "text": "Summary\n• Code can be optimized at different levels with various techniques\nu Peephole, local, loop, global\nu IR: local, global, CSE, constant folding and propagation, …\nu Target: instruction, register, …\n• Interactions between the various optimization techniques\nu Some transformations may expose possibilities for others\nu One optimization may hide or remove possibilities for others\n• Affect of compiler optimizations are intertwined and hard to separate\nu Finding optimal optimization combinations is in research\nu Compilers package optimization that typically go together into levels (e.g., -O1, -O2)\n51\n"
+  }
+]

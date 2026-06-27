@@ -1,0 +1,1011 @@
+\documentclass[UTF8,fontset=none,11pt]{ctexart}
+\usepackage[a4paper,margin=2.05cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds,calc}
+
+\setCJKmainfont[AutoFakeSlant=0.18]{PingFang SC}
+\setCJKsansfont[AutoFakeSlant=0.18]{PingFang SC}
+\setCJKmonofont[AutoFakeSlant=0.18]{PingFang SC}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black,
+  citecolor=blue!55!black,
+  pdftitle={Intermediate Code Intro IR 中文学习笔记},
+  pdfauthor={Trae AI}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist[itemize]{leftmargin=1.8em,itemsep=0.22em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=2.0em,itemsep=0.28em,topsep=0.3em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+\sloppy
+
+\definecolor{defrule}{RGB}{25,92,140}
+\definecolor{noterule}{RGB}{120,80,15}
+\definecolor{warnrule}{RGB}{160,50,45}
+\definecolor{softblue}{RGB}{235,246,255}
+\definecolor{softyellow}{RGB}{255,249,230}
+\definecolor{graytext}{RGB}{95,95,95}
+\definecolor{GRAYTEXT}{RGB}{95,95,95}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\newenvironment{defbox}[1][]{%
+  \par\medskip\noindent{\color{defrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{defrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{defrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+\newenvironment{notebox}[1][]{%
+  \par\medskip\noindent{\color{noterule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{noterule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{noterule}\rule{\linewidth}{0.4pt}}\par\medskip}
+\newenvironment{warnbox}[1][]{%
+  \par\medskip\noindent{\color{warnrule}\rule{\linewidth}{1.1pt}}\par\nopagebreak
+  \noindent{\bfseries\color{warnrule}#1}\par\nopagebreak\smallskip}%
+  {\par\nopagebreak\smallskip\noindent{\color{warnrule}\rule{\linewidth}{0.4pt}}\par\medskip}
+
+\newcommand{\pg}[1]{\texorpdfstring{{\small\color{graytext}\,[p#1]}}{ [p#1]}}
+\newcommand{\IR}{\ensuremath{\mathrm{IR}}}
+\newcommand{\TAC}{\ensuremath{\mathrm{TAC}}}
+\newcommand{\SSA}{\ensuremath{\mathrm{SSA}}}
+\newcommand{\SDD}{\ensuremath{\mathrm{SDD}}}
+\newcommand{\SDT}{\ensuremath{\mathrm{SDT}}}
+\newcommand{\eps}{\varepsilon}
+
+\title{\bfseries Lecture 8: Intermediate Code Intro \& IR\\中文学习笔记}
+\author{基于课件 \texttt{7.Intermediate\_Code\_Intro\_IR.pdf} 整理}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section*{阅读导引}
+\addcontentsline{toc}{section}{阅读导引}
+
+本讲进入编译器前端和后端之间的桥梁：中间代码生成（intermediate code generation）和中间表示（intermediate representation, IR）。前面的语法分析和语义分析已经确认程序结构合法、标识符绑定正确、类型信息可用；本讲开始把带标注的 AST 翻译成更适合优化和目标代码生成的 IR，重点是三地址码、SSA、语法制导代码生成、数组与控制流翻译，以及单遍生成中的回填。
+
+\begin{notebox}[本讲主线]
+IR 的价值在于把“源语言相关的结构”转换为“优化和后端更容易处理的结构”。三地址码把复杂表达式拆成简单指令，SSA 把值流显式化，回填解决单遍生成时前向跳转目标未知的问题。
+\end{notebox}
+
+\section{回顾与编译阶段定位 \pg{1--5}}
+
+\subsection{从 SDD/SDT 到中间代码 \pg{2}}
+
+课件开头回顾上一讲语义分析：
+
+\begin{itemize}
+  \item SDD：属性、综合属性、继承属性、依赖图、拓扑序。
+  \item S-SDD 和 L-SDD：分别适合 LR 和 LL/RDP 等不同实现方式。
+  \item SDT：把语义动作放在产生式不同位置，执行翻译或检查。
+  \item 应用：符号表、作用域、类型检查。
+\end{itemize}
+
+这些内容为本讲服务：中间代码生成也可以看成一种语法制导翻译。语义分析给 AST 加上类型、符号表入口、偏移等标注；代码生成规则根据这些属性输出三地址码。
+
+\subsection{中间代码生成在编译器中的位置 \pg{3--5}}
+
+编译阶段：
+\[
+\begin{aligned}
+&\text{Source Code}\to \text{Lexical Analyzer}\to \text{Syntax Analyzer}\to \text{Semantic Analyzer}\\
+&\to \text{Intermediate Code Generation}\to \text{Code Optimizer}\to \text{Code Generator}.
+\end{aligned}
+\]
+
+中间代码生成的输入是 syntax tree 或 annotated/decorated AST，输出是 intermediate representation。此时程序仍保持机器无关性，但已经不像 AST 那样高度依赖源语言表面语法。
+
+课件用 while 代码说明翻译结果：
+
+\begin{verbatim}
+while (y < z) {
+  int x = a + b;
+  y += x;
+}
+\end{verbatim}
+
+可能翻译成类似三地址码：
+
+\begin{verbatim}
+goto L1
+L2:
+t1 := a + b
+x := t1
+t2 := y + x
+y := t2
+L1:
+if y < z goto L2
+\end{verbatim}
+
+这说明控制结构被转为标签和跳转，复杂表达式被转为临时变量上的简单运算。
+
+\section{多层 IR 与使用多种 IR 的原因 \pg{6--9}}
+
+\subsection{IR 的作用 \pg{6}}
+
+\begin{defbox}[Intermediate Representation]
+中间表示是编译过程中使用的程序表示形式，位于源代码和目标机器码之间。它既能保留足够语义信息，又比源语言语法更规整，便于优化和后端处理。
+\end{defbox}
+
+IR 的优势：
+
+\begin{itemize}
+  \item 提高抽象层次，使每个编译阶段只处理适合自己的表示。
+  \item 让前端、优化器、后端之间边界更清晰。
+  \item 支持一个编译器构造一系列 IR，而不是只用一种表示贯穿始终。
+\end{itemize}
+
+\subsection{高层、低层和机器层 IR \pg{6--7}}
+
+\begin{longtable}{L{0.18\linewidth}L{0.26\linewidth}L{0.28\linewidth}L{0.18\linewidth}}
+\toprule
+层级 & 例子 & 特点 & 主要用途 \\
+\midrule
+High-level IR & Parse Tree, AST & 接近源语言，通常语言相关 & 语义分析、保留源程序结构 \\
+Low-level IR & Three-address code, SSA & 接近抽象机器指令集，语言和机器相对独立 & 机器无关优化 \\
+Machine-level IR & x86 IR, ARM IR & 接近具体 ISA，机器相关 & 寄存器分配、指令选择、目标代码生成 \\
+\bottomrule
+\end{longtable}
+
+高层 IR 适合表达“这个程序是什么结构”；低层 IR 适合表达“这个程序如何一步步计算”；机器层 IR 适合表达“目标机器上怎么执行”。
+
+\subsection{为什么要多层 IR \pg{8--9}}
+
+只用一种 IR 是可以的。例如某些 JIT 编译器为了减少编译时间，可能在语义分析后直接从 AST 生成机器码。但多层 IR 有两个重要优势：
+
+\begin{enumerate}
+  \item 更适合具体任务。语义分析用 AST 更自然，优化用 TAC/SSA 更自然，寄存器分配必须接近机器层。
+  \item 更容易扩展前端和后端。低层 IR 可作为多源语言和多目标机器之间的桥梁。
+\end{enumerate}
+
+如果只有 AST，新增一个源语言就要为新 AST 重写所有优化；新增一个 ISA 也要写新的 AST 到机器码转换。若统一降到低层 IR，优化器可复用，后端也只需处理一种较统一的输入。
+
+\section{中间表示与三地址码 \pg{10--18}}
+
+\subsection{三类重要 IR \pg{10--11}}
+
+课件列出几类重要 IR：
+
+\begin{itemize}
+  \item 树形结构：parse tree、AST。
+  \item DAG：有向无环图，可把共享子表达式表达为共享节点。
+  \item 线性表示：尤其是三地址码。
+  \item SSA：静态单赋值形式，常建立在低层 IR 上。
+\end{itemize}
+
+同一个程序片段可以同时表示为树和线性代码。例如：
+
+\begin{verbatim}
+do i = i + 1; while (a[i] < v);
+\end{verbatim}
+
+树更直观表达循环、下标、比较等结构；三地址码则把它拆成编号指令、临时变量和跳转，便于优化器顺序扫描和重排。
+
+\subsection{三地址码的基本形式 \pg{12}}
+
+\begin{defbox}[Three-Address Code]
+三地址码是一种线性 IR，每条指令右侧最多只有一个操作符，通用形式为：
+\[
+X = Y\ \mathrm{op}\ Z.
+\]
+其中 \(X,Y,Z\) 可以是变量名、常量或编译器生成的临时变量。
+\end{defbox}
+
+例子：
+\[
+x+y*z
+\]
+不能直接作为一条三地址指令，因为右侧有两个运算。应拆为：
+\begin{verbatim}
+t1 = y * z
+t2 = x + t1
+\end{verbatim}
+
+三地址码的特点：
+
+\begin{itemize}
+  \item 是语法树或 DAG 的线性化表示。
+  \item 可看成某种抽象机器的汇编语言。
+  \item 长表达式被拆成多条简单指令。
+  \item 控制流被转为条件跳转和无条件跳转。
+  \item 与具体机器无关，适合机器无关优化。
+\end{itemize}
+
+\subsection{优化动机：公共子表达式消除 \pg{13}}
+
+表达式：
+\[
+a*b+a*b
+\]
+直接翻译可得：
+\begin{verbatim}
+t1 = a * b
+t2 = a * b
+t3 = t1 + t2
+\end{verbatim}
+
+优化器可识别重复的 \(a*b\)，做公共子表达式消除（common subexpression elimination, CSE）：
+\begin{verbatim}
+t1 = a * b
+t3 = t1 + t1
+\end{verbatim}
+
+三地址码比 AST 更容易暴露这类优化机会，因为每一步运算都以简单指令形式呈现。
+
+\subsection{三地址码中的地址 \pg{14}}
+
+三地址码中的地址可以是：
+
+\begin{itemize}
+  \item 名字：源程序中的变量名、函数名等。
+  \item 常量：整数、浮点数、字符串等。
+  \item 编译器生成的临时变量：例如 \(t_1,t_2\)。每次需要保存中间值时生成不同临时变量，便于优化和寄存器分配。
+\end{itemize}
+
+临时变量在最终代码生成时可能合并到寄存器或栈位置中。中间阶段保留独立临时名，可以让数据依赖更清楚。
+
+\subsection{三地址指令形式 \pg{15--17}}
+
+\begin{longtable}{L{0.22\linewidth}L{0.30\linewidth}L{0.38\linewidth}}
+\toprule
+类型 & 形式 & 说明 \\
+\midrule
+二元赋值 & \(x=y\ \mathrm{op}\ z\) & op 是二元算术或逻辑运算符 \\
+一元赋值 & \(x=\mathrm{op}\ y\) & 如 unary minus、逻辑非、shift、类型转换 \\
+复制 & \(x=y\) & 把 \(y\) 的值赋给 \(x\) \\
+无条件跳转 & \(\mathrm{goto}\ L\) & 下一条执行标签 \(L\) 处指令 \\
+条件跳转 & \(\mathrm{if}\ x\ \mathrm{goto}\ L\)，\(\mathrm{ifFalse}\ x\ \mathrm{goto}\ L\)，\(\mathrm{if}\ x\ \mathrm{relop}\ y\ \mathrm{goto}\ L\) & 根据条件决定控制流 \\
+过程调用 & \(\mathrm{param}\ x\)，\(\mathrm{call}\ p,n\) & 先压参数，再调用函数 \(p\)，参数数目为 \(n\) \\
+返回 & \(\mathrm{return}\ y\) & 返回值可选 \\
+下标复制 & \(x=y[i]\)，\(x[i]=y\) & 从数组偏移处读写 \\
+地址与指针 & \(x=\&y\)，\(x=*y\)，\(*x=y\) & 取地址、解引用读、解引用写 \\
+\bottomrule
+\end{longtable}
+
+课件中数组和指针形式强调：三地址码不仅能表达算术，还能表达内存地址计算。
+
+\subsection{do-while 示例 \pg{18}}
+
+源程序：
+\begin{verbatim}
+do {
+  i = i + 1;
+} while (a[i] < v)
+\end{verbatim}
+
+对应 TAC：
+\begin{verbatim}
+L: t1 = i + 1
+i = t1
+t2 = &a
+t3 = sizeof(int)
+t4 = t3 * i
+t5 = t2 + t4
+t6 = *t5
+if t6 < v goto L
+\end{verbatim}
+
+这里 \(a[i]\) 被翻译为：先取数组基地址，再用元素宽度乘以下标得到偏移，最后解引用得到元素值。
+
+\section{三地址码的实现：四元式、三元式、间接三元式 \pg{19--30}}
+
+\subsection{四元式 \pg{19--21}}
+
+\begin{defbox}[Quadruple]
+四元式用四个字段表示一条三地址指令：
+\[
+(\mathrm{op},\ \mathrm{arg1},\ \mathrm{arg2},\ \mathrm{result}).
+\]
+\end{defbox}
+
+例子：
+\[
+x=y+z \quad\Rightarrow\quad (+,y,z,x).
+\]
+复制语句 \(x=y\) 中，op 为 \(=\)。很多运算的赋值符号是隐含的，例如 \(x=y+z\) 写作 \(+,y,z,x\)。
+
+特殊情况：
+
+\begin{itemize}
+  \item 一元操作 \(x=\mathrm{minus}\ y\)：\((minus,y,\_,x)\)，不使用 arg2。
+  \item \(\mathrm{param}\ x\)：\((param,x,\_,\_)\)，不使用 arg2 和 result。
+  \item \(\mathrm{goto}\ L\)：\((goto,\_,\_,L)\)，目标标签放入 result。
+  \item 条件跳转和无条件跳转都把目标标签放入 result。
+\end{itemize}
+
+例子：
+\begin{verbatim}
+a = b * (-c) + b * (-c)
+\end{verbatim}
+可翻译为：
+\begin{center}
+\small
+\begin{tabular}{c|cccc}
+\toprule
+编号 & op & arg1 & arg2 & result \\
+\midrule
+0 & minus & c &  & t1 \\
+1 & * & b & t1 & t2 \\
+2 & minus & c &  & t3 \\
+3 & * & b & t3 & t4 \\
+4 & + & t2 & t4 & t5 \\
+5 & = & t5 &  & a \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{三元式 \pg{22--24}}
+
+\begin{defbox}[Triple]
+三元式只有三个字段：
+\[
+(\mathrm{op},\ \mathrm{arg1},\ \mathrm{arg2}).
+\]
+它没有显式 result 字段，某条指令的结果隐含为该指令编号。
+\end{defbox}
+
+例如 \(x=y+z\) 写成 \((+,y,z)\)，结果由该三元式编号引用。上一例对应三元式：
+
+\begin{center}
+\small
+\begin{tabular}{c|ccc}
+\toprule
+编号 & op & arg1 & arg2 \\
+\midrule
+0 & minus & c &  \\
+1 & * & b & (0) \\
+2 & minus & c &  \\
+3 & * & b & (2) \\
+4 & + & (1) & (3) \\
+5 & = & a & (4) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+复杂左值需要额外三元式。例如 \(x[i]=y\)：
+\begin{center}
+\small
+\begin{tabular}{c|ccc}
+\toprule
+编号 & op & arg1 & arg2 \\
+\midrule
+0 & [] & x & i \\
+1 & = & (0) & y \\
+\bottomrule
+\end{tabular}
+\end{center}
+第 0 条先计算 \(x[i]\) 的地址，第 1 条再把 \(y\) 写入该地址。
+
+\subsection{三元式的问题 \pg{25--26}}
+
+三元式节省了 result 字段，但优化时不方便。因为结果由指令位置表示，一旦移动或删除指令，所有引用该编号的位置都可能需要更新。
+
+例如做 CSE 后删除重复计算，如果原来某条指令引用的是 \((4)\)，而第 4 条已经被删除或移动，就会出现悬空引用。优化器经常需要移动代码，因此纯三元式不利于代码变换。
+
+\subsection{间接三元式 \pg{27--30}}
+
+\begin{defbox}[Indirect Triple]
+间接三元式把三元式存入一个 triple database，真正表示程序执行顺序的是一个指向三元式的指针列表。移动指令时只重排指针列表，不移动三元式本体。
+\end{defbox}
+
+优点：
+
+\begin{itemize}
+  \item 指令重排更容易，不会破坏基于三元式编号的引用。
+  \item CSE 删除指令后，数据库中的空洞可复用。
+  \item 程序代码本身是“指令列表”，不是数据库中连续排列的三元式。
+\end{itemize}
+
+例子：
+\begin{verbatim}
+x = (a+b)*c;
+y = d/(a+b);
+\end{verbatim}
+公共子表达式 \(a+b\) 可只保留一个三元式，后续两处通过指针引用它。优化器若移动指令，只需改变 instruction list 中指针顺序。
+
+\section{SSA：静态单赋值 \pg{31--33}}
+
+\begin{defbox}[Single Static Assignment]
+SSA 要求每个变量在静态程序文本中只被赋值一次。每次赋值都会生成一个新版本名，例如 \(x_1,x_2,x_3\)。控制流汇合处用 \(\phi\) 函数合并来自不同路径的版本。
+\end{defbox}
+
+例子：
+\begin{verbatim}
+x = a + b;
+y = x - c;
+x = x - y;
+if (...) x = x + 5;
+else     x = x * 4;
+y = x * 4;
+\end{verbatim}
+
+可写成：
+\begin{verbatim}
+x1 = a + b
+y1 = x1 - c
+x2 = x1 - y1
+if (...)
+  x3 = x2 + 5
+else
+  x4 = x2 * 4
+x5 = phi(x3, x4)
+y2 = x5 * 4
+\end{verbatim}
+
+\(\phi(x_3,x_4)\) 表示：若控制流来自 true 分支，取 \(x_3\)；若来自 false 分支，取 \(x_4\)。
+
+\subsection{SSA 为什么利于优化}
+
+SSA 能显式表达值流：
+
+\begin{itemize}
+  \item 它告诉编译器什么时候不该优化。例如 \(x_2*4\) 和 \(x_5*4\) 看起来形式相似，但 SSA 版本不同，值可能不同，不能错误地做 CSE。
+  \item 它告诉编译器什么时候应该优化。例如：
+\begin{verbatim}
+x1 = a + b
+x2 = c - d
+y1 = x2 * b
+\end{verbatim}
+  \(x_1\) 从未被使用，是明显死值，可被 DCE 删除。
+  \item 没有 SSA 时，优化器通常需要额外数据流图来判断值的定义和使用；SSA 把这些信息直接写进 IR。
+\end{itemize}
+
+\section{语法制导代码生成与变量布局 \pg{34--43}}
+
+\subsection{语法制导翻译重新登场 \pg{34--36}}
+
+代码生成依赖程序语法结构，因此可以继续用 SDD/SDT 描述。要翻译的语言结构包括：
+
+\begin{itemize}
+  \item 变量、函数等定义。
+  \item 赋值语句。
+  \item 数组引用。
+  \item 布尔表达式。
+  \item 控制流语句，例如 if、if-else、while、for。
+\end{itemize}
+
+课件采用的策略：
+
+\begin{enumerate}
+  \item 写出 SDD 语义规则，说明要生成什么代码和属性。
+  \item 转成 SDT 动作，说明动作执行顺序。
+\end{enumerate}
+
+函数代码生成分两步：
+
+\begin{itemize}
+  \item 处理变量定义，决定变量在内存中的布局。
+  \item 处理语句，为赋值、数组、布尔表达式和控制流生成 TAC。
+\end{itemize}
+
+\subsection{变量定义的属性 \pg{37}}
+
+变量布局需要两个信息：
+
+\begin{itemize}
+  \item location：变量位于内存哪里。
+  \item width：变量占多少字节。
+\end{itemize}
+
+对产生式风格的声明 \(T\ V\)，可使用属性：
+
+\begin{longtable}{L{0.18\linewidth}L{0.70\linewidth}}
+\toprule
+属性 & 含义 \\
+\midrule
+\(T.type\) & 类型名，如 int、float \\
+\(T.width\) & 类型宽度，如 int 为 4 字节 \\
+\(V.type\) & 变量类型 \\
+\(V.width\) & 变量宽度，由类型决定 \\
+\(V.offset\) & 变量在所属内存区域内的偏移 \\
+\bottomrule
+\end{longtable}
+
+\subsection{作用域内分配与 offset \pg{38--39}}
+
+最朴素的方法是为所有数据预留一个大内存区，变量地址等于该区基地址加变量 offset。但这会浪费空间，因为很多变量只在短时间内存活。例如函数局部变量只在函数调用期间存在。
+
+更合理的方式是按作用域分配：
+
+\begin{itemize}
+  \item 进入作用域时分配该作用域的存储区域。
+  \item 离开作用域时释放该区域。
+  \item 同一作用域内变量一起分配和释放。
+  \item 变量地址 = 作用域基地址 + 变量 offset。
+\end{itemize}
+
+函数局部变量顺序布局示例：
+\begin{verbatim}
+void foo() {
+  int a;       // offset 0
+  int b;       // offset 4
+  long long c; // offset 8
+  int d;       // offset 16
+}
+\end{verbatim}
+若 int 为 4 字节，long long 为 8 字节，则最终 offset 到 20。
+
+\subsection{内存对齐 \pg{40}}
+
+\begin{defbox}[Allocation Alignment]
+内存对齐要求变量地址满足：
+\[
+addr(x)\bmod sizeof(x.type)=0.
+\]
+也就是说，变量起始地址最好落在其类型大小的整数倍边界上。
+\end{defbox}
+
+原因是多数机器在类型大小边界上访问效率最高。例如 int 若不在 word boundary 上，机器可能需要读两个 word，再移位拼接，效率较低。
+
+例子：
+\begin{verbatim}
+struct { char x; int y; } Test;
+\end{verbatim}
+
+若不对齐，大小可理解为 \(1+4=5\)。实际对齐时，\texttt{char x} 后会填充 3 字节，使 \texttt{int y} 从地址 4 开始，结构体总大小通常为 8。
+
+\section{赋值语句翻译 \pg{44--46}}
+
+\subsection{基本属性和辅助函数}
+
+翻译赋值语句时，表达式会被拆成每条最多一个操作符的 TAC。常用辅助函数：
+
+\begin{itemize}
+  \item \texttt{lookup(id)}：查符号表，返回标识符地址或条目；找不到则报错。
+  \item \texttt{emit()/gen()}：生成三地址码。
+  \item \texttt{newtemp()}：生成新的临时变量。
+\end{itemize}
+
+属性：
+
+\begin{itemize}
+  \item \(S.code\)、\(E.code\)：语句或表达式对应的 TAC 序列。
+  \item \(E.addr\)：表达式值所在地址，可能是变量名、常量或临时变量。
+\end{itemize}
+
+\subsection{SDT 规则与例子}
+
+文法：
+\[
+S\to id=E;\quad
+E\to E_1+E_2\mid -E_1\mid (E_1)\mid id.
+\]
+
+关键规则：
+
+\begin{itemize}
+  \item \(S\to id=E\)：先查 id，再输出 \(id=E.addr\)。
+  \item \(E\to E_1+E_2\)：生成新临时变量 \(t\)，输出 \(t=E_1.addr+E_2.addr\)。
+  \item \(E\to -E_1\)：生成 \(t=minus\ E_1.addr\)。
+  \item \(E\to (E_1)\)：直接继承 \(E_1.addr\) 和 \(E_1.code\)。
+  \item \(E\to id\)：查符号表得到地址，代码为空。
+\end{itemize}
+
+对：
+\begin{verbatim}
+a = b + (-c)
+\end{verbatim}
+生成：
+\begin{verbatim}
+t1 = minus c
+t2 = b + t1
+a = t2
+\end{verbatim}
+
+增量翻译中，\texttt{gen()} 不仅返回一条指令，还把它追加到当前已生成指令序列中，因此不必显式维护 \(E.code\) 的字符串拼接。
+
+\section{数组引用翻译 \pg{47--52}}
+
+\subsection{一维数组 \pg{48}}
+
+数组引用的核心是计算元素地址。一维数组：
+\begin{verbatim}
+int A[N];
+A[i]++;
+\end{verbatim}
+
+若 base 是首元素地址，width 是元素宽度，则：
+\[
+addr(A[i]) = base + i \times width.
+\]
+
+\subsection{多维数组 \pg{49--50}}
+
+C 语言使用 row-major layout，即按行连续存储。二维数组：
+\[
+int\ A[N_1][N_2]
+\]
+的地址为：
+\[
+addr(A[i_1,i_2]) = base + (i_1\times N_2\times width+i_2\times width).
+\]
+
+k 维数组一般形式：
+\[
+addr(A[i_1][i_2]\cdots[i_k])=base+i_1W_1+i_2W_2+\cdots+i_kW_k.
+\]
+
+例子：
+
+\begin{itemize}
+  \item \(array(10,int)\)：\(a[i]\) 偏移 \(i*4\)。
+  \item \(array(3,array(5,int))\)：\(a[i_1][i_2]\) 偏移 \(i_1*20+i_2*4\)。
+  \item \(array(3,array(5,array(8,int)))\)：\(a[i_1][i_2][i_3]\) 偏移 \(i_1*160+i_2*32+i_3*4\)。
+\end{itemize}
+
+\subsection{数组引用属性和生成规则 \pg{51--52}}
+
+对左值 \(L\)：
+
+\begin{itemize}
+  \item \(L.array\)：指向数组名对应的符号表条目，能得到 base 地址。
+  \item \(L.type\)：当前子数组类型。
+  \item \(L.addr\)：当前已经计算出的偏移临时变量。
+\end{itemize}
+
+文法：
+\[
+S\to id=E\mid L=E,\qquad
+E\to E_1+E_2\mid -E_1\mid (E_1)\mid id\mid L,
+\]
+\[
+L\to id[E]\mid L_1[E].
+\]
+
+若 \(L\) 作为右值表达式，生成：
+\[
+E.addr=newtemp();\quad gen(E.addr=L.array.base[L.addr]).
+\]
+若 \(L\) 作为赋值左值，生成：
+\[
+gen(L.array.base[L.addr]=E.addr).
+\]
+
+三维例子 \(c=a[i_1][i_2][i_3]\)：
+\begin{verbatim}
+t1 = i1 * 160
+t2 = i2 * 32
+t3 = t1 + t2
+t4 = i3 * 4
+t5 = t3 + t4
+c = a[t5]
+\end{verbatim}
+
+\section{布尔表达式翻译 \pg{53--58}}
+
+\subsection{短路求值 \pg{54}}
+
+布尔表达式包含关系运算和逻辑运算，例如
+\texttt{<}、\texttt{<=}、\texttt{!=}、\texttt{>}、\texttt{>=}、\texttt{\&\&}、\texttt{||}、\texttt{==}。
+
+\begin{defbox}[Short-circuit Evaluation]
+短路求值指：一旦布尔表达式结果已经确定，就跳过后续不必要的求值。
+\end{defbox}
+
+例子：
+
+\begin{itemize}
+  \item \texttt{if (flag || foo()) \{ bar(); \}} 中，若 \texttt{flag} 为真，\texttt{foo()} 不执行。
+  \item \texttt{if (flag \&\& foo()) \{ bar(); \}} 中，若 \texttt{flag} 为假，\texttt{foo()} 不执行。
+\end{itemize}
+
+因此在控制流中，布尔运算最好直接翻译成跳转，而不是一定先计算出 0/1 临时值。
+
+\subsection{两种翻译方式 \pg{55--57}}
+
+方式一：像算术表达式一样先算布尔临时变量。
+
+对：
+\begin{center}
+\texttt{(a < b) || (c < d \&\& e < f)}
+\end{center}
+可生成：
+\begin{verbatim}
+t1 = a < b
+t2 = c < d
+t3 = e < f
+t4 = t2 && t3
+t5 = t1 || t4
+if (!t5) goto S.next
+S1.code
+S.next:
+\end{verbatim}
+
+方式二：直接生成跳转，更适合短路控制流。
+
+\begin{verbatim}
+if a < b goto E.true
+goto L1
+L1: if c < d goto L2
+goto E.false
+L2: if e < f goto E.true
+goto E.false
+\end{verbatim}
+
+这种方式用两个标签属性：
+
+\begin{itemize}
+  \item \(E.true\)：表达式为真时跳转的标签。
+  \item \(E.false\)：表达式为假时跳转的标签。
+\end{itemize}
+
+\subsection{布尔表达式 SDT 规则 \pg{58}}
+
+布尔规则：
+
+\begin{itemize}
+  \item \(B\to B_1||B_2\)：若 \(B_1\) 真，则整体真；若 \(B_1\) 假，才进入 \(B_2\)。因此 \(B_1.true=B.true\)，\(B_1.false\) 是 \(B_2\) 的开始标签。
+  \item \(B\to B_1\land B_2\)：若 \(B_1\) 假，则整体假；若 \(B_1\) 真，才进入 \(B_2\)。因此 \(B_1.false=B.false\)，\(B_1.true\) 是 \(B_2\) 的开始标签。
+  \item \(B\to E_1\ relop\ E_2\)：直接生成条件跳转和失败跳转。
+  \item \(B\to !B_1\)：交换 \(B_1.true\) 和 \(B_1.false\)。
+  \item \(B\to true\)：生成 \(\mathrm{goto}\ B.true\)。
+  \item \(B\to false\)：生成 \(\mathrm{goto}\ B.false\)。
+\end{itemize}
+
+\section{控制流翻译与回填 \pg{59--70}}
+
+\subsection{控制语句标签属性 \pg{61--63}}
+
+控制语句包括：
+\[
+S\to if(B)S_1,\qquad S\to if(B)S_1\ else\ S_2,\qquad S\to while(B)S_1.
+\]
+
+继承属性：
+
+\begin{itemize}
+  \item \(B.true\)：若 \(B\) 为真，控制流跳到哪里。
+  \item \(B.false\)：若 \(B\) 为假，控制流跳到哪里。
+  \item \(S.next\)：语句 \(S\) 之后紧跟的指令标签。
+\end{itemize}
+
+辅助函数：
+
+\begin{itemize}
+  \item \texttt{newlabel()}：创建新标签。
+  \item \texttt{label(L)}：把标签 \(L\) 附着到下一条 TAC 指令。
+\end{itemize}
+
+if-else 的结构：
+
+\begin{verbatim}
+B.code
+B.true:
+S1.code
+goto S.next
+B.false:
+S2.code
+S.next:
+\end{verbatim}
+
+if 无 else 时，\(B.false=S.next\)。while 的结构：
+
+\begin{verbatim}
+S.begin:
+B.code
+B.true:
+S1.code
+goto S.begin
+S.next:
+\end{verbatim}
+
+\subsection{前向跳转问题 \pg{64--66}}
+
+控制流翻译的关键是把跳转指令和目标地址匹配起来。问题是：前向跳转的目标标签还没生成。
+
+解决方法：
+
+\begin{longtable}{L{0.18\linewidth}L{0.36\linewidth}L{0.36\linewidth}}
+\toprule
+方法 & 思路 & 代价 \\
+\midrule
+两遍法 & 第一遍生成伪标签并记录标签地址；第二遍把伪标签替换为实际地址 & 需要扫描代码两次 \\
+单遍法 & 遇到前向跳转先留下空洞，维护待回填列表；目标地址确定后立即填洞 & 更适合和 LR parser 同步生成 \\
+\bottomrule
+\end{longtable}
+
+\begin{defbox}[Backpatching]
+回填是在单遍代码生成中处理前向跳转的方法：先生成带空目标的跳转指令，并把这些指令编号放入列表；等目标地址已知时，批量把列表中的空目标填成该地址。
+\end{defbox}
+
+\subsection{回填属性和辅助函数 \pg{67}}
+
+综合属性：
+
+\begin{itemize}
+  \item \(B.truelist\)：当 \(B\) 为真时应跳往目标的待回填指令列表。
+  \item \(B.falselist\)：当 \(B\) 为假时应跳往目标的待回填指令列表。
+  \item \(S.nextlist\)：语句执行完后应跳到 \(S\) 后继位置的待回填指令列表。
+\end{itemize}
+
+辅助函数：
+
+\begin{itemize}
+  \item \texttt{makelist(i)}：创建只含指令编号 \(i\) 的列表。
+  \item \texttt{merge(p1,p2)}：合并两个列表。
+  \item \texttt{backpatch(p,i)}：把列表 \(p\) 中所有跳转空洞填成目标指令 \(i\)。
+\end{itemize}
+
+\subsection{控制流回填规则 \pg{68--70}}
+
+为了记录关键指令位置，需要修改文法：
+\[
+M\to\eps,\qquad M.inst=nextinst.
+\]
+\(M\) 是 marker，记录当前下一条将要生成的指令编号。
+
+还需要：
+\[
+N\to\eps,\qquad N.nextlist=makelist(nextinst);\quad gen(\mathrm{goto}\ \_).
+\]
+\(N\) 用在 if-else 中，表示 then 分支结束后要跳过 else 分支，但当时还不知道 \(S.next\) 的位置，所以先生成空跳转。
+
+规则摘要：
+
+\begin{itemize}
+  \item if 无 else：把真出口回填到 then 语句开始处；语句后继列表由假出口和 then 语句自身未决后继合并得到。
+  \item if-else：把真出口回填到 then 开始，把假出口回填到 else 开始；then 末尾跳过 else 的空跳转也并入后继列表。
+  \item while：\(M_1\) 是循环测试开始，\(M_2\) 是循环体开始。B 为真进入循环体，循环体结束跳回 \(M_1.inst\)，B 为假进入 \(S.nextlist\)。
+\end{itemize}
+
+通俗地说，回填就是“先欠着目标地址，等目标地址出现后一次性补上”。这让编译器可以单遍生成控制流代码。
+
+\section{总结与阅读 \pg{71--73}}
+
+课件总结的重点：
+
+\begin{itemize}
+  \item 三地址码通用形式为 \(X=Y\ op\ Z\)。
+  \item 三地址码实现方式：四元式、三元式、间接三元式。
+  \item SSA 让每个变量静态上只赋值一次，便于优化。
+  \item 使用语法制导翻译生成 TAC。
+  \item 需要处理的代码结构包括变量定义、赋值、数组引用、布尔表达式和控制流。
+  \item 单遍控制流代码生成依赖回填。
+\end{itemize}
+
+推荐阅读 Dragon Book 第 6 章，尤其是中间表示、类型检查以及各种程序结构的翻译。
+
+\section{练习题与解答}
+
+\subsection*{题 1：为什么现代编译器常使用多层 IR？}
+
+\textbf{解答：} 不同阶段适合不同抽象层次。AST 适合语义分析，因为它保留源程序结构；TAC/SSA 适合机器无关优化，因为每条指令简单、数据依赖清楚；机器层 IR 适合寄存器分配和指令选择，因为它接近具体 ISA。多层 IR 还能复用优化器和后端：新增源语言只需转到统一低层 IR，新增机器只需从统一低层 IR 生成目标机器 IR。
+
+\subsection*{题 2：把表达式 \texorpdfstring{\(x+y*z-w\)}{x+y*z-w} 翻译为三地址码。}
+
+\textbf{解答：}
+\begin{verbatim}
+t1 = y * z
+t2 = x + t1
+t3 = t2 - w
+\end{verbatim}
+每条指令右侧最多一个操作符。
+
+\subsection*{题 3：写出 \texorpdfstring{\(a=b*(-c)+b*(-c)\)}{a=b*(-c)+b*(-c)} 的四元式。}
+
+\textbf{解答：}
+\begin{center}
+\small
+\begin{tabular}{c|cccc}
+\toprule
+编号 & op & arg1 & arg2 & result \\
+\midrule
+0 & minus & c &  & t1 \\
+1 & * & b & t1 & t2 \\
+2 & minus & c &  & t3 \\
+3 & * & b & t3 & t4 \\
+4 & + & t2 & t4 & t5 \\
+5 & = & t5 &  & a \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{题 4：三元式为什么不利于优化中的指令移动？间接三元式如何解决？}
+
+\textbf{解答：} 三元式用指令编号隐含表示结果，其他指令通过编号引用该结果。优化时若移动、删除或重排指令，编号含义可能改变，所有引用都要更新。间接三元式把三元式存入数据库，真正代码顺序是指针列表；移动代码时只移动指针，不移动三元式本体，因此引用关系保持稳定。
+
+\subsection*{题 5：SSA 中 \texorpdfstring{\(\phi\)}{phi} 函数的作用是什么？}
+
+\textbf{解答：} \(\phi\) 函数用于控制流合并点，表示根据实际来自哪条路径选择对应变量版本。例如：
+\[
+x_5=\phi(x_3,x_4)
+\]
+表示若控制流来自 true 分支取 \(x_3\)，来自 false 分支取 \(x_4\)。它让合并后的值流在 IR 中显式可见。
+
+\subsection*{题 6：对如下变量声明计算未对齐和对齐布局。}
+
+\begin{verbatim}
+char a;
+int b;
+int c;
+long long d;
+\end{verbatim}
+
+\textbf{解答：} 若不考虑对齐，偏移为 \(a=0,b=1,c=5,d=9\)。若按类型大小对齐，\(a=0\)，随后填充到 4，\(b=4\)，\(c=8\)，随后 long long 需要 8 字节对齐，\(d=16\)。
+
+\subsection*{题 7：翻译 \texorpdfstring{\(a=b+(-c)\)}{a=b+(-c)}。}
+
+\textbf{解答：}
+\begin{verbatim}
+t1 = minus c
+t2 = b + t1
+a = t2
+\end{verbatim}
+其中 \(t1,t2\) 是 \texttt{newtemp()} 生成的临时变量。
+
+\subsection*{题 8：数组 \texorpdfstring{\(int\ a[3][5][8]\)}{int a[3][5][8]} 中 \texorpdfstring{\(a[i][j][k]\)}{a[i][j][k]} 的偏移如何计算？}
+
+\textbf{解答：} 假设 int 宽度为 4，C 语言 row-major 布局：
+\[
+offset=i*(5*8*4)+j*(8*4)+k*4=i*160+j*32+k*4.
+\]
+TAC：
+\begin{verbatim}
+t1 = i * 160
+t2 = j * 32
+t3 = t1 + t2
+t4 = k * 4
+t5 = t3 + t4
+\end{verbatim}
+若要读值：
+\begin{verbatim}
+t6 = a[t5]
+\end{verbatim}
+
+\subsection*{题 9：用跳转方式翻译布尔表达式。}
+
+\textbf{解答：}
+\begin{verbatim}
+if a < b goto E.true
+goto L1
+L1: if c < d goto L2
+goto E.false
+L2: if e < f goto E.true
+goto E.false
+\end{verbatim}
+这体现短路：若 \(a<b\) 为真，直接到真出口；若 \(c<d\) 为假，直接到假出口。
+
+\subsection*{题 10：为什么控制流翻译需要回填？}
+
+\textbf{解答：} 因为单遍生成时，前向跳转目标还没生成。例如 if 语句中，条件为假时要跳到 then 之后或 else 开始，但生成条件跳转时目标地址尚未知。回填先生成带空洞的跳转指令，把这些指令编号放入列表；等目标指令编号确定后，用 \texttt{backpatch} 一次性填入目标地址。
+
+\subsection*{题 11：说明 \texttt{B.truelist}、\texttt{B.falselist} 和 \texttt{S.nextlist} 的含义。}
+
+\textbf{解答：}
+
+\begin{itemize}
+  \item \texttt{B.truelist}：B 为真时应跳往目标的未填地址跳转指令列表。
+  \item \texttt{B.falselist}：B 为假时应跳往目标的未填地址跳转指令列表。
+  \item \texttt{S.nextlist}：语句 S 执行完后应跳到 S 后继位置的未填地址跳转指令列表。
+\end{itemize}
+
+\subsection*{题 12：给出 while 语句的回填思路。}
+
+\textbf{解答：} 对 \(while(B)S_1\)，需要记录循环测试开始位置 \(M_1.inst\) 和循环体开始位置 \(M_2.inst\)。把 \(B.truelist\) 回填到 \(M_2.inst\)，让条件为真进入循环体；把 \(S_1.nextlist\) 回填到 \(M_1.inst\)，让循环体结束后回到测试；最后生成 \(\mathrm{goto}\ M_1.inst\)，而 \(S.nextlist=B.falselist\)，表示条件为假时跳出循环。
+
+\section*{复习建议}
+\addcontentsline{toc}{section}{复习建议}
+
+复习本讲时建议按三条线整理：
+
+\begin{itemize}
+  \item 表示线：AST、DAG、TAC、四元式、三元式、间接三元式、SSA 分别解决什么问题。
+  \item 翻译线：变量布局、赋值、数组引用、布尔表达式、控制流分别如何生成 TAC。
+  \item 控制流线：标签、短路求值、前向跳转、truelist/falselist/nextlist、backpatch 的关系。
+\end{itemize}
+
+最重要的动手能力是：把复杂表达式拆成 TAC；计算多维数组偏移；把布尔表达式翻译成跳转；解释回填列表如何在 if/while 中被合并和填充。
+
+\end{document}

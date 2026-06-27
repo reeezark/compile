@@ -1,0 +1,46 @@
+\contentsline {section}{阅读导引}{4}{section*.2}%
+\contentsline {section}{\numberline {1}编译阶段与语义分析位置 {\small \color {graytext}\,[p1--4]}}{4}{section.1}%
+\contentsline {section}{\numberline {2}为什么需要语义分析 {\small \color {graytext}\,[p5--8]}}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}上下文决定含义 {\small \color {graytext}\,[p5--6]}}{4}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}语义分析要做什么 {\small \color {graytext}\,[p7]}}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}两类实现方式 {\small \color {graytext}\,[p8]}}{5}{subsection.2.3}%
+\contentsline {section}{\numberline {3}语法制导翻译、属性、SDD 与 SDT {\small \color {graytext}\,[p9--17]}}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}语法制导翻译 {\small \color {graytext}\,[p9--11]}}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}语义属性 {\small \color {graytext}\,[p12]}}{6}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}SDD：语法制导定义 {\small \color {graytext}\,[p13--14]}}{6}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}SDT：语法制导翻译方案 {\small \color {graytext}\,[p15]}}{7}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}SDD 与 SDT 的区别 {\small \color {graytext}\,[p16--17]}}{7}{subsection.3.5}%
+\contentsline {section}{\numberline {4}SDD 属性类型与基本概念 {\small \color {graytext}\,[p18--28]}}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}综合属性与继承属性 {\small \color {graytext}\,[p19--23]}}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}例子：表达式值与变量类型 {\small \color {graytext}\,[p24--25]}}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}副作用、属性文法和标注分析树 {\small \color {graytext}\,[p26--28]}}{8}{subsection.4.3}%
+\contentsline {section}{\numberline {5}依赖图与属性值计算顺序 {\small \color {graytext}\,[p29--33]}}{9}{section.5}%
+\contentsline {subsection}{\numberline {5.1}依赖图 {\small \color {graytext}\,[p29--30]}}{9}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}拓扑序和环 {\small \color {graytext}\,[p31--33]}}{9}{subsection.5.2}%
+\contentsline {section}{\numberline {6}S-Attributed 与 L-Attributed Definitions {\small \color {graytext}\,[p34--37]}}{10}{section.6}%
+\contentsline {subsection}{\numberline {6.1}S-Attributed Definition {\small \color {graytext}\,[p35]}}{10}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}L-Attributed Definition {\small \color {graytext}\,[p36--37]}}{10}{subsection.6.2}%
+\contentsline {section}{\numberline {7}SDT 的实现与 S-SDD 的 LR 实现 {\small \color {graytext}\,[p38--47]}}{11}{section.7}%
+\contentsline {subsection}{\numberline {7.1}两类实现路径 {\small \color {graytext}\,[p39--40]}}{11}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}S-SDD 转 postfix SDT {\small \color {graytext}\,[p41--42]}}{11}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}扩展 LR 分析栈 {\small \color {graytext}\,[p43--47]}}{11}{subsection.7.3}%
+\contentsline {section}{\numberline {8}L-SDD 到 SDT、消除左递归与属性传递 {\small \color {graytext}\,[p48--60]}}{12}{section.8}%
+\contentsline {subsection}{\numberline {8.1}L-SDD 转 SDT 的规则 {\small \color {graytext}\,[p48--50]}}{12}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}消除左递归时保留语义动作 {\small \color {graytext}\,[p51--55]}}{12}{subsection.8.2}%
+\contentsline {section}{\numberline {9}L-SDD 在 LL/RDP/LR 中的实现 {\small \color {graytext}\,[p61--73]}}{13}{section.9}%
+\contentsline {subsection}{\numberline {9.1}递归下降实现 {\small \color {graytext}\,[p61--62]}}{13}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}非递归 LL 预测分析实现 {\small \color {graytext}\,[p63--67]}}{13}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}L-SDD 在 LR 中的 marker 技巧 {\small \color {graytext}\,[p68--73]}}{13}{subsection.9.3}%
+\contentsline {section}{\numberline {10}语义分析应用：绑定、作用域、符号表 {\small \color {graytext}\,[p74--93]}}{14}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Binding 与 Scope {\small \color {graytext}\,[p76--80]}}{14}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}符号表是什么 {\small \color {graytext}\,[p81--82]}}{15}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}符号表数据结构 {\small \color {graytext}\,[p83--87]}}{15}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}处理多作用域 {\small \color {graytext}\,[p88--90]}}{15}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}符号表条目和类型信息 {\small \color {graytext}\,[p91--93]}}{16}{subsection.10.5}%
+\contentsline {section}{\numberline {11}类型、类型检查与类型系统 {\small \color {graytext}\,[p94--103]}}{16}{section.11}%
+\contentsline {subsection}{\numberline {11.1}Type 与 Type Checking {\small \color {graytext}\,[p94]}}{16}{subsection.11.1}%
+\contentsline {subsection}{\numberline {11.2}静态与动态类型检查 {\small \color {graytext}\,[p95--96]}}{17}{subsection.11.2}%
+\contentsline {subsection}{\numberline {11.3}Static Typing 与 Dynamic Typing {\small \color {graytext}\,[p97--99]}}{18}{subsection.11.3}%
+\contentsline {section}{\numberline {12}课件总结 {\small \color {graytext}\,[p100--103]}}{18}{section.12}%
+\contentsline {section}{\numberline {13}练习题与解答 {\small \color {graytext}\,[p104--129]}}{18}{section.13}%
+\contentsline {section}{复习建议}{22}{section*.16}%

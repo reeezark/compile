@@ -1,0 +1,826 @@
+[
+  {
+    "page": 1,
+    "text": "编译原理\nComplier Principles\nLecture 5\nSyntax Analysis: Bottom-Up\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 2,
+    "text": "Contents\n2\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nLR(0) item + \nlookaheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\ncompromise  LR(1) \nand SLR(1)\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 3,
+    "text": "Contents\n3\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 4,
+    "text": "Bottom-up parsing[自下而上分析]\n•Bottom-up parsing [自下而上分析]\nStart from the input string, and gradually reduce[规约] it (the \ninverse process of the rightmost derivation[最右推导的逆过程]) \nuntil it is reduced to the start symbol of the grammar.\nConstruct a syntax tree from the leaves to the root.\nMore powerful than top down:\nDon’t need left factoring.\nCan handle left recursion.\n4\nT\n*\nT\nF\nE\nF\nid\nid\n"
+  },
+  {
+    "page": 5,
+    "text": "Bottom-up parsing[自下而上分析]\n• Bottom-up parsing [自下而上分析]\nParser code structure nothing like grammar \nVery difficult to implement manually\nAutomated tools exist to convert to code\nG(E): E → E+T | T; T → T*F | F; F → (E) | id,    id * id\nThe rightmost derivation: \nE ⇒T ⇒T * F ⇒T * id ⇒F * id ⇒id * id \nThe leftmost reduction:\nid * id ⇒F * id ⇒T * id ⇒T * F ⇒T ⇒E\n5\nT\n*\nT\nF\nE\nF\nid\nid\n"
+  },
+  {
+    "page": 6,
+    "text": "Bottom-up: Shift-Reduce [移入-归约]\n• Shift-reduce parsing is a form of bottom-up parsing in which a \nstack[栈] holds grammar symbols and an input buffer holds the \ninput string.\n• Reduction[规约]: At each reduction step, a specific substring \nmatching the body of a production is replaced[替换] by the non-\nterminal at the head of that production.\n• Shift[移入]: During a left-to-right scan of the input string, the parser \nshifts zero or more input symbols onto the stack, until it is ready to \nreduce a string β of grammar symbols on top of the stack.\n6\n"
+  },
+  {
+    "page": 7,
+    "text": "Bottom-up: Shift-Reduce [移入-归约]\n• There are four actions that a shift-reduce parser can make:\nShift[移入]: Shift the next input symbol onto the top of the stack.\nReduce[规约]: The right end of the string to be reduced must be at the \ntop of the stack. Locate the left end of the string within the stack and \ndecide with what nonterminal to replace the string.\nAccept[接受]: Announce successful completion of parsing.\nError[报错]: Discover a syntax error and call an error recovery routine.\n7\n"
+  },
+  {
+    "page": 8,
+    "text": "Bottom-up: Shift-Reduce [移入-归约]\nExample: \n• G(S): S → aAcBe; \n• A → b;\n• A → Ab; \n• B → d. \nInput String: \n• abbcde$\nStack\nInput\nAction\n$\nabbcde$\nShift\n$a\nbbcde$\nShift\n$ab\nbcde$\nReduce A → b\n$aA\nbcde$\nShift\n$aAb\ncde$\nReduce A → Ab\n$aA\ncde$\nShift\n$aAc\nde$\nShift\n$aAcd\ne$\nReduce B → d\n$aAcB\ne$\nShift\n$aAcBe\n$\nReduce S → aAcBe\n$S\n$\nACCEPT\n8\n"
+  },
+  {
+    "page": 9,
+    "text": "Key Issue [一个关键问题]\n• The key decisions during bottom-up \nparsing are about (1) when to shift\nor reduce and (2) what production\nto apply, as the parse proceeds.\nwhen to shift or reduce?\nwhat production to apply?\nStack\nInput\nAction\n$\nabbcde$\nShift\n$a\nbbcde$\nShift\n$ab\nbcde$\nReduce A → b\n$aA\nbcde$\nShift\n$aAb\ncde$\nReduce A → Ab\nReduce A → b??\n9\nG(S): S → aAcBe; \nA → b;\nA → Ab; \nB → d. \n"
+  },
+  {
+    "page": 10,
+    "text": "Handle [句柄]\n• Right-sentential form [最右句型]: a sentential form that occurs in the \nrightmost derivation[规范推导].\n• Phrase[短语]: If α1Aα2 is a right sentential form of G(S), and S ⇒α1Aα2\n⇒α1βα2, then β is a phrase of α1Aα2.\n*\n+\n10\nG(E):\nE ⇒T ⇒T * F ⇒T * id ⇒F * id ⇒id * id \n\n一个句型的语法树中任意叶子结点所\n组成的符号串都是该句型的短语\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\n"
+  },
+  {
+    "page": 11,
+    "text": "Handle [句柄]\n• Simple Phrase[直接短语]: If α1Aα2 is a right sentential form of G(S), and \nS ⇒α1Aα2 ⇒α1βα2, then β is a simple phrase of α1Aα2.\n只有父子两代的子树形成的短语\n• Handle[句柄]: The leftmost simple phrase of a sentential form.\n语法树中最左那棵只有父子两代的子树形成的短语\n一个句型中只有一个句柄\n• We only want to reduce at handles\nHow to find it?\n*\n11\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\nhandle\n"
+  },
+  {
+    "page": 12,
+    "text": "• G(E): E → T | E+T; \nT → F | T*F; \nF → (E) | a | b | c\n• For sentential form a * b + c\n• Phrase: a*b+c, a*b, a, b, c\n• Simple Phrase: a, b, c \n• Handle: a\nExample\nE\n+\nE\nT\nF\nT\n*\nT\nF\nF\na\nb\nc\n12\n短语：一个句型的语法树中任意树叶结点组成的短语\n直接短语：只有父子两代的子树形成的短语\n句柄：语法树中最左那棵只有父子两代的子树形成的短语\n"
+  },
+  {
+    "page": 13,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：\n• E1: T+T*F+id\n• E2: T+T*F\n• E3: T\n• T1: T*F\n• T2, F1: id\nOne More Example\n13\nHandle\nSimple Phrase\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\n"
+  },
+  {
+    "page": 14,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n14\nHandle\nSimple Phrase\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\n"
+  },
+  {
+    "page": 15,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n15\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 16,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n16\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nF\n*\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 17,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n17\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nF\n*\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 18,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n18\nE1\n+\nE2\nT2\nE3\nT1\n+\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 19,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n19\nE1\n+\nE2\nT2\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nStack: E2\nInput: + id\n(Shift x2)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 20,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n20\nE1\n+\nE2\nT2\nF1\nid\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nStack: E2\nInput: + id\n(Shift x2)\nStack: E2 + id\nInput:\n(Reduce F1->id)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 21,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n21\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nStack: E2\nInput: + id\n(Shift x2)\nStack: E2 + id\nInput:\n(Reduce F1->id)\nStack: E2 + F1\nInput:\n(Reduce T2->F1)\nE1\n+\nE2\nT2\nF1\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 22,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n22\nE1\n+\nE2\nT2\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nStack: E2\nInput: + id\n(Shift x2)\nStack: E2 + id\nInput:\n(Reduce F1->id)\nStack: E2 + F1\nInput:\n(Reduce T2->F1)\nStack: E2 + T2\nInput:\n(Reduce E1->E2+T2)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 23,
+    "text": "• Gramar G(E):\nE → E+T|T \nT → T*F | F\nF →(E) | id\n• Sentential form: T + T*F + id\n• Phrase：E1: T+T*F+id\nE2: T+T*F\nE3: T\nT1: T*F\nT2, F1: id\nOne More Example\n23\nE1\nShift/Reduce:\nStack:\nInput: T + T * F + id\n(Shift)\nStack: T\nInput: + T * F + id\n(Reduce E3->T)\nStack: E3\nInput: + T * F + id\n(Shift x4)\nStack: E3 +T * F\nInput: + id\n(Reduce T1->T*F)\nStack: E3 +T1\nInput: + id\n(Reduce E2->E3+T1)\nStack: E2\nInput: + id\n(Shift x2)\nStack: E2 + id\nInput:\n(Reduce F1->id)\nStack: E2 + F1\nInput:\n(Reduce T2->F1)\nStack: E2 + T2\nInput:\n(Reduce E1->E2+T2)\nStack: E1\nInput:\n(Accept)\nHandle\nSimple Phrase\n"
+  },
+  {
+    "page": 24,
+    "text": "Example\n• G(S): S → aAcBe; A → b; A → Ab; B → d. \nStack\nInput\nAction\n$\nabbcde$\nShift\n$a\nbbcde$\nShift\n$ab\nbcde$\nReduce A → b\n$aA\nbcde$\nShift\n$aAb\ncde$\nReduce A → Ab\nS\nc\nA\nB\nd\nA\nb\na\ne\nAb is Handle, so we choose A → Ab to reduce.\n24\nReduce A → Ab?\nOR\nReduce A → b?\n"
+  },
+  {
+    "page": 25,
+    "text": "Handle Always Occurs at Stack Top\n• Does handle appear outside the stack?\nIt can, but handle will eventually be shifted in, placing it at top of stack.\n• Why does handle not appear in the middle of the stack?\nParser eagerly reduces when handle is at top of stack.\n• Results in an easily generalized shift-reduce strategy:\nIf there is no handle at the top of the stack, shift\nIf there is a handle, reduce to the non-terminal\nEasy to automate the synthesis of the parser using a table\n25\n"
+  },
+  {
+    "page": 26,
+    "text": "Viable Prefix [活前缀]\n• A viable prefix[活前缀/可行前缀] is a prefix of a right-sentential form that \ndoes not pass the end of the rightmost handle of that sentential form.\nStack content is always a viable prefix, guaranteeing the shift / reduce is on the \nright track.\n• Example 1: S ⇒aEb ⇒aaEb, the handle is aE, so the viable prefix is a, \naa, aaE, but not aaEb.\n26\nStack\nInput\n$...\nHandle...$\n$...H\nandle...$\n$...Ha\nndle...$\n$...Han\ndle...$\n"
+  },
+  {
+    "page": 27,
+    "text": "Viable Prefix [活前缀]\n• Example 2: G(S): S → aAcBe; A → b; A → Ab; B → d. \n• “aAcde” is a right sentential form, it is split between the stack and the \ninput buffer, aA, aAc, aAcd are all viable prefix of aAcde.\nStack\nInput\nAction\n$aA\ncde$\nShift\n$aAc\nde$\nShift\n$aAcd\ne$\nReduce B → d\n27\nS\nc\nA\nB\nd\nA\nb\na\ne\n"
+  },
+  {
+    "page": 28,
+    "text": "Conflicts[冲突]\n• Conflicts arise with ambiguous \ngrammars.\n• Consider G(E): \n• E → E*E | E+E | (E) | id, \n• sentential form: id * id + id\nStep\nStack\nInput\nAction\n0\n$\nid*id+id$\nShift\n1\n$id\n*id+id$\nReduce E → id\n2\n$E\n*id+id$\nShift\n3\n$E*\nid+id$\nShift\n4\n$E*id\n+id$\nReduce E → id\n5\n$E*E\n+id$\nReduce E → E*E\n6\n$E\n+id$\nShift\n7\n$E+\nid$\nShift\n8\n$E+id\n$\nReduce E → id\n9\n$E+E\n$\nReduce E → E+E\n10\n$E\n$\nACCEPT\nE\n+\nE\nE\n*\nE\nE\nid\nid\nid\n28\n"
+  },
+  {
+    "page": 29,
+    "text": "Conflicts[冲突]\n• Conflicts arise with ambiguous \ngrammars.\n• Consider G(E): \n• E → E*E | E+E | (E) | id, \n• sentential form: id * id + id\nStep\nStack\nInput\nAction\n0\n$\nid*id+id$\nShift\n1\n$id\n*id+id$\nReduce E → id\n2\n$E\n*id+id$\nShift\n3\n$E*\nid+id$\nShift\n4\n$E*id\n+id$\nReduce E → id\n5\n$E*E\n+id$\nShift (Reduce E → E*E)\n6\n$E*E+id\n$\nReduce E → id\n7\n$E*E+E\n$\nReduce E → E+E\n8\n$E*E\n$\nReduce E → E*E\n9\n$E\n$\nACCEPT\nE\n*\nE\nE\n+\nE\nE\nid\nid\nid\n29\n"
+  },
+  {
+    "page": 30,
+    "text": "Conflicts[冲突]\n• Conflicts arise with ambiguous grammars.\n• Grammar:   E   →   E*E   |   E+E   |   (E)   |   id\n• sentential form:   id * id + id\n• In the steps marked blue, both shift or reduce by E → E * E is okay \nsince the precedence of + and * is not specified in the grammar, \nsame problem with associativity.\n• As usual, we should remove conflicts due to ambiguity:\nRewrite grammar/parser to encode precedence and associativity.\nOperator Precedence Parsers (OPP), see Section 4.6 in Dragon Book, 1st Edition\nGet rid of remaining ambiguity (e.g., if-then-else)\n30\n5\n$E*E\n+id$\nShift (Reduce E \n→ E*E)\n"
+  },
+  {
+    "page": 31,
+    "text": "• Handles always appear at the top of the stack\nNever in middle of stack\nJustifies use of stack in shift–reduce parsing\n• Results in an easily generalized shift-reduce strategy\nIf there is no handle at the top of the stack, shift\nIf there is a handle, reduce to the non-terminal\nEasy to automate the synthesis of the parser using a table\n• Types of conflicts\nIf it is possible to either shift or reduce then there is a shift-reduce conflict.\nIf there are two possible reductions, then there is a reduce-reduce conflict.\nMost often occur because of ambiguous grammars, In rare cases, because of \nnon-ambiguous grammars not amenable to parser.\nProperties of Bottom-up Parsing\n31\n"
+  },
+  {
+    "page": 32,
+    "text": "Contents\n32\nLR family parsers\nParser table\ntool\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\n"
+  },
+  {
+    "page": 33,
+    "text": "Types of Bottom-Up Parsers\n• Different types of bottom-up parsers:\nSimple precedence parsers\nOperator precedence parsers\nRecursive ascent parsers\nLR family parsers\nothers...\n• Here, we will mainly focus on the LR family parsers, which are a \ntype of bottom-up parser that analyzes deterministic context-free \nlanguages in linear time. \n33\n"
+  },
+  {
+    "page": 34,
+    "text": "LR(k) Parser\n• LR(k) : member of LR family of parsers\n\n\"L\" stands for left-to-right scanning of the input.\n\n\"R\" stands for constructing a rightmost derivation in reverse.\n\n\"k\" is the number of input symbols of the lookahead used to make number of \nparsing decision.\n• Comparison with LL(k) parser\n\nEfficient as LL(k): Linear in time and space to length of input (same as LL(k)).\n\nConvenient as LL(k): Can generate automatically from grammar – YACC, Bison.\n\nMore complex than LL(k): Harder to debug parser when grammar causes \nconflicting predictions.\n\nMore powerful than LL(k): Handles more grammars: no left recursion removal, \nleft factoring needed. \n34\n"
+  },
+  {
+    "page": 35,
+    "text": "LR Parser\n• The stack holds a sequence of states, S0S1…Sm (Sm is the top)\n\nStates are to track where we are in a parse.\n\nEach grammar symbol Xi is associated with a state Si\n• Contents of stack + input (X1X2...Xmai...an) is a right sentential form\n\nIf the input string is a member of the language\n• Uses [Si, ai] to index into parsing table to determine action\n35\n"
+  },
+  {
+    "page": 36,
+    "text": "Bottom-up (Revisit)\n• LR(0) Parser:\n36\nStat\ne\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n"
+  },
+  {
+    "page": 37,
+    "text": "Parse Table\n• The LR-parsing algorithm must decide when to shift and when to \nreduce (and in the latter case, by which production).\n• It does so by consulting two tables: ACTION and GOTO. \n• The basic algorithm is the same for all LR parsers, what changes \nare the tables ACTION and GOTO.\n37\nState\nAction\nGoto\nTerminals \nNon-Terminals\n0\n1\n...\n"
+  },
+  {
+    "page": 38,
+    "text": "Action table[动作表]\n•\nThe action table is indexed by a state of the \nparser and a terminal and contains three types \nof actions. \n\nShift, Reduce, Accept, Error\n•\nAction[S, a] tells the parser what to do when \nthe state on top of the stack is S and terminal \na is the next input token.\n38\nState\n（S）\nAction\n*\n+\n0\n1\n$\n0\ns1\ns2\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n6\ns1\ns2\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n(1) E → E * B\n(2) E → E + B\n(3) E → B\n(4) B → 0\n(5) B → 1\n"
+  },
+  {
+    "page": 39,
+    "text": "Possible Actions[可能的动作]\n• ACTION[Sm, ai] has four possible actions:\n• Shift (sx): the handle is not completed loaded in the stack\n1.\nShift the next input symbol onto the top of the stack\n2.\nAdd State x to the stack\n• Reduce (ry): the handle is at the top of the stack\n1.\nPop the handle and all its associated states.\n2.\nReduce the handle by the yth production (say A → a)\n3.\nPush A onto the stack\n4.\nPush state Sj by GOTO table, Sj =GOTO[Si, A] and Si is the current state.\n• Accept\n\nACTION[Si, ai] = ACC, then parsing is complete and successfully\n• Error\n\nACTION[Si, ai] = <empty>, then report error and stop\n39\n"
+  },
+  {
+    "page": 40,
+    "text": "Goto Table[跳转表]\n• The goto table is indexed by a state of the parser and a \nnonterminal\nDefine the next state of the parser if it has recognized a certain \nnonterminal.\nThis table is important to find out the next state after every reduction.\n• GOTO[Si, A] indicates the new state to place on the top of \nthe stack after a reduction is performed\n• After a reduction action is performed:\n• a non-terminal A is pushed onto the stack without an associated state.\n• The current state at the top is Si\n• Goto table tells which state should be pushed together with A by \nGOTO[Si, A].\nState\nGoto\nE\nB\n0\n3\n4\n1\n2\n3\n4\n5\n7\n6\n8\n7\n8\n40\n"
+  },
+  {
+    "page": 41,
+    "text": "Parse Table\n41\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n(1) E → E * B\n(2) E → E + B\n(3) E → B\n(4) B → 0\n(5) B → 1\n"
+  },
+  {
+    "page": 42,
+    "text": "Parser Actions\n• If ACTION[sm, ai] = sx, then do shift:\nShift ai on stack, which is removed from the input\nEnters state x, i.e., pushes state x on stack\na1a2...an$\nInitial\nGeneral\n42\nS0\n$\nS0\nS1\nS2\n...\nSm\n$\nX1\nX2\n...\nXm\naiai+1...an$\nS0\nS1\nS2\n...\nSm\nSx\n$\nX1\nX2\n...\nXm\nai\nai+1...an$\nShift\nInput:\nInput:\nStack:\nStack:\n"
+  },
+  {
+    "page": 43,
+    "text": "Parser Actions\n• If ACTION[sm, ai] = rx, then do reduce:\nPops k (states, symbols) from stack\nPushes A on stack\nGOTO[Sm-k, A] = Sj, then\n43\nxth production: A → Xm-k+1…Xm\nGeneral\nS0\nS1\nS2\n...\nSm\n$\nX1\nX2\n...\nXm\naiai+1...an$\nPop\nS0\nS1\nS2\n...\nSm-k\n$\nX1\nX2\n...\nXm-k\naiai+1...an$\nPush & GOTO\nS0\nS1\nS2\n...\nSm-k\nSj\n$\nX1\nX2\n...\nXm-k\nA\naiai+1...an$\n"
+  },
+  {
+    "page": 44,
+    "text": "LR Parsing Program\n• Input: string ω and parse table with ACTION/GOTO\n• Output: reduction steps of ω, or error\n• Initial: s0 on the stack, ω$ in the input buffer\nwhile (1) {\nlet s and a be the state and symbol on top of the stack;\nif (ACTION[s,a] = St) {\npush (t,a) onto the stack;\n} else if (ACTION[s,a] = rk) {     /* A -> β */\npop |β| (states, symbols) off the stack;\npush (GOTO[s,A],A) onto the stack;\n} else if (ACTION[s,a] = acc) \nbreak; \nelse \ncall error-recovery routine;\n}\n44\n"
+  },
+  {
+    "page": 45,
+    "text": "Example: Parse Table\n• This example of LR parsing uses the \nfollowing small grammar with goal \nsymbol E:\n(1) E → E * B\n(2) E → E + B\n(3) E → B\n(4) B → 0\n(5) B → 1\n• to parse the following input:\n1 + 1\nParse table\nsource: https://en.wikipedia.org/wiki/LR_parser#Table_construction\n45\n"
+  },
+  {
+    "page": 46,
+    "text": "Example: Parse Table\n• Grammar:\n(1) E → E * B\n(2) E → E + B\n(3) E → B\n(4) B → 0\n(5) B → 1\n• Table entry:\nsi: shifts the input symbol and moves to \nstate i (i.e., push state on stack)\nrj: reduce by production numbered j\nacc : accept\nempty : error\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\nInput:\n1 + 1\n46\n"
+  },
+  {
+    "page": 47,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n47\n"
+  },
+  {
+    "page": 48,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n48\n"
+  },
+  {
+    "page": 49,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n0\n$\n+1$\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n49\n"
+  },
+  {
+    "page": 50,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n50\n"
+  },
+  {
+    "page": 51,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n0\n$\n+1$\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n51\n"
+  },
+  {
+    "page": 52,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E\n+1$\ns6\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n52\n"
+  },
+  {
+    "page": 53,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n53\n"
+  },
+  {
+    "page": 54,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\n0362\n$E+1\n$\nr5\n8\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n54\n"
+  },
+  {
+    "page": 55,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\n0362\n$E+1\n$\nr5\n8\n036\n$E+\n$\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n55\n"
+  },
+  {
+    "page": 56,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\n0362\n$E+1\n$\nr5\n8\n0368\n$E+B\n$\nr2\n3\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n56\n"
+  },
+  {
+    "page": 57,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\n0362\n$E+1\n$\nr5\n8\n0368\n$E+B\n$\nr2\n3\n0\n$\n$\nState\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n57\n"
+  },
+  {
+    "page": 58,
+    "text": "Example: Parsing steps\n• (1) E → E * B      (2) E → E + B     (3) E → B      (4) B → 0      (5) B → 1\nStack\ninput\nACTION\nGOTO\n0\n$\n1+1$\ns2\n02\n$1\n+1$\nr5\n4\n04\n$B\n+1$\nr3\n3\n03\n$E \n+1$\ns6\n036\n$E+\n1$\ns2\n0362\n$E+1\n$\nr5\n8\n0368\n$E+B\n$\nr2\n3\n03\n$E\n$\nacc\nState\nACTION\nGOTO\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n58\nHow to build this table?\n"
+  },
+  {
+    "page": 59,
+    "text": "Revisit\n59\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nLR(0) item + \nlookaheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\ncompromise  LR(1) \nand SLR(1)\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 60,
+    "text": "Bottom-up (Revisit)\n• Shift-Reduce parser:\n• From the input to the start symbol, rightmost derivation in reverse.\nShift[移入], Reduce[规约], Accept[接受], Error[报错]\nWhen to shift/reduce and What production to apply\nHandle tells. But how to find it?\nRight-sentential form[最右句型],Phrase[短语],\nSimple Phrase[直接短语],Handle[句柄],Viable Prefix[活前缀]\nConflictions\nShift-reduce, reduce-reduce\nLR(0) cannot resolve conflictions unless we write the grammar.\n60\nE1\n+\nE2\nT2\nE3\nT1\n+\nT\nT\nF\n*\nF1\nid\n"
+  },
+  {
+    "page": 61,
+    "text": "Bottom-up (Revisit)\n• LR(0) parser:\n• The stack holds a sequence of states, S0S1…Sm (Sm is the top)\n• stack + input (X1X2...Xm ai...an) is a right sentential form\n• Driven by an Action&Goto parser table\n• Uses [Si, ai] to index into parsing table to \ndetermine action:\n• ACTION[Sm, ai]:\n• Shift (sx): Shift the next input symbol with state x\n• Reduce (ry): reduce the top |β| symbols by the yth production\n• GOTO[Si, A]: \n• Indexed after each reduction\n• shows the new state to push based on Si (state on the top \nafter the reduction) and A (new non-terminal being pushed)\n61\nStat\ne\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\nA -> β\n"
+  },
+  {
+    "page": 62,
+    "text": "Construct Parse Table\n• Construct parsing table: \n• identify the possible states and arrange the transitions among them.\n• Different Parsing tables\n• LR(0) – Too weak (no lookahead)\n• Simplest LR parsing, only considers stack to decide shift/reduce\n• SLR(1) – Simple LR, 1 token lookahead\n• lookahead from first/follow rules derived from LR(0) \n• Keeps table as small as LR(0)\n• LALR(1) – Most common, 1 token lookahead\n• fancier lookahead analysis using the same LR(0) automaton as SLR(1)\n• LR(1) – 1 token lookahead, complex algorithms and big tables\n• LR(k) – k tokens lookahead, even bigger tables\n62\n"
+  },
+  {
+    "page": 63,
+    "text": "• How does a shift-reduce parser know when to shift and when to \nreduce? [Parser怎么知道何时移进, 何时规约]\nUsing the figure below as an example, with stack content $T and next input \nsymbol *, how does the parser know that T is not a handle, and we need to \nshift instead of reducing T to E? [对于LR(0) parser, 其实就是要让编译器能找到handle]\n• An LR parser makes shift-reduce decisions by maintaining states \nto keep track of where we are in a parse [状态追踪]\nStates represent sets of “items”\nState in LR Parsing[状态]\n64\nGrammar\n•\nE -> T\n•\nT -> F | T * F\n•\nF -> id\n"
+  },
+  {
+    "page": 64,
+    "text": "Item[项目]\n• The parsing table is based on the notion of LR(0) items (simply \ncalled items here) which are grammar rules with a special dot \nadded somewhere in the right-hand side.\n• For example, the rule A → XYZ has the following four items:\nA → • XYZ \nA → X • YZ \nA → XY • Z \nA → XYZ •\n• Rules of the form A → ε have only a single item A →•\n65\n"
+  },
+  {
+    "page": 65,
+    "text": "• A → • XYZ\nIndicates that we hope to see a string derivable from XYZ next on the input \n• A → X • YZ\nIndicates that we have just seen on the input a string derivable from X and \nthat we hope next to see a string derivable from YZ \n• A → XY • Z  \n• A → XYZ •\nIndicates that we have seen the body XYZ and that it may be time to \nreduce XYZ to A\nThe meaning of Items\n66\n"
+  },
+  {
+    "page": 66,
+    "text": "State[状态]\n• Example:\nSuppose we are currently in this position: A → X • YZ\nWe have just recognized X and expect the upcoming input to contain a \nsequence derivable from YZ (say, Y → u|w)\nY is further derivable from either u or w:\nA → X • YZ\nY → • u\nY → • w\nThe above items can be placed into a set, called as configuration set [配置集] \nof the LR parser\n• Parsing tables have one state corresponding to each set\nThe states can be modeled as a finite automaton, where we move from \none state to another via transitions marked with a symbol of the CFG\n67\n"
+  },
+  {
+    "page": 67,
+    "text": "Augmented Grammar[增广文法]\n• We want to start with an item with a dot before the start symbol \nS (•S) and move to an item with a dot after S (S•)\nRepresents shifting and reducing an entire sentence of the grammar[完成了\n整个句子的移进规约]\nThus, we need S to appear on the right side of a production\n• Modify the grammar by adding the production\nS’-> •S becomes the first item in the start state of the FA\n(0) E → E * B    (1) E → E + B \n(2) E → B    (3) B → 0    (4) B → 1\n(0) S → E\n(1) E → E * B    (2) E → E + B \n(3) E → B    (4) B → 0    (5) B → 1\nAugmented Grammar\nGrammar\n68\n"
+  },
+  {
+    "page": 68,
+    "text": "• Each FA state corresponding to a set of items\n• How to construct a state? -- closure operation\nClosure: the action of adding equivalent items to a set\nExample: S’ → ·S  S → ·BB  B → ·aB B → ·b\n• How to construct transition form one state to \nanother? -- goto operation\nA transition on symbol X from state i to state j\nConstruct the LR(0) Automaton\n69\nA→α•Xβ\n…\nA→αX•β\n…\nX\n(0) S’ → S\n(1) S → BB\n(2) B → aB\n(3) B →b\n"
+  },
+  {
+    "page": 69,
+    "text": "Example\nGrammar\n(0) S’ -> S\n(1) S -> BB\n(2) B -> aB\n(3) B -> b\n70\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nS →aB·\na\nB\na\nb\n"
+  },
+  {
+    "page": 70,
+    "text": "Example (cont.)\n“state j” refers to the state of the \nset of items Ij\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\n71\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ →·S\nS  →·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nB →aB·\na\nB\na\nb\nGrammar\n(0) S’ -> S\n(1) S -> BB\n(2) B -> aB\n(3) B -> b\nHow to construct this DFA?\n"
+  },
+  {
+    "page": 71,
+    "text": "• Closure of item sets: if I is a set of items for a grammar G, then \nCLOSURE(I) is the set of items constructed from I by the two rules:\n1.\nInitially, add every item in I to CLOSURE(I) \n2.\nFor any item A → ⍺·Bβ in CLOSURE(I), if B → γ is a production, and B \n→ ·γ is not already there , then add item B → ·γ to CLOSURE(I)\nApply the above rules until no more new items can be added to CLOSURE(I)\nCLOSURE()[闭包]\n72\nNote: the location of the point ·\nS’ → ·S\nS’ → ·S\nS→ ·BB\nCLOSURE(S’ → ·S)：\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nGrammar：\nS’ → S                                                                     \nS → BB\nB  → aB\nB  → b\nCLOSURE(S’ → ·S)\n"
+  },
+  {
+    "page": 72,
+    "text": "• GOTO(I, X): returns state (set of items) that can be reached by \nadvancing I by X\nI is a set of items and X is a grammar symbol \nReturn the closure of the set of all items [A → ⍺X·β] when [A → ⍺·Xβ] is in I\nUsed to define the transitions in the LR(0) automaton\nThe states of the automaton correspond to sets of items, and GOTO(I, X) \nspecifies the transition from the state for I under input X\nGOTO()[跳转]\n73\nI2:\nS → B·B\nB → ·aB\nB → .b\nGrammar：\nS’ → S                                                                                                 \nS → BB\nB → aB\nB → b\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nB\nCLOSURE(S → B·B)\nCLOSURE(S’ → ·S)\nGOTO(I0 , B) \n"
+  },
+  {
+    "page": 73,
+    "text": "• Create augmented grammar G’ for G:  [增广文法]\nGiven G: S → α | β, create G’: S’ → S , S → α | β\nCreates a single rule S’ → S that when reduced, signals acceptance\n• Create 1st state by performing a closure on initial item S’→ ·S\n[初始状态]\nClosure({S’→ ·S}) = {S’→ ·S, S → ·α, S → ·β}\n• Create additional states by performing a GOTO on each symbol\n[添加状态]\nGoto({S’→ ·S, S → ·α, S → ·β}, α) =Closure({S → α·}) = {S → α·}\n• Repeatedly perform gotos until there are no more states to add  [重复操作]\nConstruct LR(0) States[构造LR(0)状态集]\n74\nGrammar\nS → α\nS → β\nGrammar’\nS’ → S \nS  → α\nS  → β\nCLOSURE(S’ → ·S)\nS’ → ·S\nS  → ·α\nS  → ·β\nCLOSURE(S → α ·)\nS  → α ·\nCLOSURE(S → β ·)\nS  → β ·\nα\nβ\n"
+  },
+  {
+    "page": 74,
+    "text": "• Compute canonical LR(0) collection[规范LR(0)项集族, C], i.e., set of all states in DFA \n[DFA中的所有状态的集合]\nA collection of sets of LR(0) items that provides the basis for constructing a \nDFA that is used to make parsing decisions\nEach state of the automaton represents a set of items in the C, such an \nautomaton is called an LR(0) automaton\n• All new states are added through GOTO(I, X) [DFA中的所有边的集合]\nState transitions are done on symbol X\nConstruct DFA[构造DFA]\n75\nvoid itemSet (G’) {\nC = { CLOSURE({[S’ → ·S]}) };\nwhile (no new states are added to C)\nfor (each state I in C)\nfor (each grammar symbol X)\nif (GOTO(I, X) is not empty && is not in C)\nadd GOTO (I, X) to C;\n}\n"
+  },
+  {
+    "page": 75,
+    "text": "• The LR(0) automaton: a shift action means the transition of the current \nstate to a new state\nState: a set of items in C\nStart state S0: CLOSURE({[S’ → ·S]})\nState Sj refers to the state corresponding to the set of items Ij\nStates are computed by the CLOSURE function\nTransitions are given by the GOTO function\n• How does the automaton help with shift-reduce decisions?\nSuppose we are in a state j, and next input is a\nThen, we choose shift when state j has a transition on a\nOtherwise, we choose to reduce \nThe items in state j tell us which production to use\nIf there are not such item , the input a is illegal\nLR(0) Automaton[自动机]\n76\n"
+  },
+  {
+    "page": 76,
+    "text": "[建立第一个项]\nS0= Closure({S’→· S})\n= {S’→· S, S →· BB, B → · aB, B → · b}  (I0)\n[通过跳转建立后续项]\ngoto(S0, B) = closure({S → B · B})\nS2= {S →B · B, B → · aB, B → · b}    (I2)\ngoto(S0, a) = closure({B →a · B})\nS3= {B →a · B, B → · aB, B → · b} (I3)\ngoto(S0, b) = closure({B → b ·})\nS4= {B→ b ·}    (I4)\n…\nThe example\n77\nGrammar：\nS’ → S\nS  → BB\nB  → aB\nB  → b\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a·B\nB → · aB\nB → ·b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nS →aB ·\na\nB\na\nb\n"
+  },
+  {
+    "page": 77,
+    "text": "• ACTION [Si, a]:\nIf [A→α·aβ] is in Si and goto(Si, a) = Sj, where “a” is a terminal, then \nACTION[Si, a] = Sj (shift j)\nIf [A→α·] is in Si and A→α is jth rule, then ACTION[Si, a] = rj (reduce j)\nIf [S’ →S·] is in Si, then ACTION[Si , $] = accept(acc)\nIf no conflicts among ‘shift’ and ‘reduce’ (the first two ‘if’s above), then \nthis parser is able to parse the given grammar\n• GOTO [Si, A]:\nif goto(Si , A) = Sj then GOTO[Si , A] = j\nBuild Parse Table from DFA\n78\n"
+  },
+  {
+    "page": 78,
+    "text": "The example\n79\n(0) S’ → S\n(1) S  → BB\n(2) B  → aB\n(3) B  → b\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a · B\nB → · aB\nB → · b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nS →aB ·\na\nB\na\nb\nGrammar：\n"
+  },
+  {
+    "page": 79,
+    "text": "• Construct LR(0) automaton from the Grammar\n• Assumptions:\nInput buffer contains ⍺\nNext input is t\nAfter input ⍺, the DFA is in state S\n• Reduce if\nS contains item X → ⍺·\n• Shift if\nS contains item X → ⍺·tω\nEquivalent to saying S has a transition labeled t\nLR(0) Parsing\n80\n"
+  },
+  {
+    "page": 80,
+    "text": "• The parser must be able to determine what action to take in each \nstate without looking at any further input symbols\nBy only considering what the parsing stack contains so far \nThis is the ‘0’ in the parser name \n• In an LR(0) table, each state must only shift or reduce\nThus, an LR(0) state can only have exactly one reduce item and cannot \nhave both shift and reduce items\nIf the grammar contains the production A → ε, then the item A → ·ε will \ncreate a shift-reduce conflict if there is any other non-null production for A\nε-rules are fairly common in programming language grammars\nLR(0) Parsing(cont.)\n81\n"
+  },
+  {
+    "page": 81,
+    "text": "• LR(0) has a reduce-reduce conflict if：\nAny state has two reduce items:\nX → β · and Y → ω ·\n• LR(0) has a shift-reduce conflict if:\nAny state has a reduce item and a shift item:\nX → β· and Y → ω · t\nLR(0) Conflicts\n82\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | i | i[E]\nV → i\nI0:\nE’→ ·E\nE → ·T\nE → ·E+T\nE → ·V=E\nT → ·(E)\nT → ·i\nT → ·i[E]\nV → ·i\ni\nI1:\nT → i ·\nT → i · [E]\nV → i ·\n"
+  },
+  {
+    "page": 82,
+    "text": "• LR(0) conflicts are generally caused by reduce actions\nShift-Reduce conflict \nReduce-Reduce conflict\nIf the item is complete (A →⍺·), the parser must choose to \nreduce[项目形式完整就归约]\nIs this always appropriate?\nThe next upcoming token may tell us something different\nWhat tokens may tell the reduction is not appropriate?\nPerhaps Follow(A) could be useful here\nLR(0) Limitations[局限性]\n83\nA → α·αβ\nB → r·\nA → β·\nB → r·\n"
+  },
+  {
+    "page": 83,
+    "text": "• Construct LR(0) automaton from the Grammar\n• Assumptions:\nInput buffer contains ⍺\nNext input is t\nAfter input ⍺, the DFA is in state S\n• Reduce if\nS contains item X → ⍺·\n• Shift if\nS contains item X → ⍺·tω\nEquivalent to saying S has a transition labeled t\nLR(0) Parsing\n84\n"
+  },
+  {
+    "page": 84,
+    "text": "• The parser must be able to determine what action to take in each \nstate without looking at any further input symbols\nBy only considering what the parsing stack contains so far \nThis is the ‘0’ in the parser name \n• In an LR(0) table, each state must only shift or reduce\nThus, an LR(0) state can only have exactly one reduce item and cannot \nhave both shift and reduce items\nIf the grammar contains the production A → ε, then the item A → ·ε will \ncreate a shift-reduce conflict if there is any other non-null production for A\nε-rules are fairly common in programming language grammars\nLR(0) Parsing(cont.)\n85\n"
+  },
+  {
+    "page": 85,
+    "text": "Revisit\n86\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nLR(0) item + \nlookaheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\ncompromise  LR(1) \nand SLR(1)\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 86,
+    "text": "Bottom-up (Revisit)\n• Construction of LR(0) table\n• Tell the parser when to shift/reduce\n• Answers which production to apply for a reduction\n• States and Items\n• States: a set of items indicating where we are\n• Items: productions with a dot\nA → X • YZ (Looking forward to Y)\nA → XYZ • (all symbols ready, can go for the reduction)\nParsing tables have one state corresponding to a set of items (a.k.a the configuration set)\nThe states and their transitions can be implemented by finite automata. \n87\nStat\ne\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\nA→α•Xβ\n…\nA→αX•β\n…\nX\n"
+  },
+  {
+    "page": 87,
+    "text": "Example (Revisit)\n“state j” refers to the state of the \nset of items Ij\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\n88\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ →·S\nS  →·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nB →aB·\na\nB\na\nb\nGrammar\n(0) S’ -> S\n(1) S -> BB\n(2) B -> aB\n(3) B -> b\n"
+  },
+  {
+    "page": 88,
+    "text": "Bottom-up (Revisit)\nWe want to see S • from • S\nThe construction of LR(0) automaton\nAugmented grammar G’ for G \nAdd S’ -> S\nBuilding states and transitions: closure and goto\nCLOSURE:\n89\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nS →aB·\na\nB\na\nb\nNote: the location of the point ·\nS’ → ·S\nS’ → ·S\nS→ ·BB\nCLOSURE(S’ → ·S)：\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nGrammar：\nS’ → S                                                                     \nS  → BB\nB  → aB\nB  → b\nCLOSURE(S’ → ·S)\n"
+  },
+  {
+    "page": 89,
+    "text": "Bottom-up (Revisit)\nWe want to see S • from • S\nThe construction of LR(0) automaton\nAugmented grammar G’ for G \nAdd S’ -> S\nBuilding states and transitions: closure and goto\nGOTO:\n90\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nS →aB·\na\nB\na\nb\nI2:\nS → B·B\nB → ·aB\nB → .b\nGrammar：\nS’ → S                                                                                                 \nS → BB\nB → aB\nB → b\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nB\nCLOSURE(S → B·B)\nGOTO(I0 , B) \n"
+  },
+  {
+    "page": 90,
+    "text": "• Create augmented grammar G’ for G:  [增广文法]\nGiven G: S → α | β, create G’: S’ → S , S → α | β\nCreates a single rule S’ → S that when reduced, signals acceptance\n• Create 1st state by performing a closure on initial item S’→ ·S\n[初始状态]\nClosure({S’→ ·S}) = {S’→ ·S, S → ·α, S → ·β}\n• Create additional states by performing a GOTO on each symbol\n[添加状态]\nGoto({S’→ ·S, S → ·α, S → ·β}, α) =Closure({S → α·}) = {S → α·}\n• Repeatedly perform gotos until there are no more states to add  [重复操作]\nConstruct LR(0) States (Revisit)\n91\nGrammar\nS → α\nS → β\nGrammar’\nS’ → S \nS  → α\nS  → β\nCLOSURE(S’ → ·S)\nS’ → ·S\nS  → ·α\nS  → ·β\nCLOSURE(S → α ·)\nS  → α ·\nCLOSURE(S → β ·)\nS  → β ·\nα\nβ\n"
+  },
+  {
+    "page": 91,
+    "text": "[建立第一个项]\nS0= Closure({S’→· S})\n= {S’→· S, S →· BB, B → · aB, B → · b}  (I0)\n[通过跳转建立后续项]\ngoto(S0, B) = closure({S → B · B})\nS2= {S →B · B, B → · aB, B → · b}    (I2)\ngoto(S0, a) = closure({B →a · B})\nS3= {B →a · B, B → · aB, B → · b} (I3)\ngoto(S0, b) = closure({B → b ·})\nS4= {B→ b ·}    (I4)\n…\nThe example (Revisit)\n92\nGrammar：\nS’ → S\nS  → BB\nB  → aB\nB  → b\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a·B\nB → · aB\nB → ·b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nS →aB ·\na\nB\na\nb\n"
+  },
+  {
+    "page": 92,
+    "text": "The example (Revisit)\n93\n(0) S’ → S\n(1) S  → BB\n(2) B  → aB\n(3) B  → b\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a · B\nB → · aB\nB → · b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nS →aB ·\na\nB\na\nb\nGrammar：\n"
+  },
+  {
+    "page": 93,
+    "text": "• LR(0) has a reduce-reduce conflict if：\nAny state has two reduce items:\nX → β · and Y → ω ·\n• LR(0) has a shift-reduce conflict if:\nAny state has a reduce item and a shift item:\nX → β· and Y → ω · t\nLR(0) Conflicts\n94\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | i | i[E]\nV → i\nI0:\nE’→ ·E\nE → ·T\nE → ·E+T\nE → ·V=E\nT → ·(E)\nT → ·i\nT → ·i[E]\nV → ·i\ni\nI1:\nT → i ·\nT → i · [E]\nV → i ·\n"
+  },
+  {
+    "page": 94,
+    "text": "• LR(0) conflicts are generally caused by reduce actions\nShift-Reduce conflict \nReduce-Reduce conflict\nIf the item is complete (A →⍺·), the parser must choose to \nreduce[项目形式完整就归约]\nIs this always appropriate?\nThe next upcoming token may tell us something different\nWhat tokens may tell the reduction is not appropriate?\nPerhaps Follow(A) could be useful here\n[如果我们知道Follow(A)没有next input a，我们就不能用A → β规约，不然肯定会报错，因为没\n有能推导出Aa的产生式]\nLR(0) Limitations[局限性]\n95\nA → α·αβ\nB → r·\nA → β·\nB → r·\n"
+  },
+  {
+    "page": 95,
+    "text": "• LR(0) is the simplest LR parsing\nTable-driven shift-reduce parser \nAction table[s, a] + Goto table[s, X] \nWeakest, not used much in practice \nParses without using any lookahead\n• Adding just one token of lookahead vastly increases the parsing \npower [考虑展望]\nSLR(1): simple LR(1), use FOLLOW [用FOLLOW判断规约]\nLR(1): use stack info + dedicated symbols [比FOLLOW更精细]\nLALR(1): balance SLR(1) and LR(1)[折衷]\nLR(0) Summary\n96\nLR(1)\nLALR(1) SLR(1)\nLR(0)\n"
+  },
+  {
+    "page": 96,
+    "text": "Contents\n97\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nBottom-up parser\n"
+  },
+  {
+    "page": 97,
+    "text": "LR(0) Example (revisit)\n98\n(0) S’ → S\n(1) S  → BB\n(2) B  → aB\n(3) B  → b\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a · B\nB → · aB\nB → · b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nB →aB ·\na\nB\na\nb\nGrammar：\n"
+  },
+  {
+    "page": 98,
+    "text": "• SLR (Simple LR)\nthe same LR(0) configurating sets Use the same LR(0) configurating sets \nand have the same table structure and parser operation\nAllow both shift and reduce items in the same state as well as multiple \nreduce items.\nThe SLR(1) parser will be able to determine which action to take as long as \nthe follow sets are disjoint.\nThe difference comes in assigning table actions\n\nUse one token of lookahead to help arbitrate among the conflicts\n\nReduce only if the next input token is a member of the FOLLOW set of the nonterminal \nbeing reduced to [下一token在FOLLOW集才归约]\nSLR(1) Parsing\n99\n"
+  },
+  {
+    "page": 99,
+    "text": "• Suppose id is the first token of the input\nS1: the set has a shift-reduce conflict and a reduce-reduce conflict \nFollow(T) = { +, ), ], $ }, Follow(V) = { = }\nIf input t in Follow(T), it will reduce to T\nIf input t in Follow(V), it will reduce to V\nElse the input [ will shift\nExample\n100\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | id | id[E]\nV → id\nI0:\nE’→ · E\nE → · T\nE → · E+T\nE → · V=E\nT → · (E)\nT → · id\nT → · id[E]\nV → · id \nid\nI1:\nT → id ·\nT → id · [E]\nV → id ·\nFOLLOW(A) = {a | S ⇒…Aa…, a∈VT}, \nincluding $[结束标记]\n*\n"
+  },
+  {
+    "page": 100,
+    "text": "• A grammar is SLR(1) if the following two conditions hold for \neach configurating set:\n1.\nFor any item A → u·xv in the set, with terminal x, there is no \ncomplete item B → w· in that set with x in Follow(B)\nIn the tables, this translates no shift-reduce conflict on any state\n2.\nFor any two complete items A → u· and B → v· in the set, the \nfollow sets must be disjoint, i.e., Follow(A) ∩ Follow(B) is empty \nThis translates to no reduce-reduce conflict on any state\nIf more than one nonterminal could be reduced from this set, it must be \npossible to uniquely determine which using only one token of lookahead\nSLR(1) Grammars[SLR(1)文法]\n101\n"
+  },
+  {
+    "page": 101,
+    "text": "• SLR(1)  v.s. LR(0)\nAdding just one token of lookahead and using the Follow set greatly expands \nthe class of grammars that can be parsed without conflict\n• SLR(1) is a simple improvement over LR(0)\nLR(0) easily gets shift-reduce and reduce-reduce conflicts\n\nAlways reduce on a completed item (might be too ambitious)\nSLR(1) uses the same configuration sets (i.e., states), same table structure and \nparser operation\nBut SLR(1) reduces only if the next input token is in Follow set\n\ni.e., different table actions from LR(0)\n• SLR(1) is capable to determine which action to take as along as the Follow \nsets are disjoint\nSo, one state can have both shift and reduce items with multiple reduce items\nSLR(1) Advantages[SLR(1)优势]\n102\n"
+  },
+  {
+    "page": 102,
+    "text": "• When we have a complete configuration (i.e., dot at the end) such as X –> u· ,we \nknow that it is reducible      \nWe allow such a reduction as long as the next symbol is in Follow(X). \n• However, it may be that we should not reduce for every symbol in Follow(X), \nbecause the symbols below u on the stack preclude[排除] u being a handle for \nreduction in this case\n• In other words, SLR(1) states only tell us about the sequence on top of the stack, not \nwhat is below it on the stack\nSLR(1) Limitations[SLR(1)局限性]\n103\n"
+  },
+  {
+    "page": 103,
+    "text": "• For input string : id = id\nInitially, at S0, push id\nMove to S5, after shifting id to \nstack (S5 is also pushed to stack)\nReduce, and back to S0, and \nfurther GOTO S2\n1.\nS5 has a completed item, and next \ninput = is in Follow(L)\n2.\nS5  and id are popped from stack , \nand L is pushed onto stack\n3.\nGOTO(S0, L) = S2\nSLR(1) Limitation Example\n104\nI0:\nS’ → ·S\nS  → · L = R\nS  → · R\nL  → · *R\nL  → · id\nR  → · L\nI1:\nS’ → S ·\nI2:\nS  → L · = R\nR  → L ·\nI3:\nS  → R · \nI4:\nL  → * · R\nL  → · id\nL  → · *R\nL –> · id\nI5:\nL  → id ·\nI6:\nS → L = · R\nR  → · L\nL  → · *R\nL  → · id\nI7:\nL  → *R · \nI8:\nR  → L ·\nI9:\nS → L = R ·\nid\nL\n(0) S’ → S\n(1) S  → L = R\n(2) S  → R\n(3) L  → *R\n(4) L  → id\n(5) R  → L\nhttps://web.stanford.edu/class/archive/cs/cs143/cs143.1128/handouts/110%20LR%20and%20SLR%20Parsing.pdf\n"
+  },
+  {
+    "page": 104,
+    "text": "• Choices upon seeing = coming up in \nthe input:\nAction[2, =] = s6 : \nMove on to find the rest of assignment\nAction[2, =] = r5 : \n= ∈Follow(R)\nLeads to a wrong direction!\n• This is a shift-reduce conflict\nShould only reduce when we have seen *\nor =, i.e., when the next input is $.\nSLR parser fails to remember enough info\nSLR(1) Limitation Example (Cont.)\n105\nI0:\nS’ → ·S\nS  → · L = R\nS  → · R\nL  → · *R\nL  → · id\nR  → · L\nI1:\nS’ → S ·\nI2:\nS  → L · = R \nR  → L ·\n(0) S’ → S\n(1) S  → L = R\n(2) S  → R\n(3) L  → *R\n(4) L  → id\n(5) R  → L\nI3:\nS  → R · \nI4:\nL  → * · R\nL  → · id\nL  → · *R\nL –> · id\nI5:\nL  → id ·\nI6:\nS → L = · R\nR  → · L\nL  → · *R\nL  → · id\nI7:\nL  → *R · \nI8:\nR  → L ·\nI9:\nS → L = R ·\nid\nL\n=\nhttps://web.stanford.edu/class/archive/cs/cs143/cs143.1128/handouts/110%20LR%20and%20SLR%20Parsing.pdf\n"
+  },
+  {
+    "page": 105,
+    "text": "Contents\n106\nLR family parsers\nParser table\ntool\nLR(1) \nparsing table\nLR(0) item + \nlook aheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\nBottom-up parser\n"
+  },
+  {
+    "page": 106,
+    "text": "• We don’t need to see additional symbols beyond the first token in the input, \nwe have already seen the info that allows us to determine the correct choice \n[lookahead展望信息已足够]\n• Retain a little more of the left context that brought us here\nDivide an SLR(1) state into separate states to differentiate the possible means by which that \nsequence has appeared on the stack [额外使用栈内stack信息，FOLLOW是input buffer的信息]\n• Just using the Follow set is not discriminating enough as the guide for when to \nreduce [FOLLOW集不够]\nFor the example, the Follow set contains symbols that can follow R in any position within a \nvalid sentence\nBut it does not precisely indicate which symbols follow R at this particular point in a \nderivation\nImproving SLR(1)\n107\n"
+  },
+  {
+    "page": 107,
+    "text": "• LR parsing adds the required extra info into the state\nBy redefining items to include a terminal symbol as an added component\n[让项目中包含终结符]\n• General form of LR(1) items: A –> X1...Xi • Xi+1...Xj, a\nWe have states X1...Xi on the stack\nsuppose Xi+1...Xj are on the stack, we can perform reduction when:\nthe next input symbol is a\na is called the lookahead of the configuration \n• The lookahead only works with completed items[完成项] \nA –> X1...Xj •, a \nonly reduce when next symbol is a (a is either a terminal or $) \nMulti lookahead symbols: A -> u•, a/b/c\nLR(1) Parsing\n108\n"
+  },
+  {
+    "page": 108,
+    "text": "• When to reduce?\nLR(0): if the configuration set has a completed item (i.e., dot at the end)\nSLR(1): only if the next input token is in the Follow set\nLR(1): only if the next input token is exactly a (terminal or $)\nTrend: more and more precise\n• LR(1) items: LR(0) item + lookahead terminals\nIn many cases, LR(1) differs only in their lookahead components\nThe extra lookahead terminals allow to make parsing decisions beyond the \nSLR(1) capability, but with a big price [代价]\nMore distinguished items and thus more sets\nGreatly increases Goto and Action table size\nLR(1) Parsing(cont.)\n109\nS’ -> ·S\nS’ -> ·S, $\nLR(0)\nLR(1)\n"
+  },
+  {
+    "page": 109,
+    "text": "LR(1) Construction\n•Configuration sets\nSets construction are essentially the same with SLR, but differing on \nClosure() and Goto()\nBecause of the lookahead symbol\n• Closure()\nGiven each item [A -> u·Bv, a] in I, for each production rule B -> w in G’, \nadd [B -> ·w, b] to I:\nb ∈First(va) && [B -> ·w, b] is not in I \nv can be nullable\nLookahead is the First(va), which are the symbols that can follow B\n110\n(0)  S’ -> S\n(1)  S -> XX\n(2)  X -> aX\n(3)  X ->b\nS’ -> ·S, $\nI0: \nS’ -> ·S, $ \nS -> ·XX, First(ε$) \nX -> ·aX, First(X$) \nX -> ·b, First(X$) \nI0: \nS’ -> ·S, $\nS -> ·XX, $\nX -> ·aX, a/b \nX -> ·b, a/b \nFIRST(α) = {a | α ⇒a…, a ∈\nVT}, including ε[空串]\n"
+  },
+  {
+    "page": 110,
+    "text": "LR(1) Construction (cont.)\n• Goto(I, X)\nFor item [A -> u·Xv, a] in I, Goto(I, X) = Closure ([A -> uX·v, a])\nBasically the same Goto function as defined for LR(0)\nBut have to propagate the lookahead[传递] when computing the transitions\n• Overall steps\nStart from the initial set Closure ([S’ -> ·S, $])\nConstruct configuration sets following Goto(I, X)\nRepeat until no new sets can be added\n111\nI0 :\nS’ -> ·S, $\nS  -> ·XX, $\nX -> ·aX, a/b\nX -> ·b, a/b\nI2 :\nS  -> X·X, $\nX -> ·aX, First(ε$) \nX -> ·b, First(ε$) \nI2 :\nS  -> X·X, $\nX -> ·aX, $\nX -> ·b, $\nX\n"
+  },
+  {
+    "page": 111,
+    "text": "Revisit\n112\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nLR(0) item + \nlookaheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\ncompromise  LR(1) \nand SLR(1)\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 112,
+    "text": "• LR(0) Limitations \nParses without using lookahead - weakest, not used much in practice \nAn completed item (A →⍺·) is reduced immediately\nShift-Reduce conflict \nReduce-Reduce conflict\nAdding one lookahead symbol vastly increases the parsing power\nSLR(1): simple LR(1), use one lookhead and FOLLOW [用FOLLOW判断规约]\nLR(1): use stack info + dedicated symbols [比FOLLOW更精细]\nLALR(1): balance SLR(1) and LR(1)[折衷]\nLRs Revisit\n113\nI1:\nT → id ·\nT → id · [E]\nV → id ·\n"
+  },
+  {
+    "page": 113,
+    "text": "• SLR(1): Simple LR(1) with one lookahead\nSame LR(0) configurating sets, table structure, and parser operation.\nAllow both shift and reduce items as well as multiple reduce items.\nUse one token of lookahead to help arbitrate among the conflicts\nReduce only if the next input token is a member of the FOLLOW set of the \nnonterminal being reduced to\nLRs Revisit\n114\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | id | id[E]\nV → id\nI0:\nE’→ · E\nE → · T\nE → · E+T\nE → · V=E\nT → · (E)\nT → · id\nT → · id[E]\nV → · id \nid\nI1:\nT → id ·\nT → id · [E]\nV → id ·\nFOLLOW(A) = {a | S ⇒…Aa…, \na∈VT}, including $[结束标记]\n*\nFollow(T) = { +, ), ], $ } \nFollow(V) = { = }\nIf input t in Follow(T), \nreduce to T\nIf input t in Follow(V), \nreduce to V\nElse, the input [ will shift\n"
+  },
+  {
+    "page": 114,
+    "text": "• SLR(1) Grammar \n1.\nFor any item A → u·xv in the set, with terminal x, there is no complete \nitem B → w· in that set with x in Follow(B)\nIn the tables, this translates no shift-reduce conflict on any state\n2.\nFor any two complete items A → u· and B → v· in the set, the follow \nsets must be disjoint, i.e., Follow(A) ∩ Follow(B) is empty \nThis translates to no reduce-reduce conflict on any state\nIf more than one nonterminal could be reduced from this set, it must be possible to \nuniquely determine which using only one token of lookahead\nLRs Revisit\n115\n"
+  },
+  {
+    "page": 115,
+    "text": "• LR(1): Left-to-right scan and rightmost derivation with one \nlookahead\n\nAdding a bit more information to drive the parsing.\n\nRetain a little more of the left context in stack\n\nProving more discriminating info for reduction\n\nFollow set is still a bit ambiguous\n\nWe only to reduce only when the exact symbol appears at the next input\n• How?\nExtending the items – add one terminal at the end\nA –> X1...Xi • Xi+1...Xj, a\nExtending the automata construction\nClosure and goto functions\nLRs Revisit\n116\n"
+  },
+  {
+    "page": 116,
+    "text": "LRs Revisit\n117\n• Redefining items to include a terminal symbol as an added \ncomponent [让项目中包含终结符]\n• General form of LR(1) items: A –> X1...Xi • Xi+1...Xj, a\nWe have states X1...Xi on the stack\nsuppose Xi+1...Xj are on the stack, we can perform reduction when:\nthe next input symbol is a\na is called the lookahead of the configuration \n• The lookahead only works with completed items[完成项] \nA –> X1...Xj •, a \nonly reduce when next symbol is a (a is either a terminal or $) \nMulti lookahead symbols: A -> u•, a/b/c\n"
+  },
+  {
+    "page": 117,
+    "text": "LRs Revisit\n118\n• Closure(I)\nGiven each item [A -> u·Bv, a] in I, for each production rule B -> w in G’, \nadd [B -> ·w, b] to I:\nb ∈First(va) && [B -> ·w, b] is not in I \nv can be nullable\nLookahead is the First(va), which are the symbols that can follow B\n• Goto(I, X)\nFor item [A -> u·Xv, a] in I, Goto(I, X) = Closure ([A -> uX·v, a])\nBasically the same Goto function as defined for LR(0)\nBut have to propagate the lookahead[传递] when computing the transitions\n"
+  },
+  {
+    "page": 118,
+    "text": "LRs Revisit\n119\n• Closure(I)\n• For [A -> u·Bv, a], if b ∈First(va), then [B -> ·w, b] \n• Why First(va)?\n• Goto(I, X)\n(0)  S’ -> S\n(1)  S -> XX\n(2)  X -> aX\n(3)  X ->b\nS’ -> ·S, $\nI0: \nS’ -> ·S, $ \nS -> ·XX, First(ε$) \nX -> ·aX, First(X$) \nX -> ·b, First(X$) \nI0: \nS’ -> ·S, $\nS -> ·XX, $\nX -> ·aX, a/b \nX -> ·b, a/b \nI0 :\nS’ -> ·S, $\nS  -> ·XX, $\nX -> ·aX, a/b\nX -> ·b, a/b\nI2 :\nS  -> X·X, $\nX -> ·aX, First(ε$) \nX -> ·b, First(ε$) \nI2 :\nS  -> X·X, $\nX -> ·aX, $\nX -> ·b, $\nX\nGoto includes a closure operation!\n"
+  },
+  {
+    "page": 119,
+    "text": "Example\n120\nI1:\nS’ → S ·,$\nS\nX\nX\nb\nb\na\nI0:\nS’ → ·S, $\nS  → · XX, $\nX  → · aX, a/b\nX  → · b, a/b\nI2:\nS  → X · X, $\nX  → · aX, \nX  → · b, \nI3:\nX → a · X,  a/b\nX → · aX, \nX → ·b , \nI5:\nS →XX ·, $\nI4:\nX → b ·, a/b\nI8:\nX →aX ·, a/b\nX\na\nb\nI6:\nX  → a · X, $\nX  → · aX, \nX  → · b, \nI7:\nX →b ·, $\nI9:\nX  → aX ·, $\na\nb\nb\nX\na\na/b\na/b\n$\n$\n$\n$\n"
+  },
+  {
+    "page": 120,
+    "text": "• Shift[移进] \nSame as LR(0) and SLR(1) \nDon’t care the lookahead symbols \n• Reduce[归约] \nDon’t use Follow set (that’s SLR(1), too coarse-grain[粗粒度]) \nReduce only if input matches lookahead for item \n• ACTION and GOTO[表格] \nIf [A -> ⍺·aβ, b] ∈Si and goto(Si , a) = Sj, Action[i, a] = Sj\nShift a and goto state j \nSame as SLR(1) \nIf [A -> ⍺·, a] ∈Si and next input is a, Action[i, a] = rk\nReduce using kth production (A -> ⍺) if input matches a \nFor SLR, reduced if the next input is in Follow(A)\nLR(1) Parse Table[解析表]\n121\n"
+  },
+  {
+    "page": 121,
+    "text": "(0) S’ -> S \n(1) S -> XX \n(2) X -> aX\n(3) X -> b\nExample\n122\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns6\ns7\n5\n3\ns3\ns4\n8\n4\nr3\nr3\n5\nr1\n6\ns6\ns7\n9\n7\nr3\n8\nr2\nr2\n9\nr2\n0\n"
+  },
+  {
+    "page": 122,
+    "text": "LR(1) Grammars\n• Every SLR(1) grammar is LR(1), but the LR(1) parser may have \nmore states than SLR(1) parser\nLR(1) parser splits states based on differing lookaheads, thus it may \navoid conflicts that would otherwise result in using the full Follow set\n• A grammar is LR(1) if the following two conditions hold for each \nconfigurating set\n(1) For any item [A → u·xv, a] in the set, with terminal x, there is no item \nin the set of form [B → v·, x]\n\nIn the table, this translates no shift-reduce conflict on any state\n(2) The lookaheads for all complete items within the set must be disjoint, \ne.g. set cannot have both [A → u·, a] and [B → v·, a]\n\nThis translates to no reduce-reduce conflict on any state\n123\n"
+  },
+  {
+    "page": 123,
+    "text": "Contents\n124\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\ncompromise  LR(1) \nand SLR(1)\nBottom-up parser\n"
+  },
+  {
+    "page": 124,
+    "text": "LALR(1) Parser\n• What’s the drawbacks of LR(1)?\nWith state splitting, the LR(1) parser can have many more states than \nSLR(1) or LR(0) parser\n\nOne LR(0) item may split up to many LR(1) items\n\nAs many as all possible lookaheads\n\nIn theory can lead to an exponential increase in #states\n• LALR (lookahead LR) – compromise LR(1) and SLR(1)[折衷]\nReduce the number of states in LR(1) parser by merging similar states\n\nReduces the #states to the same as SLR(1), but still retains the power of LR(1) \nlookaheads\nSimilar states: have same number of items, the core of each item is \nidentical, and they differ only in their lookahead sets\n125\n"
+  },
+  {
+    "page": 125,
+    "text": "I1:\nS’ → S ·,$\nS\nX\nX\nb\nb\na\nI0:\nS’ → ·S, $\nS  → · XX, $\nX → · aX, a/b\nX  → · b, a/b\nI2:\nS  → X · X, $\nX  → · aX, $\nX  → · b, $\nI3:\nX → a·X , a/b\nX → · aX , a/b\nX → ·b , a/b\nI5:\nS →XX ·, $\nI4:\nX → b ·, a/b\nI8:\nX →aX ·, a/b\nX\na\nb\nI6:\nX  → a · X, $\nX  → · aX, $\nX  → · b, $\nI7:\nX →b ·, $\nI9:\nX  → aX ·, $\na\nb\nb\nX\na\nExample\n126\n"
+  },
+  {
+    "page": 126,
+    "text": "State Merging[状态合并]\n• Merge states with the same core\nCore: LR(1) items minus the lookahead (i.e., LR(0) items)\nAll items are identical except lookahead\nI3:\nX → a·X, a/b\nX → .aX, a/b\nX → ·b, a/b\nI4:\nX → b·, a/b\nI8:\nX → aX·, a/b\nI6:\nX → a·X, $\nX → .aX, $\nX → ·b, $\nI7:\nX → b·, $\nI9:\nX → aX·, $\nI36:\nX → a·X, a/b/$\nX → .aX, a/b/$\nX → ·b, a/b/$\nI47:\nX → b·, a/b/$\nI89:\nX → aX·, a/b/$\n127\n"
+  },
+  {
+    "page": 127,
+    "text": "State Merging (cont.)\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns6\ns7\n5\n3\ns3\ns4\n8\n4\nr3\nr3\n5\nr1\n6\ns6\ns7\n9\n7\nr3\n8\nr2\nr2\n9\nr2\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns36\ns47\n1\n2\n1\nacc\n2\ns36\ns47\n5\n36\ns36\ns47\n89\n47\nr3\nr3\nr3\n5\nr1\n89\nr2\nr2\nr2\nLR(1)\nLALR(1)\nGrammar\n(0) S’ -> S\n(1) S -> XX\n(2) X -> aX\n(3) X -> b\n128\nStates 3 and 6: State 36\nStates 4 and 7: State 47\nStates 8 and 9: State 89\n"
+  },
+  {
+    "page": 128,
+    "text": "Merge Effects[合并效果]\n1. Merging of states can introduce conflicts[引入归约-归约冲突]\nCan introduce reduce-reduce (r-r) conflicts\n\nLR was introduced to split the Follow set on reduce action\n\nMerging reverts the splitting\nCannot introduce shift-reduce (s-r) conflicts\n\ni.e., a s-r conflict cannot exist in a merged set unless the conflict was already present \nin one of the original LR(1) sets\n129\n2. Detection of errors may be delayed[推迟错误识别]\n\nOn error, LALR parsers will not perform shifts beyond an LR parser, \nbut may perform more reductions before finding error\n"
+  },
+  {
+    "page": 129,
+    "text": "• Shift-reduce conflicts are not introduced by merging\n• Suppose:\nSijcontains: [A -> ⍺·, a] reduce on input a\n[B -> β·a𝛾, b] shift on input a\nFormed by merging Si and Sj [注：Sij并不一定只有这两个items]\n• Then:\nCores must be the same for Si and Sj, and thus one of them must contain \n[A -> ⍺·, a]\nand it must have an item [B -> β·a𝛾, c] for some random c\n\nThis state has the same shift/reduce conflict on a, i.e., the grammar was not LR(1)\nShift-reduce conflicts were already present in either Si and Sj (or both) \nand not newly introduced by merging\nMerge Conflict: Shift-Reduce\n130\n"
+  },
+  {
+    "page": 130,
+    "text": "Merge Conflict: Reduce-Reduce\n• Reduce-reduce conflicts can be introduced by merging\n• In this case, we say the grammar is not LALR(1)\nS' –> S\nS –> aBc | bCc | aCd | bBd \nB –> e\nC –> e\nI69:\nC → e·, c/d\nB → e·, d/c\nReduce to B or C when next \ntoken is c or d\nhttps://web.stanford.edu/class/archive/cs/cs143/cs143.1128/handouts/140%20LALR%20Parsing.pdf 131\n"
+  },
+  {
+    "page": 131,
+    "text": "Merge Effects[合并效果]\n1. Merging of states can introduce conflicts[引入归约-归约冲突]\nCan introduce reduce-reduce (r-r) conflicts\n\nLR was introduced to split the Follow set on reduce action\n\nMerging reverts the splitting\nCannot introduce shift-reduce (s-r) conflicts\n\ni.e., a s-r conflict cannot exist in a merged set unless the conflict was already present \nin one of the original LR(1) sets\n132\n2. Detection of errors may be delayed[推迟错误识别]\n\nOn error, LALR parsers will not perform shifts beyond an LR parser, \nbut may perform more reductions before finding error\n"
+  },
+  {
+    "page": 132,
+    "text": "Example: Error Delay\nState\nAction\nGoto\na\nb\n$\nS\nX\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns6\ns7\n5\n3\ns3\ns4\n8\n4\nr3\nr3\n5\nr1\n6\ns6\ns7\n9\n7\nr3\n8\nr2\nr2\n9\nr2\nGrammar\n(0) S’ -> S\n(1) S -> XX\n(2) X -> aX\n(3) X -> b\nState    \nSymbol \nS0\n$                                aab$\nState    \nSymbol \nS0 S3\n$   a                             ab$\nState    \nSymbol \nS0 S3 S3\n$   a  a\nb$\nState    \nSymbol \nS0 S3 S3 S4\n$  a  a b                         $\nInput\naab$\n133\ns3\ns3\ns4\nnull\n"
+  },
+  {
+    "page": 133,
+    "text": "Example: Error Delay(cont.)\nGrammar\n(0) S’ -> S    (1) S -> XX   (2) X -> aX\n(3) X -> b\nState\nAction\nGoto\na\nb\n$\nS\nX\n0\ns36\ns47\n1\n2\n1\nacc\n2\ns36\ns47\n5\n36\ns36\ns47\n89\n47\nr3\nr3\nr3\n5\nr1\n89\nr2\nr2\nr2\nState    \nSymbol \nS0\n$                                 aab$\nState    \nSymbol \nS0 S36\n$   a                              ab$\nState    \nSymbol \nS0 S36 S36\n$   a   a\nb$\nState    \nSymbol \nS0 S36 S36 S47\n$   a   a\nb                       $\nState    \nSymbol \nS0 S36 S36 S89\n$   a   a    X                       $\nState    \nSymbol \nS0 S36 S89\n$    a   X                            $\nState    \nSymbol \nS0 S2\n$  X                                   $ 134\nInput\naab$\n"
+  },
+  {
+    "page": 134,
+    "text": "LALR Table Construction[解析表构建]\n• LALR(1) parsing table is built from the configuration sets in the \nsame way as LR(1)[同样方法构建的项目集]\nThe lookaheads determine where to place reduce actions\nIf there are no mergable states, the LALR(1) table will be identical to the \nLR(1) table and we gain nothing[退化为LR(1)]\nUsually, there will be states that can be merged and the LALR table will \nthus have fewer rows than LR(1)\n• LALR(1) table have the same #states (rows) with SLR(1) and LR(0), \nbut have fewer reduce actions[同等数目的状态,但更少的归约动作]\nSome reductions are not valid if we are more precise about the lookahead\nSome conflicts in SLR(1) and LR(0) are avoided by LALR(1)\nFor C language: SLR/LALR - 100s states, LR - 1000s states\n135\n"
+  },
+  {
+    "page": 135,
+    "text": "LALR Table Construction (Cont.)\n• Brute force[暴力方法]\nConstruct LR(1) states, then merge states with same core\nIf no conflicts, you have a LALR parser\nInefficient: building LR(1) items are expensive in time and space\n\nWe need a better solution\n• Efficient way[高效方式]\nAvoid initial construction of LR(1) states\nMerge states on-the-fly (step-by-step merging)\n\nStates are created as in LR(1)\n\nOn state creation, immediately merge if there is an opportunity\n136\n"
+  },
+  {
+    "page": 136,
+    "text": "LALR(1) Grammars\n• For a grammar, if the LALR(1) parse table has no conflicts, \nthen we say the grammar is LALR(1)\nNo formal definition of a set of rules\n• LALR(1) is a subset of LR(1) and a superset of SLR(1)\nA SLR(1) grammar is definitely LALR(1)\nA LR(1) grammar may or may not be LALR(1)\nDepends on whether merging introduces conflicts\nA non-SLR(1) grammar may be LALR(1)\nDepends on whether the more precise lookaheads resolve the SLR(1) conflicts\nMost used variant of the LR family\n137\nLR(1)\nLALR(1) SLR(1)\nLR(0)\n"
+  },
+  {
+    "page": 137,
+    "text": "• LALR(1) provides a good balancing between LR(1) and SLR(1)\nRange of grammars supported: LR > LALR > SLR \nNumber of states in the table: LR > LALR = SLR\n• If a grammar G is LR but is not SLR\ncannot simply rely on the Follow set to resolve conflicts\nNeed more precise decision on reduction -- lookahead\nLR grammars have a large parsing table with many states, we can merge some of \nthe states, i.e., LALR\nNo Confliction after merge --> G is LALR\nThe confliction in SLR is resolved.\nLALR have the same number of sates with SLR, but less reduction actions\nIf no states can be merged, then LALR=LR for G\n• If a grammar G is SLR, G is also LR and LALR. Therefore, we don’t need \nto split the states using specific lookaheads, that is, LALR=SLR\nLALR Summary\n138\nLR(1)\nLALR(1) SLR(1)\nLR(0)\n"
+  },
+  {
+    "page": 138,
+    "text": "LL vs. LR Parsing (LL < LR)\n• LL(k) parser, each expansion A -> ⍺is decided based on\nCurrent non-terminal at the top of the stack[依赖LHS]\n\nWhich LHS to produce\nk terminals of lookahead at beginning of RHS[展望RHS]\n\nMust guess which RHS by peeking at first few terminals of RHS\n• LR(k) parser, each production A -> ⍺· is decided based on\nRHS at the top of the stack[依赖RHS]\n\nCan postpone choice of RHS until entire RHS is seen\n\nCommon left factor is OK – waits until entire RHS is seen anyway\n\nLeft recursion is OK – does not impede forming RHS for reduction\nk terminals of lookahead beyond RHS[超越RHS]\n\nCan decide on RHS after looking at entire RHS plus lookahead\n139\n"
+  },
+  {
+    "page": 139,
+    "text": "Hierarchy of Grammars[文法层级]\n140\n"
+  },
+  {
+    "page": 140,
+    "text": "编译原理\nComplier Principles\nLecture 3\nSyntax Analysis: Revisit\n赵帅\n计算机学院\n中山大学\n"
+  },
+  {
+    "page": 141,
+    "text": "Compilation Phases[编译阶段]\n142\n(keyword, while)\n(id, y)\n(sym, <)\n(id, z)\n(id, x)\n(id, a)\n(sym, +)\n(id, b)\n(sym, ;)\n(id, y)\n(sym, +=)\n(id, x)\n(sym, ;)\nwhile (y<z){\nint x = a + b;\ny += x;\n}\n?\n"
+  },
+  {
+    "page": 142,
+    "text": "Mind Map[思维导图]\nremove ambiguity\ndefinition\nGrammars\nSyntax\nclass 0\nclass 1\nclass 2\nclass 3\nfrom grammar to \nlanguage\nLeftmost \nDerivation\nRightmost \nDerivation\nusage\nrepresentation\nremove ambiguity\nUnrestricted\nRegular\nDerivation\nClass\nParse Tree\nDetermine \nambiguity\nSpecify \nprecedence\nSpecify \nassociativity\nContext-\nSensitive\nContext-\nFree\n143\n"
+  },
+  {
+    "page": 143,
+    "text": "Syntax analysis\n• Syntax analysis – the second phase of compilation\nInput: a sequence of token provided by the Lexical Analysis\nOutput: a parse tree or abstract syntax tree (AST)\n• Syntax specification\n• RE/FA is not powerful enough (e.g., anbn\n, where n>0)\n• So Grammar is needed, especially for context-free grammar (CFG)\n• Grammar G: G=(VT, VN, S, δ)\nVT: terminal symbols[终结符] = tokens from Lexical Analysis, leaves of the parse tree\nVN: non-terminal symbols[非终结符], internal nodes of the parse tree\nS: start symbol[开始符号]\nδ: set of productions[产生式]: LHS -> RHS\n144\n"
+  },
+  {
+    "page": 144,
+    "text": "Sentential form, Sentence, Language[句型&句子&语言]\n• Example:\n• G[A]: A→ c | Ab\n• Derivation: from grammar to language[文法到语言]\n• A ⇒c\n• A ⇒Ab ⇒cb\n• A ⇒Ab ⇒Abb ⇒cbb\n• A ⇒Ab ⇒Abb ⇒Abbb ⇒cbbb\n• A ⇒Ab ⇒Abb ⇒Abbb ⇒Abbbb ⇒cbbbb\n• ……\nSentential form\nsentence\n145\n"
+  },
+  {
+    "page": 145,
+    "text": "Overall Concepts\n• Derivation\nThe application of the productions (from LHS to RHS)\n\nstarts from the start symbol S to the input string\n• Reduce\nThe reserve of derivation (from RHS to LHS)\n\nstarts from the input string to the start symbol S\n• Parse tree\nGraphical representation of Derivation/Reduce without the order of productions\n• Ambiguous grammar\nA sentence has more than one parse (leftmost or rightmost) trees\nAmbiguity can be resolved by defining precedence and associativity for the grammar\n146\n"
+  },
+  {
+    "page": 146,
+    "text": "Chomsky Grammar System[乔姆斯基文法体系]\n• Chomsky established the formal language system in 1956. He \ndivided grammar into four types: 0, 1, 2, 3.\n• Like context-free grammar, they are composed of 4 components\nG=(VT , VN , S, δ), but with different restrictions on productions.\nType 0 — unrestricted grammar [0型文法,无限制文法]\nType 1 — context sensitive grammar(CSG) [1型文法,上下文有关文法]\nType 2 — context free grammar (CFG) [2型文法,上下文无关文法]\nType 3 — regular grammar [3型文法,正则文法]\nNoam Chomsky\n147\n"
+  },
+  {
+    "page": 147,
+    "text": "Chomsky Grammar System[乔姆斯基文法体系]\nSource: Prof Wenjun Li @ SYSU\n148\n"
+  },
+  {
+    "page": 148,
+    "text": "Parse Tree VS Abstract Syntax Tree\n• An abstract syntax tree (AST) is abbreviated representation[缩写表示] of a \nparse tree \n• drops details without compromising meaning [在不影响意义的情况下删除推导细节].\nE\n+\nE\nT\nT\nF\nF\nF\n+\nT\ni\nF\nE\nT\ni\nF\ni\nE\n)\n(\nParse \ntree\n+\n( + )\ni\ni\ni\nAST\n149\nwhile (y<z){\nint x = a + b;\ny += x;\n}\n"
+  },
+  {
+    "page": 149,
+    "text": "Parsers\n• Syntax analysis takes a sentence as the input, and outputs the \nparse tree or AST of the sentence\nTop-down: from the root to the leaves, in each step:\n\nWhich non-terminal to replace?\n\nWhich production?\nBottom-up: from leaves to the root\n\nShift or reduce?\n\nIf reduce, then which production?\nRD-backtrack\nparser\nPredictive\nparser\nTop-down parser\nBottom-up parser\nParser\n150\n"
+  },
+  {
+    "page": 150,
+    "text": "Top-down\n151\nproblem\ntype 1\nsolve\nTop-down parser\nBottom-up parser\nParser Type\nFirst \nSets\nFollow \nSets\nRD-backtrack \nparser\nPredictive \nparser\nLeft \nRecursion\nRemove left \nrecursion\nLL(1) \ngrammar\ncompute\nLL(1) table\ntype 1\ntype 2\nremove problem in grammars\nconstruct\ntool\n"
+  },
+  {
+    "page": 151,
+    "text": "Top-down Parsers\n• Top-down Parsing\n• Recursive-descent parsing [RDP, 递归下降语法分析]\n• (immediate and indirect) left recursion -> remove left recursion\n• Backtracking -> brutal force, not preferred due to complications and high overheads\n• Predicative parsing – LL(k) [预测分析]\n• Predict the right production based on the input symbol (i.e., lookahead), no backtracking!\n• Preliminaries: (1) remove left recursion, (2) left factoring\n• To enable prediction: FIRST and FOLLOW\n• FIRST(α) = { a | α ⇒a…, a ∈VT }, ε can be included\n• FOLLOW(A) = { a | S ⇒…Aa…, a ∈VT }, $ can be included\n• Prediction based on the input symbol a when expanding A:\n• For A with A → α | β, where FIRST(α) and FIRST(β) are disjoint, i.e., chose the one with a \ninside its FIRST set.\n• If all FIRST sets do not contain a, but ε ∈FIRST(α) while a ∈FOLLOW(A), chose FIRST(α) \n"
+  },
+  {
+    "page": 152,
+    "text": "Remove Left Recursion[消除左递归]\n• Immediate left recursion can be eliminated by the following \ntechnique, which works for any number of A-productions.\nFirst, group the productions as\nA →A⍺1 | A⍺2 | … | A⍺m | β1 | β2 … | βn    where no βi begins with an A.\nThen, replace the A-productions by\nA →β1A’ | β2A’ | … | βnA’   AND A’ →⍺1A’ | ⍺2A’ | … | ⍺mA’ | ε\n• Exercise-Remove Immediate left recursion.\nG1[E]: E → E+T| T ;                            T → T*F | F ;                          F → (E) | i.\nG2[E]: E → TE’; E’ → +TE’ | ε;\nT → FT’; T’ → *FT’ | ε;         F → (E) | i.\n⍺\n⍺\nβ\nβ\n153\n"
+  },
+  {
+    "page": 153,
+    "text": "Compute FIRST\n• To compute FIRST(X) for all grammar symbol X, apply the following \nrules until no more terminals or ε can be added to any FIRST set:\nRule1: If X∈VT , then FIRST(X) = {X}. [X是终结符]\nRule2: If X∈VN and X → ε exists, then add ε to FIRST(X). [非终结符,空式]\nRule3: If X∈VN and X→ Y1Y2Y3...Yk, then [非终结符,非空式]\nIf for some Yi and a terminal a: ①ε ∈all of FIRST(Y1),…, FIRST(Yi-1), i.e., \nY1…Yi-1⇒ε; ②a ∈FIRST(Yi) \\ {ε}. Then, a ∈FIRST(X).\nE.g.,\nEverything in FIRST(Y1) \\ {ε} is surely in FIRST(X).\nIf Y1 doesn’t derive ε, then we add nothing more.\nBut if Y1 ⇒ε, then we add FIRST(Y2) \\ {ε} , and so on…\nAdd ε to FIRST(X), if ε is in FIRST(Yi) for all i=1,2,…k.\n*\n*\n154\n"
+  },
+  {
+    "page": 154,
+    "text": "Compute FIRST\n• Next, we can compute FIRST for any string ⍺= X1X2…Xn [符号串]\nAdd all non-ε symbols of FIRST(X1) to FlRST(⍺). \nAdd non-ε symbols of FIRST(Xi), 2≤i≤n, to FIRST(α), if FIRST(X1), ..., FIRST(Xi-1) all \ncontain ε. [前i-1个都包含空串]\nAdd ε to FIRST(⍺), if FIRST(X1), ..., FIRST(Xn) all contain ε.\n155\n[First(α)集合的计算本质上就是看α能推导出什么，First(α)包括所有α能推导出的句子的首个字符(必须是终结符或空串)]\n[给定α ->X1X2…Xn，First(α)的计算基于单个First(Xi) 的计算（方法见上页）\n"
+  },
+  {
+    "page": 155,
+    "text": "Compute FIRST\n• Example: G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → \n(E) | id , compute the FIRST set of each non-terminal.\nFIRST(E):{ (, id\nFIRST(T):{ (, id\nFIRST(E’):{ +, ε\nFIRST(T’):{ *, ε\nFIRST(F):{ (, id\nE → TE’ FIRST(T) add to FIRST(E), FIRST(T) doesn’t contain ε\nE’ → +TE’ FIRST(+) add to FIRST(E’), FIRST(+) doesn’t contain ε\nE’ → ε ε add to FIRST(E’)\nT → FT’ FIRST(F) add to FIRST(T), FIRST(F) doesn’t contain ε\nT’ → *FT’ FIRST(*) add to FIRST(T’), FIRST(*) doesn’t contain ε\nT’ → ε ε add to FIRST(T’)\nF → (E) FIRST(‘(’) add to FIRST(F), FIRST(‘(’) doesn’t contain ε\nF → id FIRST(id) add to FIRST(F)\nIt is necessary to determine whether the FIRST set has \nchanged after each rule application. \n}\n}\n}\n}\n}\n156\n⍺= X1X2…Xn\n(1) all non-ε symbols of FIRST(X1) to \nFlRST(⍺)\n(2) If FIRST(X1), ..., FIRST(Xi-1) all contain \nε, add non-ε symbols of FIRST(Xi), \n2≤i≤n, to FIRST(α)\n(3) If FIRST(X1), ..., FIRST(Xn) all contain \nε, add ε to FIRST(⍺)\n"
+  },
+  {
+    "page": 156,
+    "text": "Compute FOLLOW\n• To compute FOLLOW(A) for all non-terminals A, apply the following \nrules until nothing can be added to any FOLLOW set.\nRule1: Place $ in FOLLOW(S), where S is the start symbol.\nRule2: If there is a production A → αBβ, then everything in FIRST(β) except ε is \nin FOLLOW(B).\nRule3: If there is a production A → αB, or a production A → αBβ, where FIRST(β) \ncontains ε, then everything in FOLLOW(A) is in FOLLOW(B).\n157\n[FOLLOW(A)计算的本质是在看这个A后(不包含A本身的推导结果) 的符号(必须是终结符或结束符号)]\n[给定A → αBβ, FOLLOW(B)计算基于FIRST(β)的计算\n"
+  },
+  {
+    "page": 157,
+    "text": "Compute FOLLOW\n• G[E]: E → TE’ ; E’ → +TE’ | ε ; T → FT’ ; T’ → *FT’ | ε ; F → (E) | id\nFIRST(E):{ (, id };FIRST(T):{ (, id };FIRST(E’):{ +, ε };FIRST(T’):{ *, ε };FIRST(F):{ (, id }.\nFOLLOW(E):{ $, ) }\nFOLLOW(T):{ +, $, ) }\nFOLLOW(E’):{ $ , ) }\nFOLLOW(T’):{ +, $, ) }\nFOLLOW(F):{ *, +, $, ) }\nPlace $ in FOLLOW(E), since E is the start symbol.\nE → TE’\nFIRST(E’) except ε is in FOLLOW(T).\nEverything in FOLLOW(E) is in FOLLOW(E’).\nSince FIRST(E’) contains ε, then everything in \nFOLLOW(E) is in FOLLOW(T).\nE’ → +TE’ | ε\nFIRST(E’) except ε is in FOLLOW(T).\nEverything in FOLLOW(E’) is in FOLLOW(E’).\nSince FIRST(E’) contains ε, then everything in \nFOLLOW(E’) is in FOLLOW(T).\n158\nA → αBβ\n(1)\nIf A is the start symbol, $ ∈FOLLOW(A)\n(2)\nEverything in FIRST(β) except ε is in \nFOLLOW(B).\n(3)\nIf β does not exist or FIRST(β) contains ε, \nthen everything in FOLLOW(A) is in \nFOLLOW(B).\n"
+  },
+  {
+    "page": 158,
+    "text": "Non-recursive LL(1) Parser [非递归]\n• Input buffer[输入串]: contains the \nstring to be parsed, followed by \nthe “end marker” $.\n• Stack[推导的中间结果]: holds a \nsequence of grammar symbols \nand the symbol $ to mark the \nbottom of the stack. It may \ncontain:\nTerminals that have yet to matched \nagainst the input symbol.\nNon-terminals that have yet to be \nexpanded.\na\n+\nb\n$\nX\nY\nZ\n$\nPredictive Parsing \nProgram\nParsing Table M\nInput\nStack\nOutput\n• Parsing Table M[A,a] [语法分析表]: an \nentry containing production “A→…” \nor error.\n• Predictive Parsing Program[语法分析程\n序]: Execute the action according to \n<stack top, current input symbol>\n159\n"
+  },
+  {
+    "page": 159,
+    "text": "LL(1) Parse Table [预测分析表]\nid\n+\n*\n(\n)\n$\nE\nE → TE’\nE → TE’\nE’\nE’ → +TE’\nE’ → ε\nE’ → ε\nT\nT → FT’\nT → FT’\nT’\nT’ → ε\nT’ → *FT’\nT’ → ε\nT’ → ε\nF\nF → id\nF → (E)\nG[E]: \nE → TE’\nE’ → +TE’ | ε\nT → FT’\nT’ → *FT’ | ε\nF → (E) | id\nall non-terminals \nin the grammar\nInput symbol, \nlists all possible \nterminals and $\nOne action for each <non-terminal, next input>, it \n“predicts” the correct action based on one lookahead\n-\nReject on reaching error state\n-\nAccept on end of input & empty stack\n160\nFIRST(E):{ (, id }\nFIRST(T):{ (, id }\nFIRST(E’):{ +, ε }       \nFIRST(T’):{ *, ε }      \nFIRST(F):{ (, id }.\nFOLLOW(E):{ $, )}\nFOLLOW(T):{ +, $, )}     FOLLOW(E’):{ $ , )} \nFOLLOW(T’):{ +, $, )} \nFOLLOW(F):{ *, +, $, )}\n"
+  },
+  {
+    "page": 160,
+    "text": "LL(1) Parsing Algorithm [非递归算法]\n• Algorithm Step-by-Step based on <X, a>:\nX: symbol at the top of the stack\na: current input token\nIf X ∈VT, [栈顶符号为终结符] and\nX == a == $, declare SUCCESS, stop parsing.\nX == a != $, pop X from stack and move the \ncurrent input symbol forward one.\nX != a, declare ERROR, input is rejected, stop \nparsing.\nIf X ∈VN, [栈顶符号为非终结符] and\nM[X, a] has a production about X, pop X and \npush right side of production to stack.\nM[X, a] == empty, declare ERROR, input is \nrejected, stop parsing.\nX\n…\n$\n+\nT\nE’\n…\n$\nIf M[X,a] = X → +TE’\nPush to stack in \nReverse Order \n[逆序入栈]\nIf M[X,a] = X → ε\nOnly pop and \npush nothing\n161\na\n+\nb\n$\na\nY\n$\nPredictive Parsing \nProgram\nParsing Table M\nInput\nStack\nOutput\n"
+  },
+  {
+    "page": 161,
+    "text": "Bottom-Up\n162\nLR family parsers\nParser table\ntool\nSLR(1) \nparsing table\nLALR(1) \nparsing table\nLR(1) \nparsing table\nlimit reduce \nactions\nBased on LR(0)\nLR(0) item + \nlookaheads\nLimit reduce \nactions\nadd extra info\nprecisely indicate\ncompromise  LR(1) \nand SLR(1)\nLR(0) \nparsing table\nLR(0) automation\nconstructed by\nStates\nTransitions\nGOTO function\nCLOSURE \nfunction\nare computed by \nare given by \nconsist of\nLR(0) \nconflicts\nexist conflicts\nBottom-up parser\nShift-Reduce\nHandle, Viable Prefix, Conflicts, Prop.\n"
+  },
+  {
+    "page": 162,
+    "text": "Bottom-up: Shift-Reduce [移入-归约]\n• Shift-reduce parsing is a form of bottom-up parsing in which a \nstack[栈] holds grammar symbols and an input buffer holds the \ninput string.\n• Reduction[规约]: At each reduction step, a specific substring \nmatching the body of a production is replaced[替换] by the non-\nterminal at the head of that production.\n• Shift[移入]: During a left-to-right scan of the input string, the parser \nshifts zero or more input symbols onto the stack, until it is ready to \nreduce a string β of grammar symbols on top of the stack.\n163\n"
+  },
+  {
+    "page": 163,
+    "text": "• G(E): E → T | E+T; \nT → F | T*F; \nF → (E) | a | b | c\n• For sentential form a * b + c\n• Phrase: a*b+c, a*b, a, b, c\n• Simple Phrase: a, b, c \n• Handle: a\nPhrase and Handle\nE\n+\nE\nT\nF\nT\n*\nT\nF\nF\na\nb\nc\n164\n短语：一个句型的语法树中任意树叶结点组成的短语\n直接短语：只有父子两代的子树形成的短语\n句柄：语法树中最左那棵只有父子两代的子树形成的短语\n"
+  },
+  {
+    "page": 164,
+    "text": "Viable Prefix [活前缀]\n• A viable prefix[活前缀/可行前缀] is a prefix of a right-sentential form that \ndoes not pass the end of the rightmost handle of that sentential form.\nStack content is always a viable prefix, guaranteeing the shift / reduce is on the \nright track.\n• Example 1: S ⇒aEb ⇒aaEb, the handle is aE, so the viable prefix is a, \naa, aaE, but not aaEb.\n165\nStack\nInput\n$...\nHandle...$\n$...H\nandle...$\n$...Ha\nndle...$\n$...Han\ndle...$\n"
+  },
+  {
+    "page": 165,
+    "text": "LR(k) Parser\n• LR(k) : member of LR family of parsers\n\n\"L\" stands for left-to-right scanning of the input.\n\n\"R\" stands for constructing a rightmost derivation in reverse.\n\n\"k\" is the number of input symbols of the lookahead used to make number of \nparsing decision.\n• Comparison with LL(k) parser\n\nEfficient as LL(k): Linear in time and space to length of input (same as LL(k)).\n\nConvenient as LL(k): Can generate automatically from grammar – YACC, Bison.\n\nMore complex than LL(k): Harder to debug parser when grammar causes \nconflicting predictions.\n\nMore powerful than LL(k): Handles more grammars: no left recursion removal, \nleft factoring needed. \n166\n"
+  },
+  {
+    "page": 166,
+    "text": "LR Parser\n• The stack holds a sequence of states, S0S1…Sm\n\nStates are to track where we are in a parse.\n\nEach grammar symbol Xi is associated with a state Si\n• Contents of stack + input (X1X2...Xmai...an) is a right sentential form\n\nIf the input string is a member of the language\n• Uses [Si, ai] to index into parsing table to determine action\n167\nStat\ne\nAction\nGoto\n*\n+\n0\n1\n$\nE\nB\n0\ns1\ns2\n3\n4\n1\nr4\nr4\nr4\nr4\nr4\n2\nr5\nr5\nr5\nr5\nr5\n3\ns5\ns6\nacc\n4\nr3\nr3\nr3\nr3\nr3\n5\ns1\ns2\n7\n6\ns1\ns2\n8\n7\nr1\nr1\nr1\nr1\nr1\n8\nr2\nr2\nr2\nr2\nr2\n"
+  },
+  {
+    "page": 167,
+    "text": "Possible Actions[可能的动作]\n• ACTION[Sm, ai] has four possible actions:\n• Shift (sx): the handle is not completed loaded in the stack\n1.\nShift the next input symbol onto the top of the stack\n2.\nAdd State x to the stack\n• Reduce (ry): the handle is at the top of the stack\n1.\nPop the handle and all its associated states.\n2.\nReduce the handle by the yth production (say A → a)\n3.\nPush A onto the stack\n4.\nPush state Sj by GOTO table, Sj =GOTO[Si, A] and Si is the current state.\n• Accept\n\nACTION[Si, ai] = ACC, then parsing is complete and successfully\n• Error\n\nACTION[Si, ai] = <empty>, then report error and stop\n168\n"
+  },
+  {
+    "page": 168,
+    "text": "Construct Parse Table\n• Construct parsing table: \n• identify the possible states and arrange the transitions among them.\n• Different Parsing tables\n• LR(0) – Too weak (no lookahead)\n• Simplest LR parsing, only considers stack to decide shift/reduce\n• SLR(1) – Simple LR, 1 token lookahead\n• lookahead from first/follow rules derived from LR(0) \n• Keeps table as small as LR(0)\n• LALR(1) – Most common, 1 token lookahead\n• fancier lookahead analysis using the same LR(0) automaton as SLR(1)\n• LR(1) – 1 token lookahead, complex algorithms and big tables\n• LR(k) – k tokens lookahead, even bigger tables\n169\n"
+  },
+  {
+    "page": 169,
+    "text": "Item[项目]\n• The parsing table is based on the notion of LR(0) items (simply \ncalled items here) which are grammar rules with a special dot \nadded somewhere in the right-hand side.\n• For example, the rule A → XYZ has the following four items:\nA → • XYZ \nA → X • YZ \nA → XY • Z \nA → XYZ •\n• Rules of the form A → ε have only a single item A →•\n170\n"
+  },
+  {
+    "page": 170,
+    "text": "• Each FA state corresponding to a set of items\n• How to construct a state? -- closure operation\nClosure: the action of adding equivalent items to a set\nExample: S’ → ·S  S → ·BB  B → ·aB B → ·b\n• How to construct transition form one state to \nanother? -- goto operation\nA transition on symbol X from state i to state j\nConstruct the LR(0) Automaton\n171\nA→α•Xβ\n…\nA→αX•β\n…\nX\n(0) S’ → S\n(1) S → BB\n(2) B → aB\n(3) B →b\n"
+  },
+  {
+    "page": 171,
+    "text": "• Closure of item sets: if I is a set of items for a grammar G, then \nCLOSURE(I) is the set of items constructed from I by the two rules:\n1.\nInitially, add every item in I to CLOSURE(I) \n2.\nFor any item A → ⍺·Bβ in CLOSURE(I), if B → γ is a production, and B \n→ ·γ is not already there , then add item B → ·γ to CLOSURE(I)\nApply the above rules until no more new items can be added to CLOSURE(I)\nCLOSURE()[闭包]\n172\nNote: the location of the point ·\nS’ → ·S\nS’ → ·S\nS→ ·BB\nCLOSURE(S’ → ·S)：\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nGrammar：\nS’ → S                                                                     \nS → BB\nB  → aB\nB  → b\nCLOSURE(S’ → ·S)\n"
+  },
+  {
+    "page": 172,
+    "text": "• GOTO(I, X): returns state (set of items) that can be reached by \nadvancing I by X\nI is a set of items and X is a grammar symbol \nReturn the closure of the set of all items [A → ⍺X·β] when [A → ⍺·Xβ] is in I\nUsed to define the transitions in the LR(0) automaton\nThe states of the automaton correspond to sets of items, and GOTO(I, X) \nspecifies the transition from the state for I under input X\nGOTO()[跳转]\n173\nI2:\nS → B·B\nB → ·aB\nB → .b\nGrammar：\nS’ → S                                                                                                 \nS → BB\nB → aB\nB → b\nI0:\nS’ → ·S\nS  → ·BB\nB  → ·aB\nB  → ·b\nB\nCLOSURE(S → B·B)\nCLOSURE(S’ → ·S)\nGOTO(I0 , B) \n"
+  },
+  {
+    "page": 173,
+    "text": "[建立第一个项]\nS0= Closure({S’→· S})\n= {S’→· S, S →· BB, B → · aB, B → · b}  (I0)\n[通过跳转建立后续项]\ngoto(S0, B) = closure({S → B · B})\nS2= {S →B · B, B → · aB, B → · b}    (I2)\ngoto(S0, a) = closure({B →a · B})\nS3= {B →a · B, B → · aB, B → · b} (I3)\ngoto(S0, b) = closure({B → b ·})\nS4= {B→ b ·}    (I4)\n…\nThe example\n174\nGrammar：\nS’ → S\nS  → BB\nB  → aB\nB  → b\nI1:\nS’ → S ·\nS\nB\nB\nb\nb\na\nI0:\nS’ → ·S\nS  → · BB\nB  → · aB\nB  → · b\nI2:\nS  → B · B\nB  → · aB\nB  → · b\nI3:\nB → a·B\nB → · aB\nB → ·b\nI5:\nS →BB ·\nI4:\nB → b ·\nI6:\nS →aB ·\na\nB\na\nb\n"
+  },
+  {
+    "page": 174,
+    "text": "Example (cont.)\n“state j” refers to the state of the \nset of items Ij\nState\nACTION\nGOTO\na\nb\n$\nS\nB\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns3\ns4\n5\n3\ns3\ns4\n6\n4\nr3\nr3\nr3\n5\nr1\nr1\nr1\n6\nr2\nr2\nr2\n175\nI1:\nS’ → S·\nS\nB\nB\nb\nb\na\nI0:\nS’ →·S\nS  →·BB\nB  → ·aB\nB  → ·b\nI2:\nS  → B·B\nB  → ·aB\nB  → ·b\nI3:\nB → a·B\nB → ·aB\nB → ·b\nI5:\nS →BB·\nI4:\nB → b·\nI6:\nB →aB·\na\nB\na\nb\nGrammar\n(0) S’ -> S\n(1) S -> BB\n(2) B -> aB\n(3) B -> b\n"
+  },
+  {
+    "page": 175,
+    "text": "• Create augmented grammar G’ for G:  [增广文法]\nGiven G: S → α | β, create G’: S’ → S , S → α | β\nCreates a single rule S’ → S that when reduced, signals acceptance\n• Create 1st state by performing a closure on initial item S’→ ·S\n[初始状态]\nClosure({S’→ ·S}) = {S’→ ·S, S → ·α, S → ·β}\n• Create additional states by performing a GOTO on each symbol\n[添加状态]\nGoto({S’→ ·S, S → ·α, S → ·β}, α) =Closure({S → α·}) = {S → α·}\n• Repeatedly perform gotos until there are no more states to add  [重复操作]\nConstruct LR(0) States[构造LR(0)状态集]\n176\nGrammar\nS → α\nS → β\nGrammar’\nS’ → S \nS  → α\nS  → β\nCLOSURE(S’ → ·S)\nS’ → ·S\nS  → ·α\nS  → ·β\nCLOSURE(S → α ·)\nS  → α ·\nCLOSURE(S → β ·)\nS  → β ·\nα\nβ\n"
+  },
+  {
+    "page": 176,
+    "text": "• LR(0) has a reduce-reduce conflict if：\nAny state has two reduce items:\nX → β · and Y → ω ·\n• LR(0) has a shift-reduce conflict if:\nAny state has a reduce item and a shift item:\nX → β· and Y → ω · t\nLR(0) Conflicts\n177\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | i | i[E]\nV → i\nI0:\nE’→ ·E\nE → ·T\nE → ·E+T\nE → ·V=E\nT → ·(E)\nT → ·i\nT → ·i[E]\nV → ·i\ni\nI1:\nT → i ·\nT → i · [E]\nV → i ·\n"
+  },
+  {
+    "page": 177,
+    "text": "• SLR(1): Simple LR(1) with one lookahead\nSame LR(0) configurating sets, table structure, and parser operation.\nAllow both shift and reduce items as well as multiple reduce items.\nUse one token of lookahead to help arbitrate among the conflicts\nReduce only if the next input token is a member of the FOLLOW set of the \nnonterminal being reduced to\nSLR(1): Simple LR(1) \n178\nGrammar：\nE’→ E\nE → E+T | T | V=E\nT → (E) | id | id[E]\nV → id\nI0:\nE’→ · E\nE → · T\nE → · E+T\nE → · V=E\nT → · (E)\nT → · id\nT → · id[E]\nV → · id \nid\nI1:\nT → id ·\nT → id · [E]\nV → id ·\nFOLLOW(A) = {a | S ⇒…Aa…, \na∈VT}, including $[结束标记]\n*\nFollow(T) = { +, ), ], $ } \nFollow(V) = { = }\nIf input t in Follow(T), \nreduce to T\nIf input t in Follow(V), \nreduce to V\nElse, the input [ will shift\n"
+  },
+  {
+    "page": 178,
+    "text": "• A grammar is SLR(1) if the following two conditions hold for \neach configurating set:\n1.\nFor any item A → u·xv in the set, with terminal x, there is no \ncomplete item B → w· in that set with x in Follow(B)\nIn the tables, this translates no shift-reduce conflict on any state\n2.\nFor any two complete items A → u· and B → v· in the set, the \nfollow sets must be disjoint, i.e., Follow(A) ∩ Follow(B) is empty \nThis translates to no reduce-reduce conflict on any state\nIf more than one nonterminal could be reduced from this set, it must be \npossible to uniquely determine which using only one token of lookahead\nSLR(1) Grammars[SLR(1)文法]\n179\n"
+  },
+  {
+    "page": 179,
+    "text": "• LR parsing adds the required extra info into the state\nBy redefining items to include a terminal symbol as an added component\n[让项目中包含终结符]\n• General form of LR(1) items: A –> X1...Xi • Xi+1...Xj, a\nWe have states X1...Xi on the stack\nsuppose Xi+1...Xj are on the stack, we can perform reduction when:\nthe next input symbol is a\na is called the lookahead of the configuration \n• The lookahead only works with completed items[完成项] \nA –> X1...Xj •, a \nonly reduce when next symbol is a (a is either a terminal or $) \nMulti lookahead symbols: A -> u•, a/b/c\nLR(1) Parsing\n180\n"
+  },
+  {
+    "page": 180,
+    "text": "• When to reduce?\nLR(0): if the configuration set has a completed item (i.e., dot at the end)\nSLR(1): only if the next input token is in the Follow set\nLR(1): only if the next input token is exactly a (terminal or $)\nTrend: more and more precise\n• LR(1) items: LR(0) item + lookahead terminals\nIn many cases, LR(1) differs only in their lookahead components\nThe extra lookahead terminals allow to make parsing decisions beyond the \nSLR(1) capability, but with a big price [代价]\nMore distinguished items and thus more sets\nGreatly increases Goto and Action table size\nLR(1) Parsing(cont.)\n181\nS’ -> ·S\nS’ -> ·S, $\nLR(0)\nLR(1)\n"
+  },
+  {
+    "page": 181,
+    "text": "LR(1) Construction\n•Configuration sets\nSets construction are essentially the same with SLR, but differing on \nClosure() and Goto()\nBecause of the lookahead symbol\n• Closure()\nGiven each item [A -> u·Bv, a] in I, for each production rule B -> w in G’, \nadd [B -> ·w, b] to I:\nb ∈First(va) && [B -> ·w, b] is not in I \nv can be nullable\nLookahead is the First(va), which are the symbols that can follow B\n182\n(0)  S’ -> S\n(1)  S -> XX\n(2)  X -> aX\n(3)  X ->b\nS’ -> ·S, $\nI0: \nS’ -> ·S, $ \nS -> ·XX, First(ε$) \nX -> ·aX, First(X$) \nX -> ·b, First(X$) \nI0: \nS’ -> ·S, $\nS -> ·XX, $\nX -> ·aX, a/b \nX -> ·b, a/b \nFIRST(α) = {a | α ⇒a…, a ∈\nVT}, including ε[空串]\n"
+  },
+  {
+    "page": 182,
+    "text": "LR(1) Construction (cont.)\n• Goto(I, X)\nFor item [A -> u·Xv, a] in I, Goto(I, X) = Closure ([A -> uX·v, a])\nBasically the same Goto function as defined for LR(0)\nBut have to propagate the lookahead[传递] when computing the transitions\n• Overall steps\nStart from the initial set Closure ([S’ -> ·S, $])\nConstruct configuration sets following Goto(I, X)\nRepeat until no new sets can be added\n183\nI0 :\nS’ -> ·S, $\nS  -> ·XX, $\nX -> ·aX, a/b\nX -> ·b, a/b\nI2 :\nS  -> X·X, $\nX -> ·aX, First(ε$) \nX -> ·b, First(ε$) \nI2 :\nS  -> X·X, $\nX -> ·aX, $\nX -> ·b, $\nX\n"
+  },
+  {
+    "page": 183,
+    "text": "• Shift[移进] \nSame as LR(0) and SLR(1) \nDon’t care the lookahead symbols \n• Reduce[归约] \nDon’t use Follow set (that’s SLR(1), too coarse-grain[粗粒度]) \nReduce only if input matches lookahead for item \n• ACTION and GOTO[表格] \nIf [A -> ⍺·aβ, b] ∈Si and goto(Si , a) = Sj, Action[i, a] = Sj\nShift a and goto state j \nSame as SLR(1) \nIf [A -> ⍺·, a] ∈Si and next input is a, Action[i, a] = rk\nReduce using kth production (A -> ⍺) if input matches a \nFor SLR, reduced if the next input is in Follow(A)\nLR(1) Parse Table[解析表]\n184\n"
+  },
+  {
+    "page": 184,
+    "text": "(0) S’ -> S \n(1) S -> XX \n(2) X -> aX\n(3) X -> b\nExample\n185\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns6\ns7\n5\n3\ns3\ns4\n8\n4\nr3\nr3\n5\nr1\n6\ns6\ns7\n9\n7\nr3\n8\nr2\nr2\n9\nr2\n0\n"
+  },
+  {
+    "page": 185,
+    "text": "LALR(1) Parser\n• What’s the drawbacks of LR(1)?\nWith state splitting, the LR(1) parser can have many more states than \nSLR(1) or LR(0) parser\n\nOne LR(0) item may split up to many LR(1) items\n\nAs many as all possible lookaheads\n\nIn theory can lead to an exponential increase in #states\n• LALR (lookahead LR) – compromise LR(1) and SLR(1)[折衷]\nReduce the number of states in LR(1) parser by merging similar states\n\nReduces the #states to the same as SLR(1), but still retains the power of LR(1) \nlookaheads\nSimilar states: have same number of items, the core of each item is \nidentical, and they differ only in their lookahead sets\n186\n"
+  },
+  {
+    "page": 186,
+    "text": "I1:\nS’ → S ·,$\nS\nX\nX\nb\nb\na\nI0:\nS’ → ·S, $\nS  → · XX, $\nX → · aX, a/b\nX  → · b, a/b\nI2:\nS  → X · X, $\nX  → · aX, $\nX  → · b, $\nI3:\nX → a·X , a/b\nX → · aX , a/b\nX → ·b , a/b\nI5:\nS →XX ·, $\nI4:\nX → b ·, a/b\nI8:\nX →aX ·, a/b\nX\na\nb\nI6:\nX  → a · X, $\nX  → · aX, $\nX  → · b, $\nI7:\nX →b ·, $\nI9:\nX  → aX ·, $\na\nb\nb\nX\na\nExample\n187\n"
+  },
+  {
+    "page": 187,
+    "text": "State Merging[状态合并]\n• Merge states with the same core\nCore: LR(1) items minus the lookahead (i.e., LR(0) items)\nAll items are identical except lookahead\nI3:\nX → a·X, a/b\nX → .aX, a/b\nX → ·b, a/b\nI4:\nX → b·, a/b\nI8:\nX → aX·, a/b\nI6:\nX → a·X, $\nX → .aX, $\nX → ·b, $\nI7:\nX → b·, $\nI9:\nX → aX·, $\nI36:\nX → a·X, a/b/$\nX → .aX, a/b/$\nX → ·b, a/b/$\nI47:\nX → b·, a/b/$\nI89:\nX → aX·, a/b/$\n188\n"
+  },
+  {
+    "page": 188,
+    "text": "State Merging (cont.)\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns3\ns4\n1\n2\n1\nacc\n2\ns6\ns7\n5\n3\ns3\ns4\n8\n4\nr3\nr3\n5\nr1\n6\ns6\ns7\n9\n7\nr3\n8\nr2\nr2\n9\nr2\nStat\ne\nAction\nGoto\na\nb\n$\nS\nX\n0\ns36\ns47\n1\n2\n1\nacc\n2\ns36\ns47\n5\n36\ns36\ns47\n89\n47\nr3\nr3\nr3\n5\nr1\n89\nr2\nr2\nr2\nLR(1)\nLALR(1)\nGrammar\n(0) S’ -> S\n(1) S -> XX\n(2) X -> aX\n(3) X -> b\n189\nStates 3 and 6: State 36\nStates 4 and 7: State 47\nStates 8 and 9: State 89\n"
+  },
+  {
+    "page": 189,
+    "text": "Merge Effects[合并效果]\n1. Merging of states can introduce conflicts[引入归约-归约冲突]\nCan introduce reduce-reduce (r-r) conflicts\n\nLR was introduced to split the Follow set on reduce action\n\nMerging reverts the splitting\nCannot introduce shift-reduce (s-r) conflicts\n\ni.e., a s-r conflict cannot exist in a merged set unless the conflict was already present \nin one of the original LR(1) sets\n190\n2. Detection of errors may be delayed[推迟错误识别]\n\nOn error, LALR parsers will not perform shifts beyond an LR parser, \nbut may perform more reductions before finding error\n"
+  },
+  {
+    "page": 190,
+    "text": "• 正则表达式可以表达语言𝐿= {𝑥𝑛𝑦𝑧𝑛, 1 ≤𝑛≤10}吗?\n• 可以，任何有穷集都是正规集，都可以用正规表达式来描述\n• 正则表达式可以表达语言𝐿= {𝑥𝑛𝑦𝑧𝑛, n > 0}吗?\n• 不行，该语言是无穷的，不能用正规式表达\n• 确定有限自动机(DFA)中不存在ε弧，所以DFA无法识别空串ε吗?\n• 错，DFA可以识别空串，但当且仅当开始状态与终止状态\n• 给定正则式(a| b)*，使用汤普森构造法（Thompson‘s Construction ）构造的\n有限自动机拥有几个状态?\n• 8个\nExercise 2\n191\n"
+  },
+  {
+    "page": 191,
+    "text": "• 对于一个无二义性文法G，它的一个句子的最左与最右推导产生的分析树一\n定是一样的吗?\n• 对的，是这样的。语法树会隐去推导顺序\n• 怎么样判断一个文法是否为LL(1)型文法?\n• 对文法中的每个产生式A → α | β:\n• FIRST(α) ∩ FIRST(β) = ∅.\n• If β ⇒ε, then FIRST(α) ∩ FOLLOW(A) = ∅.\n• LL(1)语法分析表行数与列数分别由哪些因素确定?\n• 行数是该文法的非终结符个数，列数为终结符个数+1（结束符号$ ）\n• 设句型aaAb 的最右推导为S⇒aBb⇒aaAb ，句柄为aA ，该句型的活前缀是?\n• a, aa, aaA\nExercise 2\n192\n"
+  },
+  {
+    "page": 192,
+    "text": "• 找出以下文法中的句型的所有短语，直接短语，句柄\n• 文法: G(E): E → T | E+T;\nT → F | T*F;\nF → (E) | a | b | c\n• 句型: a * b + c\n• 第一步：画出语法树\n• 第二步：找出语法树的叶子节点\n• a, *, b, +, c\n• 第三步：由叶子节点找出短语\n• a,  a*b,  b,  c,  a*b+c (why not *b, b+c, *, +?)\n• 第四步：从短语中找出直接短语\n• a, b, c\n• 第五步：从直接短语中找出句柄\n• a\nExercise 2\n193\nE\n+\nE\nT\nF\nT\n*\nT\nF\nF\na\nb\nc\n"
+  },
+  {
+    "page": 193,
+    "text": "• 给定一下文法G(S), 请构建该文法的LL(1)分析表\n• S →A\n• A →\n• A →bbA\n• FIRST & Follow:\n• S →A: FIRST(α) = {b, }\n• A →: FIRST(α) = {}\n• A →bbA: FIRST(α) = {b}\n• FOLLOW(S) = {$}\n• FOLLOW(A) = {$}\n• Parse Table:\nExercise 2\n194\nb\n$\nS\nA\nb\n$\nS\nS  A\nA\nA  bbA\nb\n$\nS\nS  A\nS  A\nA\nA  bbA\nA →\nuse FIRST\nuse FOLLOW\n"
+  },
+  {
+    "page": 194,
+    "text": "• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表\n• S →A\n• A →A + A  |  B + +\n• B →y\nExercise 2\n195\nI0:\nS· A,  $\nA·A+A, +/$\nA·B++, +/$\nB·y, +\nI1:\nBy ·, +\ny\nI2:\nSA ·,  $\nAA ·+A, +/$\nA\nB\nI3:\nAB · ++,  +/$\n+\nI4:\nAA+ ·A, +/$\nA·A+A, +/$\nA·B++, +/$\nB·y, +\ny\nB\nA\nI5:\nAA+A ·, +/$\nAA ·+A, +/$\n+\n+\nI6:\nAB+ · +,  +/$\n+\nI7:\nAB++ · ,  +/$\n"
+  },
+  {
+    "page": 195,
+    "text": "• 给定一下文法G(S) , 请构建识别活前缀的DFA与LR(1)分析表\n• (1) S →A\n• (2) A →A + A\n• (3) A →B + +\n• (4) B →y\nExercise 2\n196\nS\nACTOION\nGOTO\ny\n+\n$\nA\nB\n0\n1\n2\n3\n4\n5\n6\n7\ns1\n2\n3\nr4\ns4\ns6\ns1\n5\n3\nr2/s4 r2\ns7\nacc\nr3\nr3\n"
+  },
+  {
+    "page": 196,
+    "text": "• 该文法是LR(1)型文法吗? 若不是，应如何解决? (有多种选择)\nExercise 2\n197\nS\nACTOION\nGOTO\ny\n+\n$\nA\nB\n0\n1\n2\n3\n4\n5\n6\n7\ns1\n2\n3\nr4\ns4\ns6\ns1\n5\n3\ns4\nr2\ns7\nacc\nr3\nr3\n"
+  },
+  {
+    "page": 197,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n198\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\n"
+  },
+  {
+    "page": 198,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n199\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n"
+  },
+  {
+    "page": 199,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n200\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\n"
+  },
+  {
+    "page": 200,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n201\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n"
+  },
+  {
+    "page": 201,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n202\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n"
+  },
+  {
+    "page": 202,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n203\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n"
+  },
+  {
+    "page": 203,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n204\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n"
+  },
+  {
+    "page": 204,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n205\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n"
+  },
+  {
+    "page": 205,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n206\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n0\n$A\n$\n2\n"
+  },
+  {
+    "page": 206,
+    "text": "• 对于句子y++, 请给出其分析流程，并说明y++是否为该文法的一个句子? \n(1) S →A;    (2) A →A + A;\n(3) A →B + +;    (4) B →y;\nExercise 2\n207\nStack\nInput\nACTION\nGOTO\n0\n$\ny++$\ns1\n01\n$y\n++$\nr4(B →y)\n0\n$B\n++$\n3\n03\n$B\n++$\ns6\n036\n$B+ \n+$\ns7\n0367\n$B++\n$\nr3(A →B + +)\n0\n$A\n$\n2\n02\n$A\n$\nacc\n"
+  }
+]

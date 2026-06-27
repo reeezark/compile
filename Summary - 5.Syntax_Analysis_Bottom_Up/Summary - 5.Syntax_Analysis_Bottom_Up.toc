@@ -1,0 +1,51 @@
+\contentsline {section}{阅读导引}{4}{section*.2}%
+\contentsline {section}{\numberline {1}课程总览：Bottom-up 到 LR Family {\small \color {graytext}\,[p1--3]}}{4}{section.1}%
+\contentsline {section}{\numberline {2}自底向上分析与移入-规约 {\small \color {graytext}\,[p4--9]}}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Bottom-up Parsing 的基本思想 {\small \color {graytext}\,[p4--5]}}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Shift-Reduce Parser 的四种动作 {\small \color {graytext}\,[p6--7]}}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}例子：分析 \(abbcde\) {\small \color {graytext}\,[p8--9]}}{6}{subsection.2.3}%
+\contentsline {section}{\numberline {3}句柄、短语、直接短语与活前缀 {\small \color {graytext}\,[p10--27]}}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}右句型、短语、直接短语、句柄 {\small \color {graytext}\,[p10--12]}}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}句柄规约示例 {\small \color {graytext}\,[p13--24]}}{8}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}为什么句柄总在栈顶 {\small \color {graytext}\,[p25]}}{8}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}活前缀 {\small \color {graytext}\,[p26--27]}}{8}{subsection.3.4}%
+\contentsline {section}{\numberline {4}冲突与自底向上分析性质 {\small \color {graytext}\,[p28--31]}}{9}{section.4}%
+\contentsline {subsection}{\numberline {4.1}冲突来自哪里 {\small \color {graytext}\,[p28--30]}}{9}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Bottom-up Parsing 的性质 {\small \color {graytext}\,[p31]}}{9}{subsection.4.2}%
+\contentsline {section}{\numberline {5}LR Parser 与 ACTION/GOTO 表 {\small \color {graytext}\,[p32--62]}}{9}{section.5}%
+\contentsline {subsection}{\numberline {5.1}LR(k) Parser 的含义 {\small \color {graytext}\,[p33--34]}}{9}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}LR Parser 的栈与右句型 {\small \color {graytext}\,[p35]}}{10}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}ACTION 表和 GOTO 表 {\small \color {graytext}\,[p37--41]}}{10}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}表驱动 LR 程序 {\small \color {graytext}\,[p42--44]}}{11}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.5}示例：用 LR 表分析 \(1+1\) {\small \color {graytext}\,[p45--58]}}{11}{subsection.5.5}%
+\contentsline {subsection}{\numberline {5.6}解析表类型概览 {\small \color {graytext}\,[p59--62]}}{12}{subsection.5.6}%
+\contentsline {section}{\numberline {6}LR(0)：项目、自动机与解析表 {\small \color {graytext}\,[p63--95]}}{12}{section.6}%
+\contentsline {subsection}{\numberline {6.1}状态为什么需要 item {\small \color {graytext}\,[p63--66]}}{12}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}增广文法 {\small \color {graytext}\,[p67]}}{13}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}CLOSURE 与 GOTO {\small \color {graytext}\,[p68--74]}}{13}{subsection.6.3}%
+\contentsline {subsection}{\numberline {6.4}例子：\(S\to BB,\ B\to aB\mid b\) {\small \color {graytext}\,[p69--78]}}{14}{subsection.6.4}%
+\contentsline {subsection}{\numberline {6.5}由 DFA 构造 LR(0) 表 {\small \color {graytext}\,[p77--80]}}{14}{subsection.6.5}%
+\contentsline {subsection}{\numberline {6.6}LR(0) 冲突与局限 {\small \color {graytext}\,[p81--95]}}{15}{subsection.6.6}%
+\contentsline {section}{\numberline {7}SLR(1)：用 FOLLOW 限制规约 {\small \color {graytext}\,[p96--106]}}{15}{section.7}%
+\contentsline {subsection}{\numberline {7.1}SLR(1) 的基本思想 {\small \color {graytext}\,[p98--99]}}{15}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}SLR(1) 文法判定条件 {\small \color {graytext}\,[p100]}}{16}{subsection.7.2}%
+\contentsline {subsection}{\numberline {7.3}SLR(1) 的优势与局限 {\small \color {graytext}\,[p101--106]}}{16}{subsection.7.3}%
+\contentsline {section}{\numberline {8}LR(1)：把 Lookahead 放进 Item {\small \color {graytext}\,[p107--122]}}{17}{section.8}%
+\contentsline {subsection}{\numberline {8.1}LR(1) item {\small \color {graytext}\,[p107--108]}}{17}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}LR(1) 的 CLOSURE 和 GOTO {\small \color {graytext}\,[p109--110]}}{17}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}LR(1) 示例 {\small \color {graytext}\,[p109--121]}}{18}{subsection.8.3}%
+\contentsline {subsection}{\numberline {8.4}LR(1) 解析表与文法条件 {\small \color {graytext}\,[p120--122]}}{18}{subsection.8.4}%
+\contentsline {section}{\numberline {9}LALR(1)：合并同 Core 状态的折中方案 {\small \color {graytext}\,[p123--139]}}{19}{section.9}%
+\contentsline {subsection}{\numberline {9.1}为什么需要 LALR(1) {\small \color {graytext}\,[p124]}}{19}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}状态合并示例 {\small \color {graytext}\,[p125--127]}}{19}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}合并效果：冲突与错误延迟 {\small \color {graytext}\,[p128--133]}}{20}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}LALR 表构造与文法关系 {\small \color {graytext}\,[p134--137]}}{20}{subsection.9.4}%
+\contentsline {subsection}{\numberline {9.5}LL vs LR {\small \color {graytext}\,[p138--139]}}{21}{subsection.9.5}%
+\contentsline {section}{\numberline {10}Syntax Analysis Revisit：语法分析总复习 {\small \color {graytext}\,[p140--189]}}{21}{section.10}%
+\contentsline {subsection}{\numberline {10.1}语法分析的位置与文法定义 {\small \color {graytext}\,[p141--145]}}{21}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}句型、句子、语言、二义性 {\small \color {graytext}\,[p144--145]}}{22}{subsection.10.2}%
+\contentsline {subsection}{\numberline {10.3}乔姆斯基文法体系与 AST {\small \color {graytext}\,[p146--148]}}{22}{subsection.10.3}%
+\contentsline {subsection}{\numberline {10.4}Top-down 复习：RDP、FIRST、FOLLOW 与 LL(1) {\small \color {graytext}\,[p149--160]}}{22}{subsection.10.4}%
+\contentsline {subsection}{\numberline {10.5}Bottom-up 复习 {\small \color {graytext}\,[p161--189]}}{23}{subsection.10.5}%
+\contentsline {section}{\numberline {11}练习题与解答 {\small \color {graytext}\,[p190--206]}}{24}{section.11}%
+\contentsline {section}{复习建议}{27}{section*.16}%
